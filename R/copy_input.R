@@ -20,7 +20,7 @@ CopyInput <- R6::R6Class(
           actionButton(
             inputId = ns("action"),
             label = "Copy",
-            style = "max-height:35px; margin-top:30px; text-align:center;",
+            style = "margin-top:32px; text-align:center;",
             width = "100%",
             class = "btn-primary"
           )

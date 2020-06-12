@@ -100,12 +100,9 @@ PerformanceCard <- R6::R6Class(
           results <- store$iraceResults$experiments
           intersectedColumns <- self$format_col_data(results, configurationPerIteration)
           results <- subset(store$iraceResults$experiments, select = intersectedColumns)
-          conf <- gl(ncol(results), nrow(results), labels = colnames(results))
-          pairwise.wilcox.test(as.vector(results), conf, paired = TRUE, p.adj = "bonf")
-          
           na.omit(results)
         }) %...>% {
-          plot <- configurationsBoxplot(., ylab = "Solution cost", title = "Box Plot")
+          plot <- irace::configurationsBoxplot(., ylab = "Solution cost", title = "Box Plot")
           pkg$reportStore$performanceBoxPlot <- save_plot_as_base64()
           plot
         }
@@ -124,8 +121,8 @@ PerformanceCard <- R6::R6Class(
             "ERROR: Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
           )
         )
-        
-        fes <- cumsum(table(iters))
+
+        fes <- cumsum(table(store$iraceResults$experimentLog[, "iteration"]))
         fes <- fes[!names(fes) == "0"]
         elites <- as.character(store$iraceResults$iterationElites)
         

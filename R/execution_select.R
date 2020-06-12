@@ -38,7 +38,7 @@ ExecutionSelect <- R6::R6Class(
           store$sandbox <- exe$getSandbox()
         }
         
-        updateSelectInput(
+        updatePickerInput(
           session = session,
           inputId = "options",
           choices = unique(executions)

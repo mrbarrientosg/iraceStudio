@@ -5,7 +5,7 @@
 #'
 #' @noRd
 app_sys <- function(...){
-  system.file(..., package = "iraceStudio")
+  system.file(..., package = packageName())
 }
 
 
@@ -46,21 +46,20 @@ add_external_resources <- function() {
     'www', app_sys('app/www')
   )
 
-  singleton(
-    tags$head(
-      favicon(),
-      bundle_resources(
-        path = app_sys('app/www'),
-        app_title = 'Irace Studio'
-      ),
-      shinyalert::useShinyalert(),
-      shinyjs::useShinyjs(),
-      tags$script(src = "www/summernote_binding.js"),
-      tags$script(src = "www/summernote-bs4.js"),
-      tags$link(href = "www/summernote-bs4.css", rel = "stylesheet", type = "text/css")
-      # Add here other external resources
-      # for example, you can add shinyalert::useShinyalert()
-    )
+  tags$head(
+    favicon(),
+    bundle_resources(
+      path = app_sys('app/www'),
+      app_title = 'Irace Studio'
+    ),
+    shinyalert::useShinyalert(),
+    shinyjs::useShinyjs(),
+    tags$script(src = "www/summernote_binding.js"),
+    tags$script(src = "www/summernote-bs4.js"),
+    tags$link(href = "www/summernote-bs4.css", rel = "stylesheet", type = "text/css"),
+    tags$link(href = "www/app-styles.css", rel = "stylesheet", type = "text/css")
+    # Add here other external resources
+    # for example, you can add shinyalert::useShinyalert()
   )
 }
 

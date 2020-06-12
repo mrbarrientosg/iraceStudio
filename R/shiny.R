@@ -72,3 +72,4 @@ importButton <- function(inputId, style = NULL, size = "default") {
   btn[[2]]$attribs$class <- gsub("btn-default", "", btn[[2]]$attribs$class)
   return(btn)
 }
+

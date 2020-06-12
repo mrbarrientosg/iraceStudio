@@ -111,18 +111,18 @@ run_irace <- function(store, executionName = "") {
     length(store$pg$get_target_evaluator()) != 0) {
     create_target_evaluator_file(pkg$tempFolder, store$pg)
   }
-  
+
   store$iraceProcess <- process$new(
     command = "Rscript",
     args = c(
-      system.file("inst/app/script/run_irace.R", package = "iracegui"),
+      system.file("inst/app/script/run_irace.R", package = packageName()),
       store$gui$iracePath,
       pkg$tempFolder,
-      executionName
+      pkg$outputLog
     ),
     stdout = "|", stderr = "|"
   )
-  
+
   store$startIrace <- TRUE
   shinyalert(title = "IRACE is now running", type = "success", timer = 1500)
 }

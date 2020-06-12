@@ -34,23 +34,20 @@ ReportView <- R6::R6Class(
           column(
             width = 7,
             class = "d-flex align-items-center justify-content-end",
-            tags$form(
-              class = "form-inline",
-              self$executionSelect$ui(inputId = ns("executions")),
-              disabled(
-                importButton(
-                  inputId = ns("load"),
-                  style = "margin-left: 5px; height: 34px;",
-                  size = "default"
-                )
-              ),
-              shinyDirButton(
-                id = ns("pdf"),
-                title = "PDF Report",
-                label = "Save as PDF",
-                style = "margin-left: 5px; height: 34px;",
-                class = "btn-primary"
+            self$executionSelect$ui(inputId = ns("executions")),
+            disabled(
+              importButton(
+                inputId = ns("load"),
+                style = "margin-left: 5px; margin-top: 15px;",
+                size = "default"
               )
+            ),
+            shinyDirButton(
+              id = ns("pdf"),
+              title = "Select a directory to save PDF Report",
+              label = "Save as PDF",
+              style = "margin-left: 5px; margin-top: 15px;",
+              buttonType = "primary"
             )
           )
         ),
@@ -110,17 +107,15 @@ ReportView <- R6::R6Class(
         req(store$iraceResults)
         
         if (!is.integer(input$pdf)) {
-          make_pdf_report(store, input)
+          make_pdf_report(store, input, volum)
         }
       })
       
       observeEvent(store$iraceResults, {
         if (is.null(store$iraceResults)) {
           disable(id = "pdf")
-          disable(id = "save")
         } else {
           enable(id = "pdf")
-          enable(id = "save")
         }
       }, ignoreNULL = FALSE)
     }

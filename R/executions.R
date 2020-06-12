@@ -80,10 +80,10 @@ executions <- R6::R6Class(
     },
     
     add_execution = function(id, execution) {
-      private$count(isolate(private$count()) + 1)
-      new_id <- paste0("execution-", id, "-", isolate(private$count()))
+      new_id <- paste0("execution-", id, "-", isolate(private$count() + 1))
       execution$set_id(new_id)
       private$executions[[new_id]] <- execution
+      private$count(isolate(private$count()) + 1)
     },
     
     add_irace_results = function(id, irace_results) {

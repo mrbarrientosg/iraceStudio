@@ -79,6 +79,11 @@ IraceOutputView <- R6::R6Class(
               if (is.logical(name) && !name) {
                 return(invisible())
               }
+
+              if (is.null(name) || name == "") {
+                alert.error("Give a name.")
+                return(invisible())
+              }
               
               if (!is.null(store$pg$get_execution(name))) {
                 alert.error("The execution name is repeated.")
@@ -109,31 +114,34 @@ IraceOutputView <- R6::R6Class(
           
           store$iraceProcess$poll_io(1000)
           error <- store$iraceProcess$read_all_error_lines()
-          
-          if (!is.null(error) && error != "" && length(error) > 0) {
-            log_error("Stop irace with error: {error}")
-            alert.error(paste(error, collapse = "\n"))
-            self$execution <- NULL
-          } else {
-            log <- gsub('"', "", store$pg$get_irace_option("logFile"))
+
+          log <- gsub('"', "", store$pg$get_irace_option("logFile"))
+
+          if (file.exists(log)) {
             load(log)
-            
+
             if (nrow(iraceResults$allConfigurations) != 0) {
               self$execution$set_irace_results(iraceResults)
-              
+
               if (file.exists(pkg$outputLog)) {
                 self$execution$set_output_log(paste(readLines(pkg$outputLog), collapse = "\n"))
               }
-              
+
               store$pg$add_execution(self$execution)
             } else {
               file.remove(log)
               file.remove(pkg$outputLog)
+
+              if (!is.null(error) && error != "" && length(error) > 0) {
+                log_error("Stop irace with error: {error}")
+                alert.error(paste(error, collapse = "\n"))
+                self$execution <- NULL
+              }
             }
-            
+
             rm(iraceResults)
           }
-          
+
           store$pg$clear_scenario_temp()
           
           store$startIrace <- FALSE

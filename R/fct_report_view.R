@@ -1,4 +1,4 @@
-make_pdf_report <- function(store, input) {
+make_pdf_report <- function(store, input, volum) {
   shinybusy::show_modal_spinner(text = "Making pdf...")
   
   data <- environment()
