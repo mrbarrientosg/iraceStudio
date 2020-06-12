@@ -20,12 +20,18 @@
     height: 100vh !important;
     left: 0 !important;
     position: fixed !important;
-    top: 74px !important;
+    top: 0 !important;
+}
+
+.sidebar {
+    padding-top: 4.5rem;
+    height: 100%;
 }
 
 .brand-link {
     background-color: #242939 !important;
     border: 0 !important;
+    color: white !important;
 }
 
 .main-header {

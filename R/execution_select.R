@@ -4,12 +4,11 @@ ExecutionSelect <- R6::R6Class(
   public = list(
     ui = function(inputId, ...) {
       ns <- NS(inputId)
-      
-      selectInput(
+
+      pickerInput(
         inputId = ns("options"),
         label = "Executions",
-        choices = c(""),
-        selectize = FALSE,
+        choices = "",
         ...
       )
     },

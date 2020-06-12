@@ -23,15 +23,13 @@ IraceOptionTab <- R6::R6Class(
                 value = paste0('"', input[[my_id]], '"')
               )
             }
-          })
-          
-          bs4Dash::bs4TooltipServer(
-            id = session$ns(my_id),
-            options = list(
+            bs4Dash::bs4TooltipServer(
               title = option$description,
-              placement = "right"
+              placement = "right",
+              target = session$ns(my_id),
+              session = session
             )
-          )
+          })
         })
       }
       

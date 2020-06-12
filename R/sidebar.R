@@ -4,9 +4,8 @@ Sidebar <- R6::R6Class(
     ui = function() {
       bs4Dash::bs4DashSidebar(
         title = h1("Irace Studio", style = "text-align:center; margin-bottom: 0;"),
-        fixed = TRUE,
+        fixed = FALSE,
         elevation = 0,
-        opacity = 0.8,
         bs4Dash::bs4SidebarMenu(
           bs4Dash::bs4SidebarMenuItem(
             text = "UI Options",
