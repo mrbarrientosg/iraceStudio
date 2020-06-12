@@ -1,0 +1,33 @@
+
+#' @import config
+#' @import golem
+#' @import shiny
+#' @import attempt
+#' @import DT
+#' @import glue
+#' @import htmltools
+#' @import bs4Dash
+#' @import shinyjs
+#' @import shinyalert
+#' @import shinyAce
+#' @import data.table
+#' @import processx
+#' @import jsonlite
+#' @import irace
+#' @import promises
+#' @import future
+#' @import knitr
+#' @import rmarkdown
+#' @import shinyWidgets
+#' @import shinyFiles
+#' @import magick
+#' @import pdftools
+#' @import ipc
+#' @import fs
+#' @import logger
+#' @import R6
+#' @import dplyr
+#' @import shinybusy
+#' @import plotly
+#' @import igraph
+NULL

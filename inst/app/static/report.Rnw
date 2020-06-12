@@ -1,0 +1,224 @@
+\documentclass[10pt, letterpaper]{article}
+\usepackage[paper=letterpaper, ignoreall, nomarginpar, margin=0.8in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{tocloft}
+\usepackage{multicol}
+\usepackage[export]{adjustbox}
+\usepackage{color}
+\usepackage{pdflscape}
+\usepackage{underscore}
+\usepackage{tabu}
+
+\numberwithin{table}{section}
+\numberwithin{figure}{section}
+\numberwithin{equation}{section}
+
+\author{}
+\title{The \textbf{irace} Report}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+<<include=FALSE, echo=FALSE>>=
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE)
+knitr::opts_knit$set(eval.after = "out.width", base.dir = paste0(output, "/"))
+@
+
+<<setup, eval=TRUE,include=FALSE, echo=FALSE>>=
+library(knitr)
+library(irace)
+
+muffleError <- function(x,options) {}
+knit_hooks$set(error=muffleError)
+
+.pt <- function(x){
+  return(paste(x, collapse='\n'))
+}
+
+.body <- function (x) {
+  paste("\\item ", lapply(x, paste))
+}
+
+.list <- function(x,
+                 envir = 'itemize'){
+  .pt(c(
+       sprintf('\\begin{%s}', envir),
+       .body(x),
+       sprintf('\\end{%s}', envir)
+       ))
+}
+@
+
+\section{Summary}
+<<summmary, echo=FALSE, results='asis'>>=
+cat("\\begin{itemize}", fill = T)
+cat("\\itemsep0em", fill = T)
+cat("\\item \\textbf{IRACE version:}", iraceResults$irace.version, fill = T)
+cat("\\item \\textbf{Number of candidate configurations:}", nrow(iraceResults$allConfigurations), fill = T)
+cat("\\item \\textbf{Number of target executions:}", iraceResults$state$experimentsUsedSoFar, fill = T)
+cat("\\item \\textbf{Elitist new instances:}", iraceResults$scenario$elitistNewInstances, fill = T)
+cat("\\item \\textbf{Elitist limit:}", iraceResults$scenario$elitistLimit, fill = T)
+cat("\\item \\textbf{nbIterations:}", iraceResults$state$nbIterations, fill = T)
+
+cat("\\item \\textbf{minNbSurvival:}", iraceResults$state$minSurvival, fill = T)
+cat("\\item \\textbf{nbParameters:}", iraceResults$parameters$nbParameters, fill = T)
+cat("\\item \\textbf{seed:}", iraceResults$scenario$seed, fill = T)
+cat("\\item \\textbf{confidence level:}", iraceResults$scenario$confidence, fill = T)
+cat("\\item \\textbf{budget:}", iraceResults$scenario$budgetEstimation, fill = T)
+cat("\\item \\textbf{mu:}", iraceResults$scenario$mu, fill = T)
+cat("\\item \\textbf{deterministic:}", iraceResults$scenario$deterministic, fill = T)
+
+cat("\\end{itemize}", fill = T)
+@
+
+\newpage
+\section{Best Configuration}
+
+\begin{multicols}{2}
+<<best, echo=FALSE, results='asis'>>=
+last <- length(iraceResults$iterationElites)
+id <- iraceResults$iterationElites[last]
+bestConfiguration <- getConfigurationById(iraceResults, ids = id)
+meanValue <- colMeans(iraceResults$experiments[,iraceResults$iterationElites[last], drop=FALSE], na.rm=TRUE)[[1]]
+totalInstances <- sum(!is.na(iraceResults$experiments[ ,iraceResults$iterationElites[length(iraceResults$iterationElites)]]))
+
+cat("\\textbf{Best so far}", fill = T)
+cat("\\begin{itemize}", fill = T)
+cat("\\itemsep0em", fill = T)
+cat("\\item \\textbf{Configuration:}", bestConfiguration[[1]], fill = T)
+cat("\\item \\textbf{Mean value:}", meanValue, fill = T)
+cat("\\item \\textbf{Parent:}", bestConfiguration[[length(bestConfiguration)]], fill = T)
+cat("\\item \\textbf{Total instances tested:}", totalInstances, fill = T)
+cat("\\end{itemize}", fill = T)
+
+@
+
+<<bestPlot, echo=FALSE, results='hide', fig.show='asis', fig.pos="H", fig.align="center", fig.cap="Best Configuration Box Plot">>=
+results <- subset(iraceResults$experiments, select = c(id))
+conf <- gl(ncol(results), nrow(results), labels = colnames(results))
+pairwise.wilcox.test (as.vector(results), conf, paired = TRUE, p.adj = "bonf")
+    
+configurationsBoxplot(title = "Best Configuration Box Plot", experiments = results, ylab = "Solution cost")
+@
+
+<<best2, echo=FALSE, results='asis'>>=
+listConfigurations <- function(configurations) {
+  formatedData <- c()
+ 
+  for(i in 2:(length(configurations) - 1)) {
+    formatedData <- c(formatedData, paste("\\item", sprintf("\\textbf{%s:}", colnames(configurations[i])), configurations[i]))
+  }
+  
+  return(paste(formatedData, collapse = "\n"))
+}
+
+cat("\\textbf{Description of the 'Best so far' configuration:}", fill = T)
+cat("\\begin{itemize}", fill = T)
+cat("\\itemsep0em", fill = T)
+cat(listConfigurations(bestConfiguration), fill = T)
+cat("\\end{itemize}", fill = T)
+@
+\end{multicols}
+
+\newpage
+\section{Candidates}
+
+\begin{multicols}{2}
+<<freq, fig.pos="H", fig.align="center", out.width="70%", fig.cap="Parameters sampling frequency.", results='hide', fig.show='asis', fig.keep='all', fig.width=9, fig.height=9>>=
+parameterFrequency(configurations = iraceResults$allConfigurations, parameters = iraceResults$parameters, pdf.width = 20)
+@
+
+\columnbreak
+
+<<parrallel, fig.pos="H", fig.align="center", out.width="70%", fig.cap="Parameters sampling frequency.", results='hide', fig.show='asis', fig.keep='all', fig.width=9, fig.height=9>>=
+iterations <- c(iraceResults$state$nbIterations - 1, iraceResults$state$nbIterations)
+conf <- getConfigurationByIteration(iraceResults = iraceResults, iterations = iterations[1]:iterations[2])
+
+max <- 12
+limit <- 1
+params <- c()
+parameters <- iraceResults$parameters$names
+numberOfParameters <- ceiling(length(parameters)/max)
+      
+for(i in seq_len(numberOfParameters)) {
+  k <- 1
+  for(j in limit:(max*i)) {
+    if(length(parameters) >= j) {
+      params[k] <- parameters[j]
+      k <- k + 1
+    }
+  }
+        
+  parallelCoordinatesPlot(configurations = conf, parameters = iraceResults$parameters, param_names = params, hierarchy = FALSE)
+  limit <- (max*i) + 1;
+}
+@
+\end{multicols}
+
+\newpage
+\section{Performance}
+
+\begin{multicols}{2}
+<<converge, fig.pos="H", fig.align="center", results='hide', fig.show='asis', fig.height=9>>=
+iters <- unique(iraceResults$experimentLog[,"iteration"])
+fes <- cumsum(table(iraceResults$experimentLog[,"iteration"]))
+fes <- fes[!names(fes) == '0']
+elites <- as.character(iraceResults$iterationElites)
+    
+values <- colMeans(iraceResults$experiments[,elites])
+    
+data <- data.frame(x = fes, y = values, e = elites)
+data <- na.omit(data)
+    
+plot(x = data$x,
+     y = data$y,
+     type = "s",
+     xlab = "Number of runs of the target algorithm",
+     ylab = "Mean value over testing set",
+     main = "Convergence Plot",
+)
+points(x = data$x, y = data$y)
+text(x = data$x, y = data$y, labels = data$e, pos = 1)
+@
+
+\columnbreak
+
+<<performanceBox, fig.pos="H", fig.align="center", results='hide', warning=F, fig.show='asis', fig.height=9>>=
+formatColData <- function(resultsData, iterationData) {
+  vectorColNames <- colnames(resultsData)
+  formatedData <- Reduce(intersect, list(vectorColNames, iterationData))
+  return(formatedData)
+}
+
+convertVectorToString <- function(vector) {
+  newVector <- c()
+  for (i in 1:length(vector)) {
+    newVector[i] <- paste0(vector[i])
+  }
+  return(newVector)
+}
+
+iteration <- iraceResults$state$nbIterations
+
+configurationPerIteration <- convertVectorToString(iraceResults$allElites[iteration][[1]])
+results <- iraceResults$experiments
+intersectedColumns <- formatColData(results, configurationPerIteration)
+results <- subset(iraceResults$experiments, select=(intersectedColumns))
+conf <- gl(ncol(results), nrow(results), labels = colnames(results))
+#pairwise.wilcox.test(as.vector(results), conf, paired = TRUE, p.adj = "bonf")
+
+configurationsBoxplot(na.omit(results), ylab = "Solution cost", title = "Box Plot")
+@
+\end{multicols}
+
+\end{document}

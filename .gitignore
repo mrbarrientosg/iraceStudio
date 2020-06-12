@@ -2,3 +2,9 @@
 .RData
 .Rproj.user
 .idea
+.dev
+inst/doc
+doc
+Meta
+.gui-data.Rdata
+workspace/*

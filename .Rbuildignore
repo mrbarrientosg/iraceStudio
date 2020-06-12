@@ -6,3 +6,5 @@ dev_history.R
 $run_dev.*
 ^.idea$
 ^\.travis\.yml$
+^doc$
+^Meta$
