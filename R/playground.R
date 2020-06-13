@@ -162,15 +162,10 @@ playground <- R6::R6Class(
     get_last_scenario = function() private$last_scenario,
     set_last_scenario = function(value) private$last_scenario <- value,
     
-    change_current_scenario = function(new_name) {
-      for (name in names(private$scenarios)) {
-        scenario <- private$scenarios[[name]]
-        if (scenario$get_name() == new_name) {
-          private$current_scenario <- scenario
-          private$change_current(isolate(private$change_current()) + 1)
-          return(invisible())
-        }
-      }
+    change_current_scenario = function(id) {
+      scenario <- private$scenarios[[id]]
+      private$current_scenario <- scenario
+      private$change_current(isolate(private$change_current()) + 1)
     },
     
     clear_scenario_temp = function() {
@@ -190,7 +185,7 @@ playground <- R6::R6Class(
       playground <- list()
       playground$name <- private$name
       playground$description <- private$description
-      playground$last_scenario <- private$current_scenario$get_name()
+      playground$last_scenario <- private$current_scenario$get_id()
       playground$scenarios <- list()
       for (name in names(private$scenarios)) {
         playground$scenarios[[name]] <- private$scenarios[[name]]$as_list()

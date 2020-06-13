@@ -24,24 +24,24 @@ ExecutionSelect <- R6::R6Class(
         count()
         
         executions <- lapply(store$pg$get_executions(), function(execution) execution$get_name())
-        
+        executions_id <- lapply(store$pg$get_executions(), function(execution) execution$get_id())
+
         if (length(executions) == 0) {
           store$iraceResults <- NULL
           store$currentExecution <- NULL
-          executions <- c("")
+          executions_id <- ""
         } else {
-          executions <- unlist(executions, use.names = FALSE)
-          
-          exe <- store$pg$get_execution(executions[1])
+          names(executions_id) <- unlist(executions, use.names = FALSE)
+          exe <- store$pg$get_execution(executions_id[[1]])
           store$currentExecution <- exe
           store$iraceResults <- exe$get_irace_results()
           store$sandbox <- exe$getSandbox()
         }
-        
+
         updatePickerInput(
           session = session,
           inputId = "options",
-          choices = unique(executions)
+          choices = executions_id
         )
       })
       

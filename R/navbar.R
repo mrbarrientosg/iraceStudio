@@ -50,6 +50,7 @@ Navbar <- R6::R6Class(
       output$playgroundName <- renderText(store$playgroundName)
 
       observeEvent(input$scenarioPicker, {
+        req(input$scenarioPicker)
         store$pg$change_current_scenario(input$scenarioPicker)
         pkg$outputLog <- NULL
 
@@ -67,26 +68,27 @@ Navbar <- R6::R6Class(
       observe({
         observe <- store$pg$get_update_observer()
         observe()
+
+        scenarios <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_name())
+        scenarios_id <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_id())
   
-        names <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_name())
-        names <- unlist(names, use.names = FALSE)
-        names <- sort(names)
-  
-        if (length(names) == 0) {
-          names <- ""
+        if (length(scenarios) == 0) {
+          scenarios_id <- ""
+        } else {
+          names(scenarios_id) <- unlist(scenarios, use.names = FALSE)
         }
-  
+
         selected <- NULL
   
         if (!is.null(store$pg$get_last_scenario())) {
           selected <- store$pg$get_last_scenario()
           store$pg$set_last_scenario(NULL)
         }
-  
+
         updateSelectInput(
           session = session,
           inputId = "scenarioPicker",
-          choices = names,
+          choices = scenarios_id,
           selected = selected
         )
       })

@@ -107,13 +107,9 @@ executions <- R6::R6Class(
     is_empty = function() isolate(private$count()) == 0,
     size = function() isolate(private$count()),
     get_executions = function() private$executions,
-    get_execution = function(name) {
-      for (id in names(private$executions)) {
-        if (private$executions[[id]]$get_name() == name) {
-          return(private$executions[[id]])
-        }
-      }
-      return(NULL)
+    get_execution = function(id) {
+      print(id)
+      return(private$executions[[id]])
     },
     get_count = function() private$count,
     
