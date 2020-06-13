@@ -123,6 +123,10 @@ run_irace <- function(store, executionName = "") {
     stdout = "|", stderr = "|"
   )
 
+  print(store$iraceProcess$poll_io(5000))
+  print(store$iraceProcess$read_output_lines())
+  print(store$iraceProcess$read_error_lines())
+
   store$startIrace <- TRUE
   shinyalert(title = "IRACE is now running", type = "success", timer = 1500)
 }

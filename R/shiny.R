@@ -73,3 +73,27 @@ importButton <- function(inputId, style = NULL, size = "default") {
   return(btn)
 }
 
+directoryInput <- function(idButton, idInput, label, buttonText = "Browse", title, width = NULL) {
+  input <- textInput(
+    inputId = idInput,
+    label = label,
+    width = width
+  ) %>% tagAppendChild(
+    div(
+      class = "input-group-append",
+      shinyDirButton(
+        id = idButton,
+        label = buttonText,
+        title = title,
+        buttonType = "primary"
+      )
+    )
+  )
+
+  label <- input$children[[1]]
+  input$children[[1]] <- NULL
+
+  input$attribs$class <- gsub("form-group", "input-group", input$attribs$class)
+
+  return(div(label, input))
+}

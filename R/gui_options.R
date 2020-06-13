@@ -1,7 +1,7 @@
 GUIOptions <- R6::R6Class(
   classname = "GUIOptions",
   public = list(
-    iracePath = character(0),
+    iracePath = .libPaths()[1],
     workspacePath = file.path(getwd(), "workspace")
   )
 )

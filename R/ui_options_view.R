@@ -13,23 +13,20 @@ UIOptionsView <- R6::R6Class(
             collapsible = FALSE,
             closable = FALSE,
             width = 12,
-            textInput(
-              inputId = ns("iracePath"),
-              label = "Irace Path"
+            directoryInput(
+              idButton = ns("iraceButton"),
+              idInput = ns("iracePath"),
+              label = "Irace Path",
+              title = "Irace Library Directory",
+              width = "auto"
             ),
-            div(
-              class = "input-group-append",
-              textInput(
-                inputId = ns("workspace"),
-                label = "Workspace Path"
-              ),
-              shinyDirButton(
-                id = ns("dirPath"),
-                label = "Browse",
-                title = "Workspace Directory",
-                style = "margin-top: 30px; height: 38px;",
-                class = "btn-primary"
-              )
+            tags$br(),
+            directoryInput(
+              idButton = ns("workspaceButton"),
+              idInput = ns("workspacePath"),
+              label = "Workspace Path",
+              title = "Workspace Directory",
+              width = "auto"
             )
           )
         )
@@ -39,9 +36,13 @@ UIOptionsView <- R6::R6Class(
     server = function(input, output, session, store) {
       volum <- list(root = path_home())
       
-      shinyDirChoose(input = input, id = "dirPath", roots = volum)
-  
+      shinyDirChoose(input = input, id = "workspaceButton", roots = volum)
+      shinyDirChoose(input = input, id = "iraceButton", roots = volum)
+
       observeEvent(store$gui, {
+        shinyjs::disable(id = "workspacePath")
+        shinyjs::disable(id = "iracePath")
+
         updateTextInput(
           session = session,
           inputId = "iracePath",
@@ -50,33 +51,65 @@ UIOptionsView <- R6::R6Class(
   
         updateTextInput(
           session = session,
-          inputId = "workspace",
+          inputId = "workspacePath",
           value = store$gui$workspacePath
         )
       })
       
-      observeEvent(input$dirPath, {
-        if (!is.integer(input$dirPath)) {
-          dir <- parseDirPath(roots = volum, input$dirPath)
+      observeEvent(input$workspaceButton, {
+        if (!is.integer(input$workspaceButton)) {
+          dir <- parseDirPath(roots = volum, input$workspaceButton)
+
+          path <- private$getWorkspacePath(dir)
+
           updateTextInput(
             session = session,
-            inputId = "workspace",
-            value = file.path(dir, "workspace")
+            inputId = "workspacePath",
+            value = path
           )
+
+          store$gui$workspacePath <- path
+          store$app$createWorkspaceDirectory()
+        }
+      })
+
+      observeEvent(input$iraceButton, {
+        if (!is.integer(input$iraceButton)) {
+          dir <- parseDirPath(roots = volum, input$iraceButton)
+
+          path <- .libPaths()[1]
+
+          if (private$checkPath(dir)) {
+            path <- dir
+          }
+
+          updateTextInput(
+            session = session,
+            inputId = "iracePath",
+            value = path
+          )
+
+          store$gui$iracePath <- input$iracePath
         }
       })
       
-      observeEvent(input$workspace, {
-        store$gui$workspacePath <- input$workspace
-  
-        if (is.null(input$workspace) || input$workspace == "") {
-          store$gui$workspacePath <- file.path(getwd(), "workspace")
-        }
-  
-        store$app$createWorkspaceDirectory()
-      })
-      
-      observeEvent(input$iracePath, store$gui$iracePath <- input$iracePath)
+    }
+  ),
+  private = list(
+    checkPath = function(path) {
+      if (is.null(path) || path == "") {
+        return(false)
+      }
+
+      return(true)
+    },
+
+    getWorkspacePath = function(path) {
+      if (!private$checkPath(path)) {
+        return(file.path(getwd(), "workspace"))
+      }
+
+      return(file.path(path, "workspace"));
     }
   )
 )
