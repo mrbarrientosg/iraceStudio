@@ -81,10 +81,8 @@ PlaygroundView <- R6::R6Class(
       })
       
       output$scenarios <- renderDT({
-        shiny::validate(
-          need(store$pg$get_update_observer()() != 0, "")
-        )
-        
+        playground_emitter$value(playground_events$update_scenarios)
+
         datatable(
           data = data$scenarios,
           escape = FALSE,
@@ -176,8 +174,8 @@ PlaygroundView <- R6::R6Class(
         
         scenario$set_name(input$scenario_name)
         scenario$set_description(input$scenario_description)
-        store$pg$set_update_observer(isolate(store$pg$get_update_observer()()) + 1)
-        
+        playground_emitter$emit(playground_events$update_scenarios)
+
         data$scenarios <- self$scenarios_as_data_frame(store)
         
         removeModal()

@@ -81,10 +81,7 @@ InitialConfigurationsView <- R6::R6Class(
         }
       })
       
-      observe({
-        change_scenario <- store$pg$get_change_current()
-        change_scenario()
-        
+      observeEvent(playground_emitter$value(playground_events$current_scenario), {
         values$configurations <- store$pg$get_configurations()
       })
       
@@ -98,8 +95,8 @@ InitialConfigurationsView <- R6::R6Class(
       })
       
       output$initial_config_table <- renderDT({
-        store$updateConfig
-        
+        playground_emitter$value(playground_events$update_parameters)
+
         shiny::validate(
           need(nrow(store$pg$get_parameters()) > 0, "Empty parameters")
         )

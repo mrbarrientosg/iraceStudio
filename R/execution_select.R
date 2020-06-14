@@ -17,11 +17,8 @@ ExecutionSelect <- R6::R6Class(
       values <- reactiveValues()
       
       observe({
-        change_scenario <- store$pg$get_change_current()
-        change_scenario()
-        
-        count <- store$pg$get_executions_count()
-        count()
+        playground_emitter$value(playground_events$current_scenario)
+        playground_emitter$value(playground_events$update_executions)
         
         executions <- lapply(store$pg$get_executions(), function(execution) execution$get_name())
         executions_id <- lapply(store$pg$get_executions(), function(execution) execution$get_id())

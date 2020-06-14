@@ -75,15 +75,16 @@ executions <- R6::R6Class(
         for (name in names(data$executions)) {
           private$executions[[name]] <- execution$new(execution = data$executions[[name]])
         }
-        private$count(data$count)
+        private$count <- data$count
       }
     },
     
     add_execution = function(id, execution) {
-      new_id <- paste0("execution-", id, "-", isolate(private$count() + 1))
+      private$count <- private$count + 1
+      new_id <- paste0("execution-", id, "-", private$count)
       execution$set_id(new_id)
       private$executions[[new_id]] <- execution
-      private$count(isolate(private$count()) + 1)
+      playground_emitter$emit(playground_events$update_executions)
     },
     
     add_irace_results = function(id, irace_results) {
@@ -101,14 +102,13 @@ executions <- R6::R6Class(
     remove_all = function() {
       private$executions <- NULL
       private$executions <- list()
-      private$count(0)
+      private$count <- 0
+      playground_emitter$emit(playground_events$update_scenarios)
     },
     
-    is_empty = function() isolate(private$count()) == 0,
-    size = function() isolate(private$count()),
+    is_empty = function() private$count == 0,
     get_executions = function() private$executions,
     get_execution = function(id) {
-      print(id)
       return(private$executions[[id]])
     },
     get_count = function() private$count,
@@ -121,7 +121,7 @@ executions <- R6::R6Class(
         data$executions[[name]] <- private$executions[[name]]$as_list()
       }
       
-      data$count <- isolate(private$count())
+      data$count <- private$count
       
       return(data)
     }

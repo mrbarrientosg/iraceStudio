@@ -5,9 +5,7 @@ playground <- R6::R6Class(
     name = "",
     description = "",
     scenarios = NULL,
-    update_observer = NULL,
     last_scenario = NULL,
-    change_current = NULL,
     current_scenario = NULL,
     count = 0
   ),
@@ -15,8 +13,6 @@ playground <- R6::R6Class(
     initialize = function(name = "", playground = NULL) {
       private$name <- name
       private$scenarios <- list()
-      private$update_observer <- reactiveVal(value = 0)
-      private$change_current <- reactiveVal(value = 0)
       if (!is.null(playground)) {
         private$name <- playground$name
         private$description <- playground$description
@@ -25,7 +21,6 @@ playground <- R6::R6Class(
           private$current_scenario <- private$scenarios[[name]]
         }
         private$last_scenario <- playground$last_scenario
-        private$update_observer(playground$update_observer)
         private$count <- playground$count
       } else {
         self$add_scenario(scenario$new(name = "scenario-1"))
@@ -42,11 +37,11 @@ playground <- R6::R6Class(
       
       new_scenario$set_id(id)
       private$scenarios[[id]] <- new_scenario
-      private$update_observer(isolate(private$update_observer()) + 1)
+      playground_emitter$emit(playground_events$update_scenarios)
       
       if (is.null(private$current_scenario)) {
         private$current_scenario <- new_scenario
-        private$change_current(isolate(private$change_current()) + 1)
+        playground_emitter$emit(playground_events$current_scenario)
       }
     },
     
@@ -56,7 +51,7 @@ playground <- R6::R6Class(
       if (is.null(private$scenarios) || length(private$scenarios) == 0) {
         self$add_scenario(scenario$new(name = "scenario-1"))
       } else {
-        private$update_observer(isolate(private$update_observer()) + 1)
+        playground_emitter$emit(playground_events$update_scenarios)
       }
     },
     
@@ -149,23 +144,17 @@ playground <- R6::R6Class(
     
     get_scenarios = function() private$scenarios,
     get_scenario = function(id) private$scenarios[[as.character(id)]],
-    
-    get_update_observer = function() private$update_observer,
-    set_update_observer = function(value) private$update_observer(value),
-    
+
     get_executions = function() private$current_scenario$get_executions(),
     get_execution = function(name) private$current_scenario$get_execution(name),
-    get_executions_count = function() private$current_scenario$get_executions_count(),
-    
-    get_change_current = function() private$change_current,
-    
+
     get_last_scenario = function() private$last_scenario,
     set_last_scenario = function(value) private$last_scenario <- value,
     
     change_current_scenario = function(id) {
       scenario <- private$scenarios[[id]]
       private$current_scenario <- scenario
-      private$change_current(isolate(private$change_current()) + 1)
+      playground_emitter$emit(playground_events$current_scenario)
     },
     
     clear_scenario_temp = function() {
@@ -190,7 +179,6 @@ playground <- R6::R6Class(
       for (name in names(private$scenarios)) {
         playground$scenarios[[name]] <- private$scenarios[[name]]$as_list()
       }
-      playground$update_observer <- isolate(private$update_observer())
       playground$count <- private$count
       saveRDS(playground, file = path)
     }

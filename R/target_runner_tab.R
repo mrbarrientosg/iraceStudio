@@ -100,17 +100,14 @@ TargetRunnerTab <- R6::R6Class(
         )
       })
       
-      observe({
-        change_scenario <- store$pg$get_change_current()
-        change_scenario()
-        
+      observeEvent(playground_emitter$value(playground_events$current_scenario), {
         updateAceEditor(
           session = session,
           editorId = "target_code",
           value = store$pg$get_target_runner()
         )
       })
-      
+
       observeEvent(input$target_code, {
         store$pg$add_target_runner(input$target_code)
       }, ignoreInit = TRUE)

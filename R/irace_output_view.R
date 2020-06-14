@@ -149,9 +149,8 @@ IraceOutputView <- R6::R6Class(
       })
       
       observe({
-        change_scenario <- store$pg$get_change_current()
-        change_scenario()
-        
+        playground_emitter$value(playground_events$current_scenario)
+
         if (!store$startIrace) {
           if (!is.null(pkg$outputLog) && file.exists(pkg$outputLog)) {
             values$source <- paste(readLines(pkg$outputLog), collapse = "\n")

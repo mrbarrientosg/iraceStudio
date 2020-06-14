@@ -132,8 +132,7 @@ TestingView <- R6::R6Class(
       })
       
       output$content <- renderUI({
-        change_scenario <- store$pg$get_change_current()
-        change_scenario()
+        playground_emitter$value(playground_events$current_scenario)
         
         obs_value(TRUE)
         self$testingOptions$ui(inputId = ns("testing"), "testing", store)
@@ -144,10 +143,7 @@ TestingView <- R6::R6Class(
         store$pg$set_test_instances(input$source_instances_file)
       })
       
-      observe({
-        change_scenario <- store$pg$get_change_current()
-        change_scenario()
-        
+      observeEvent(playground_emitter$value(playground_events$current_scenario), {
         updateTextAreaInput(
           session = session,
           inputId = "source_instances_file",

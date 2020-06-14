@@ -84,10 +84,7 @@ ForbiddenView <- R6::R6Class(
         store$pg$add_forbidden(input$conditions)
       }, ignoreInit = TRUE)
       
-      observe({
-        change_scenario <- store$pg$get_change_current()
-        change_scenario()
-        
+      observeEvent(playground_emitter$value(playground_events$current_scenario), {
         updateAceEditor(
           session = session,
           editorId = "conditions",

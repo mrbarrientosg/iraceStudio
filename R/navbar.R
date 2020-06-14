@@ -65,10 +65,7 @@ Navbar <- R6::R6Class(
         }
       })
 
-      observe({
-        observe <- store$pg$get_update_observer()
-        observe()
-
+      observeEvent(playground_emitter$value(playground_events$update_scenarios), {
         scenarios <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_name())
         scenarios_id <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_id())
   

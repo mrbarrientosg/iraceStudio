@@ -151,8 +151,7 @@ scenario <- R6::R6Class(
     
     get_executions = function() private$executions$get_executions(),
     get_execution = function(name) private$executions$get_execution(name),
-    get_executions_count = function() private$executions$get_count(),
-    
+
     as_list = function() {
       data <- list()
       data$id <- private$id

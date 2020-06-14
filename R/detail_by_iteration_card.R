@@ -103,7 +103,9 @@ DetailByIterationCard <- R6::R6Class(
             nrow(store$iraceResults$allConfigurations) != 0, ""
           )
         )
-        
+
+        req(input$iterations, cancelOutput = TRUE)
+
         bestConfigurations <- store$iraceResults$allElites[as.integer(input$iterations)]
         bestConfigurationID <- bestConfigurations[[1]][1]
         detailsBestConfiguration <- getConfigurationById(store$iraceResults, ids = bestConfigurationID)
@@ -138,7 +140,7 @@ DetailByIterationCard <- R6::R6Class(
           )
         )
         
-        req(input$iterations)
+        req(input$iterations, cancelOutput = TRUE)
         
         bestConfigurations <- store$iraceResults$allElites[as.integer(input$iterations)]
         bestConfigurationID <- bestConfigurations[[1]][1]
