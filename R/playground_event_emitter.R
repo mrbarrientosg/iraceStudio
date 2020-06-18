@@ -28,7 +28,9 @@ playground_events <- list(
   update_scenarios = "update_scenarios",
   current_scenario = "current_scenario",
   update_executions = "update_executions",
-  update_parameters = "update_parameters"
+  update_parameters = "update_parameters",
+  update_sandboxes = "update_sandboxes",
+  update_report = "update_report"
 )
 
 playground_emitter <- PlaygroundEventEmitter$new()

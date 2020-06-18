@@ -33,7 +33,7 @@ Body <- R6::R6Class(
       self$iraceOutputView <- IraceOutputView$new("execution_irace_output")
       self$executionsHistoryView <- ExecutionsHistoryView$new("execution_history")
       
-      # self$sandboxView <- SandboxView$new("visualization_sandbox")
+      self$sandboxView <- SandboxView$new("visualization_sandbox")
       # self$performanceConfig <- PerformanceConfig$new("visualization_perf_config")
       
       self$reportView <- ReportView$new("report")
@@ -90,7 +90,7 @@ Body <- R6::R6Class(
           ),
           bs4TabItem(
             tabName = "visualization_sandbox",
-            # self$sandboxView$ui()
+            self$sandboxView$ui()
           ),
           bs4TabItem(
             tabName = "visualization_perf_config",
@@ -122,7 +122,7 @@ Body <- R6::R6Class(
       self$iraceOutputView$call(store = store)
       self$executionsHistoryView$call(store = store)
       
-      #self$sandboxView$call(store = store)
+      self$sandboxView$call(store = store)
       #self$performanceConfig$call(store = store)
       
       self$reportView$call(store = store)

@@ -25,7 +25,7 @@ run_app <- function (...) {
       server = app$server,
       onStart = function() {
         app$setup()
-    
+        
         onStop(function() {
           app$destroy()
         })

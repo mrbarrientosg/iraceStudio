@@ -13,6 +13,7 @@ playground <- R6::R6Class(
     initialize = function(name = "", playground = NULL) {
       private$name <- name
       private$scenarios <- list()
+      private$count <- 0
       if (!is.null(playground)) {
         private$name <- playground$name
         private$description <- playground$description
@@ -46,6 +47,7 @@ playground <- R6::R6Class(
     },
     
     remove_scenario = function(id) {
+      private$count <- private$count - 1
       private$scenarios <- private$scenarios[-id]
       
       if (is.null(private$scenarios) || length(private$scenarios) == 0) {

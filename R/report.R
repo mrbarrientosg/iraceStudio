@@ -8,7 +8,7 @@ report <- R6::R6Class(
   public = list(
     initialize = function(report = NULL) {
       private$data <- list()
-      private$update <- reactiveVal(value = 0)
+      private$update <- 0
       
       if (!is.null(report)) {
         private$data <- report$data
@@ -18,8 +18,8 @@ report <- R6::R6Class(
     
     add_title = function(title) {
       private$count <- private$count + 1
-      private$update(isolate(private$update() + 1))
       private$data[[as.character(private$count)]]$title <- title
+      playground_emitter$emit(playground_events$update_report)
     },
     
     set_content = function(id, content) {
@@ -33,7 +33,7 @@ report <- R6::R6Class(
     remove_data = function(id) {
       private$data[[as.character(id)]] <- NULL
       private$count <- private$count - 1
-      private$update(isolate(private$update() + 1))
+      playground_emitter$emit(playground_events$update_report)
     },
     
     get_id = function(section) {
@@ -44,8 +44,7 @@ report <- R6::R6Class(
     
     get_data = function() private$data,
     get_count = function() private$count,
-    get_update = function() private$update,
-    
+
     as_list = function() {
       return(list(data = private$data, count = private$count))
     }

@@ -32,7 +32,6 @@ ExecutionSelect <- R6::R6Class(
           exe <- store$pg$get_execution(executions_id[[1]])
           store$currentExecution <- exe
           store$iraceResults <- exe$get_irace_results()
-          store$sandbox <- exe$getSandbox()
         }
 
         updatePickerInput(

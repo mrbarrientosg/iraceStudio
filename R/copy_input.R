@@ -43,10 +43,8 @@ CopyInput <- R6::R6Class(
           )
         } else {
           report <- store$currentExecution$get_report()
-          
-          update <- report$get_update()
-          update()
-          
+          playground_emitter$value(playground_events$update_report)
+
           data <- report$get_data()
           
           if (length(data) == 0) {

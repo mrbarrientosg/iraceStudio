@@ -19,8 +19,7 @@ IraceButton <- R6::R6Class(
     server = function(input, output, session, store) {
       values <- reactiveValues()
       
-      observeEvent(input$action,
-        {
+      observeEvent(input$action, {
         if (store$startIrace) {
           shinyalert(
             title = "Stop Irace",
@@ -41,9 +40,7 @@ IraceButton <- R6::R6Class(
         }
         
         values$action <- input$action
-      },
-        ignoreInit = TRUE
-      )
+      }, ignoreInit = TRUE)
       
       observeEvent(store$startIrace, self$changeState(session), ignoreInit = TRUE)
       

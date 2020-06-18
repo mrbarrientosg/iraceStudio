@@ -2,7 +2,9 @@ Sandbox <- R6::R6Class(
   classname = "Sandbox",
   cloneable = FALSE,
   private = list(
+    id = NA,
     name = "",
+    description = "",
     elites = FALSE,
     iterations = NULL,
     filters = NULL,
@@ -13,13 +15,16 @@ Sandbox <- R6::R6Class(
   ),
 
   public = list(
-    initialize = function(name = "", sandbox = NULL) {
+    initialize = function(name = "", description = "", sandbox = NULL) {
       private$name <- name
+      private$description <- description
       private$filters <- data.frame()
       private$configurations <- data.frame()
 
       if (!is.null(sandbox)) {
+        private$id <- sandbox$id
         private$name <- sandbox$name
+        private$description <- sandbox$description
         private$elites <- sandbox$elites
         private$iterations <- sandbox$iterations
         private$filters <- sandbox$filters
@@ -42,6 +47,9 @@ Sandbox <- R6::R6Class(
       private$configurations <- private$configurations[-row, ]
     },
 
+    setId = function(id) private$id <- id,
+    setName = function(name) private$name <- name,
+    setDescription = function(desc) private$description <- desc,
     setElites = function(elites) private$elites <- elites,
     setIterations = function(iterations) private$iterations <- iterations,
     setIds = function(ids) private$ids <- ids,
@@ -50,6 +58,9 @@ Sandbox <- R6::R6Class(
     setConfigurations = function(configurations) private$configurations <- configurations,
 
     # GETTER
+    getId = function() return(private$id),
+    getName = function() return(private$name),
+    getDescription = function() return(private$description),
     getElites = function() return(private$elites),
     getIterations = function() return(private$iterations),
     getFilters = function() return(private$filters),
@@ -60,7 +71,9 @@ Sandbox <- R6::R6Class(
 
     asList = function() {
       data <- list()
+      data$id <- private$id
       data$name <- private$name
+      data$description <- private$description
       data$elites <- private$elites
       data$iterations <- private$iterations
       data$filters <- private$filters

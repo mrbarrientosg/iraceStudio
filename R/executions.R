@@ -7,7 +7,7 @@ execution <- R6::R6Class(
     irace_results = NULL,
     output_log = NULL,
     report = NULL,
-    sandbox = NULL
+    sandboxes = NULL
   ),
   public = list(
     initialize = function(name = "", execution = NULL) {
@@ -18,13 +18,25 @@ execution <- R6::R6Class(
         private$irace_results <- execution$irace_results
         private$output_log <- execution$output_log
         private$report <- report$new(report = execution$report)
-        private$sandbox <- Sandbox$new(sandbox = execution$sandbox)
+        private$sandboxes <- SandBoxes$new(data = execution$sandboxes)
       } else {
         private$report <- report$new()
-        private$sandbox <- Sandbox$new()
+        private$sandboxes <- SandBoxes$new()
       }
     },
-    
+
+    add_sandbox = function(sandbox) {
+      private$sandboxes$add_sandbox(sandbox)
+    },
+
+    get_sandbox = function(id) {
+      return(private$sandboxes$get_box(id))
+    },
+
+    remove_sandbox = function(id) {
+      private$sandbox$remove_sandbox(id)
+    },
+
     set_id = function(id) {
       if (private$name == "") {
         private$name <- id
@@ -45,7 +57,7 @@ execution <- R6::R6Class(
     get_irace_results = function() private$irace_results,
     get_report = function() private$report,
     get_name = function() private$name,
-    getSandbox = function() private$sandbox,
+    get_sandboxes = function() private$sandboxes,
     
     as_list = function() {
       data <- list()
@@ -54,7 +66,7 @@ execution <- R6::R6Class(
       data$irace_results <- private$irace_results
       data$output_log <- private$output_log
       data$report <- private$report$as_list()
-      data$sandbox <- private$sandbox$asList()
+      data$sandboxes <- private$sandboxes$as_list()
       return(data)
     }
   )
@@ -70,7 +82,7 @@ executions <- R6::R6Class(
   public = list(
     initialize = function(data = NULL) {
       private$executions <- list()
-      private$count <- reactiveVal(value = 0)
+      private$count <- 0
       if (!is.null(data)) {
         for (name in names(data$executions)) {
           private$executions[[name]] <- execution$new(execution = data$executions[[name]])
