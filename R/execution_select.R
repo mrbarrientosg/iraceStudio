@@ -40,7 +40,15 @@ ExecutionSelect <- R6::R6Class(
         )
       })
       
-      observe(values$option <- input$options)
+      observeEvent(input$options, values$option <- input$options)
+
+      observe({
+        req(store$pg)
+        req(input$options != "")
+        exe <- store$pg$get_execution(input$options)
+        store$currentExecution <- exe
+        store$iraceResults <- exe$get_irace_results()
+      })
       
       return(values)
     }

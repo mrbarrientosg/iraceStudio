@@ -165,15 +165,20 @@ FilterView <- R6::R6Class(
         store$sandbox$setIds(input$idSelect)
       }, suspended = TRUE)
 
-      observeEvent(c(sandbox$option, execution$option),  {
+      observeEvent(
+        c(sandbox$option,
+          execution$option,
+          playground_emitter$value(playground_events$current_scenario)),  {
         updateValue$suspend()
-        if (is.null(store$sandbox)) {
-          self$configurationFilter$clearInputs()
-          self$clearInputs(session)
-        } else {
+
+        if (!is.null(store$sandbox)) {
           self$setupInputs(session, store)
           self$configurationFilter$setupInputs(store)
+        } else{
+          self$configurationFilter$clearInputs()
+          self$clearInputs(session)
         }
+
         updateValue$resume()
       })
 

@@ -49,7 +49,14 @@ SandboxSelect <- R6::R6Class(
         )
       })
 
-      observe(values$option <- input$options)
+      observeEvent(input$options, values$option <- input$options)
+
+      observe({
+        req(store$currentExecution)
+        req(input$options != "")
+        sandboxes <- store$currentExecution$get_sandboxes()
+        store$sandbox <- sandboxes$get_box(input$options)
+      })
 
       return(values)
     }
