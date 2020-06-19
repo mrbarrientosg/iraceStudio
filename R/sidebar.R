@@ -65,6 +65,10 @@ Sidebar <- R6::R6Class(
               text = "Sandbox",
               tabName = "visualization_sandbox"
             ),
+            bs4Dash::bs4SidebarMenuSubItem(
+              text = "Filter",
+              tabName = "visualization_filter"
+            ),
             bs4Dash::bs4SidebarMenuItem(
               text = strong("Performance"),
               bs4SidebarMenuSubItem(

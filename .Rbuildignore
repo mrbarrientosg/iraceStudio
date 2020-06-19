@@ -8,3 +8,4 @@ $run_dev.*
 ^\.travis\.yml$
 ^doc$
 ^Meta$
+^\.github$

@@ -3,6 +3,7 @@
 
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.com/mrbarrientosg/iraceStudio.svg?branch=master)](https://travis-ci.com/mrbarrientosg/iraceStudio)
+[![R build status](https://github.com/mrbarrientosg/iraceStudio/workflows/R-CMD-check/badge.svg)](https://github.com/mrbarrientosg/iraceStudio/actions)
 <!-- badges: end -->
 
 The goal of iraceStudio is to ...

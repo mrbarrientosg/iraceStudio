@@ -7,7 +7,7 @@ ExecutionSelect <- R6::R6Class(
 
       pickerInput(
         inputId = ns("options"),
-        label = "Executions",
+        label = "Execution",
         choices = "",
         ...
       )
