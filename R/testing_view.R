@@ -30,30 +30,20 @@ TestingView <- R6::R6Class(
             closable = FALSE,
             width = 12,
             fluidRow(
+              class = "sub-header",
               column(
                 width = 8,
-                fluidRow(
-                  column(
-                    width = 4,
-                    disabled(
-                      textInput(inputId = ns("instances_dir"), label = "Test Instances Dir")
-                    )
-                  ),
-                  column(
-                    width = 2,
-                    shinyDirButton(
-                      id = ns("dirPath"),
-                      label = "Browse",
-                      title = "Test Instances Directory",
-                      style = "margin-top: 30px; height: 38px;",
-                      class = "ant-btn ant-btn-primary ant-btn-background-ghost"
-                    )
-                  )
+                directoryInput(
+                  idButton = ns("dirPath"),
+                  idInput = ns("instances_dir"),
+                  label = "Test Instances Dir",
+                  title = "Test Instances Directory",
+                  width = "auto"
                 )
               ),
               column(
                 width = 4,
-                class = "d-flex align-items-center justify-content-end",
+                class = "d-flex align-items-end justify-content-end",
                 importButton(inputId = ns("load")),
                 exportButton(
                   inputId = ns("export"),
@@ -85,7 +75,15 @@ TestingView <- R6::R6Class(
       obs_value <- reactiveVal(value = FALSE)
       
       volum <- c(root = path_home())
-      
+
+      observeEvent(store$pg, {
+        updateTextInput(
+          session = session,
+          inputId = "instances_dir",
+          value = gsub('"', "", store$pg$get_irace_option("testInstancesDir"))
+        )
+      })
+
       shinyDirChoose(input, "dirPath", roots = volum)
       
       observeEvent(input$dirPath, {
@@ -141,6 +139,19 @@ TestingView <- R6::R6Class(
       observeEvent(input$source_instances_file, {
         req(input$source_instances_file != "")
         store$pg$set_test_instances(input$source_instances_file)
+      })
+
+      observeEvent(input$instances_dir, {
+        value <- NULL
+
+        if (input$instances_dir != "") {
+          value <- paste0('"', input$instances_dir, '"')
+        }
+
+        store$pg$add_irace_option(
+          option = "testInstancesDir",
+          value = value
+        )
       })
       
       observeEvent(playground_emitter$value(playground_events$current_scenario), {

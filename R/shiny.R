@@ -4,7 +4,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
   opts <- list(...)
 
   if (!is.null(opts$class)) {
-    btn$attribs$class <- paste("btn action-button", opts$class)
+    btn$attribs$class <- gsub("btn-default", "", btn$attribs$class)
   }
 
   return(btn)
@@ -73,7 +73,7 @@ importButton <- function(inputId, style = NULL, size = "default") {
   return(btn)
 }
 
-directoryInput <- function(idButton, idInput, label, buttonText = "Browse", title, width = NULL) {
+directoryInput <- function(idButton, idInput, label, title, buttonText = "Browse" , width = NULL) {
   input <- textInput(
     inputId = idInput,
     label = label,

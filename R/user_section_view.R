@@ -55,7 +55,7 @@ UserSectionView <- R6::R6Class(
               easyClose = TRUE,
               textInput(inputId = ns("title"), label = "Title"),
               footer = tagList(
-                actionButton(inputId = ns("addSection"), label = "Add", type = "primary"),
+                actionButton(inputId = ns("addSection"), label = "Add", class = "btn-primary"),
                 modalButton(label = "Cancel")
               )
             )

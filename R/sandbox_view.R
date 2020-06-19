@@ -164,16 +164,18 @@ SandboxView <- R6::R6Class(
       observeEvent(input$delete, {
         req(input$boxes_rows_selected)
 
+        sandbox <- data$sandbox[input$boxes_rows_selected, ]
+
         showModal(
           modalDialog(
             title = "Warning",
             HTML(
               paste(
-                "Are you sure to delete", tags$b(input$boxes_rows_selected), "sandbox?"
+                "Are you sure to delete", tags$b(sandbox$name), "?"
               )
             ),
             footer = tagList(
-              actionButton(inputId = ns("confirm_delete"), label = "Yes", type = "primary"),
+              actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
               modalButton(label = "Cancel")
             ),
             easyClose = TRUE

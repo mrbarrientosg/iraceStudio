@@ -16,10 +16,9 @@ ExecutionSelect <- R6::R6Class(
     server = function(input, output, session, store) {
       values <- reactiveValues()
       
-      observe({
-        playground_emitter$value(playground_events$current_scenario)
-        playground_emitter$value(playground_events$update_executions)
-        
+      observeEvent(c(playground_emitter$value(playground_events$current_scenario),
+        playground_emitter$value(playground_events$update_executions)), {
+
         executions <- lapply(store$pg$get_executions(), function(execution) execution$get_name())
         executions_id <- lapply(store$pg$get_executions(), function(execution) execution$get_id())
 

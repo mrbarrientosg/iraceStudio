@@ -142,7 +142,7 @@ InitialConfigurationsView <- R6::R6Class(
             create_initial_modal_content(ns, NULL, store),
             style = "overflow-y: scroll; max-height:650px;",
             footer = tagList(
-              actionButton(inputId = ns("add_config"), label = "Add", type = "primary"),
+              actionButton(inputId = ns("add_config"), label = "Add", class = "btn-primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -188,7 +188,7 @@ InitialConfigurationsView <- R6::R6Class(
               create_initial_modal_content(ns, configuration, store),
               style = "overflow-y:scroll; max-height:650px;",
               footer = tagList(
-                actionButton(inputId = ns("confirm_update"), label = "Update", type = "primary"),
+                actionButton(inputId = ns("confirm_update"), label = "Update", class = "btn-primary"),
                 modalButton(label = "Cancel")
               )
             )
@@ -237,7 +237,7 @@ InitialConfigurationsView <- R6::R6Class(
                 )
               ),
               footer = tagList(
-                actionButton(inputId = ns("confirm_delete"), label = "Yes", type = "primary"),
+                actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
                 modalButton(label = "Cancel")
               ),
               easyClose = TRUE

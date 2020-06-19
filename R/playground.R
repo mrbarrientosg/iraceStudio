@@ -48,7 +48,7 @@ playground <- R6::R6Class(
     
     remove_scenario = function(id) {
       private$count <- private$count - 1
-      private$scenarios <- private$scenarios[-id]
+      private$scenarios[[id]] <- NULL
       
       if (is.null(private$scenarios) || length(private$scenarios) == 0) {
         self$add_scenario(scenario$new(name = "scenario-1"))

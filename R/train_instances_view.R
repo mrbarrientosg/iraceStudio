@@ -8,33 +8,20 @@ TrainInstancesView <- R6::R6Class(
       tagList(
         div(class = "sub-header", h2("Train Instances")),
         fluidRow(
+          class = "sub-header",
           column(
             width = 8,
-            fluidRow(
-              column(
-                width = 4,
-                disabled(
-                  textInput(
-                    inputId = ns("instances_dir"),
-                    label = "Instances Dir"
-                  )
-                )
-              ),
-              column(
-                width = 2,
-                shinyDirButton(
-                  id = ns("dir_path"),
-                  label = "Browse",
-                  title = "Instances Directory",
-                  style = "margin-top: 30px; height: 38px;",
-                  class = "ant-btn ant-btn-primary ant-btn-background-ghost"
-                )
-              )
+            directoryInput(
+              idButton = ns("dir_path"),
+              idInput = ns("instances_dir"),
+              label = "Train Instances Dir",
+              title = "Train Instances Directory",
+              width = "auto"
             )
           ),
           column(
             width = 4,
-            class = "d-flex align-items-center justify-content-end",
+            class = "d-flex align-items-end justify-content-end",
             importButton(inputId = ns("load")),
             exportButton(
               inputId = ns("export"),
@@ -68,6 +55,14 @@ TrainInstancesView <- R6::R6Class(
       )
       
       volum <- c(root = path_home())
+
+      observeEvent(store$pg, {
+        updateTextInput(
+          session = session,
+          inputId = "instances_dir",
+          value = gsub('"', "", store$pg$get_irace_option("trainInstancesDir"))
+        )
+      })
       
       shinyDirChoose(input, "dir_path", roots = volum)
       
@@ -110,6 +105,19 @@ TrainInstancesView <- R6::R6Class(
             value = source
           )
         }
+      })
+
+      observeEvent(input$instances_dir, {
+        value <- NULL
+
+        if (input$instances_dir != "") {
+          value <- paste0('"', input$instances_dir, '"')
+        }
+
+        store$pg$add_irace_option(
+          option = "trainInstancesDir",
+          value = value
+        )
       })
       
       observeEvent(playground_emitter$value(playground_events$current_scenario), {

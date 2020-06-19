@@ -217,7 +217,7 @@ ParametersView <- R6::R6Class(
               label = "Conditions"
             ),
             footer = tagList(
-              actionButton(inputId = ns("add_parameter"), label = "Add", type = "primary"),
+              actionButton(inputId = ns("add_parameter"), label = "Add", class = "btn-primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -287,7 +287,7 @@ ParametersView <- R6::R6Class(
                 value = parameter$conditions
               ),
               footer = tagList(
-                actionButton(inputId = ns("confirm_update"), label = "Update", type = "primary"),
+                actionButton(inputId = ns("confirm_update"), label = "Update", class = "btn-primary"),
                 modalButton(label = "Cancel")
               )
             )
@@ -339,7 +339,7 @@ ParametersView <- R6::R6Class(
                 )
               ),
               footer = tagList(
-                actionButton(inputId = ns("confirm_delete"), label = "Yes", type = "primary"),
+                actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
                 modalButton(label = "Cancel")
               ),
               easyClose = TRUE

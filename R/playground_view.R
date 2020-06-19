@@ -109,7 +109,7 @@ PlaygroundView <- R6::R6Class(
             textInput(inputId = ns("scenario_name"), label = "Name"),
             textAreaInput(inputId = ns("scenario_description"), label = "Description"),
             footer = tagList(
-              actionButton(inputId = ns("add_scenario"), label = "Add", type = "primary"),
+              actionButton(inputId = ns("add_scenario"), label = "Add", class = "btn-primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -138,15 +138,15 @@ PlaygroundView <- R6::R6Class(
         req(input$scenarios_rows_selected)
         
         scenario <- data$scenarios[input$scenarios_rows_selected, ]
-        scenario <- store$pg$get_scenario(scenario$id)
+
         showModal(
           modalDialog(
             title = "Edit scenario",
             easyClose = TRUE,
-            textInput(inputId = ns("scenario_name"), label = "Name", value = scenario$get_name()),
-            textAreaInput(inputId = ns("scenario_description"), label = "Description", value = scenario$get_description()),
+            textInput(inputId = ns("scenario_name"), label = "Name", value = scenario$name),
+            textAreaInput(inputId = ns("scenario_description"), label = "Description", value = scenario$description),
             footer = tagList(
-              actionButton(inputId = ns("update_scenario"), label = "Save", type = "primary"),
+              actionButton(inputId = ns("update_scenario"), label = "Save", class = "btn-primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -183,17 +183,19 @@ PlaygroundView <- R6::R6Class(
       
       observeEvent(input$delete, {
         req(input$scenarios_rows_selected)
-        
+
+        scenario <- data$scenarios[input$scenarios_rows_selected, ]
+
         showModal(
           modalDialog(
             title = "Warning",
             HTML(
               paste(
-                "Are you sure to delete", tags$b(input$scenarios_rows_selected), "param?"
+                "Are you sure to delete", tags$b(scenario$name), "?"
               )
             ),
             footer = tagList(
-              actionButton(inputId = ns("confirm_delete"), label = "Yes", type = "primary"),
+              actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
               modalButton(label = "Cancel")
             ),
             easyClose = TRUE
@@ -202,7 +204,9 @@ PlaygroundView <- R6::R6Class(
       })
       
       observeEvent(input$confirm_delete, {
-        store$pg$remove_scenario(input$scenarios_rows_selected)
+        scenario <- data$scenarios[input$scenarios_rows_selected, ]
+
+        store$pg$remove_scenario(scenario$id)
         
         data$scenarios <- self$scenarios_as_data_frame(store)
         

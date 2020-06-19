@@ -34,7 +34,7 @@ execution <- R6::R6Class(
     },
 
     remove_sandbox = function(id) {
-      private$sandbox$remove_sandbox(id)
+      private$sandboxes$remove_sandbox(id)
     },
 
     set_id = function(id) {
