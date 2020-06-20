@@ -49,6 +49,14 @@ ExecutionSelect <- R6::R6Class(
         store$currentExecution <- exe
         store$iraceResults <- exe$get_irace_results()
       })
+
+      observeEvent(store$currentExecution, {
+        updatePickerInput(
+          session = session,
+          inputId = "options",
+          selected = store$currentExecution$get_id()
+        )
+      })
       
       return(values)
     }

@@ -154,7 +154,7 @@ FilterView <- R6::R6Class(
 
       self$configurationFilter$call(id = "filter", store = store)
 
-      values <- reactiveValues(configurations = data.frame(), sandbox = data.frame())
+      values <- reactiveValues(configurations = NULL, sandbox = NULL)
 
       updateValue <- observe({
         req(store$sandbox)
@@ -166,15 +166,27 @@ FilterView <- R6::R6Class(
       }, suspended = TRUE)
 
       observeEvent(
-        c(sandbox$option,
-          execution$option,
+        c(store$sandbox,
           playground_emitter$value(playground_events$current_scenario)),  {
         updateValue$suspend()
+
+        values$sandbox <- data.frame()
+        values$configurations <- data.frame()
 
         if (!is.null(store$sandbox)) {
           self$setupInputs(session, store)
           self$configurationFilter$setupInputs(store)
-        } else{
+
+          if (!is.null(store$iraceResults)) {
+            values$configurations <- store$iraceResults$allConfigurations[0, ]
+          }
+
+          if (nrow(store$sandbox$getConfigurations()) == 0)
+            values$sandbox <- values$configurations
+          else
+            values$sandbox <- store$sandbox$getConfigurations()
+
+        } else {
           self$configurationFilter$clearInputs()
           self$clearInputs(session)
         }
@@ -196,7 +208,7 @@ FilterView <- R6::R6Class(
 
       output$configurationsTable <- renderDT({
         datatable(
-          isolate(values$configurations),
+          values$configurations,
           escape = FALSE,
           selection = "multiple",
           rownames = FALSE,
@@ -213,6 +225,7 @@ FilterView <- R6::R6Class(
       configProxy <- dataTableProxy(outputId = "configurationsTable")
 
       observeEvent(input$filter, {
+        req(store$iraceResults)
         req(store$sandbox)
 
         iterations <- seq.int(
@@ -263,15 +276,13 @@ FilterView <- R6::R6Class(
         }
 
         values$configurations <- unique(configurationsIter)
+      })
+
+      observe({
+        req(values$configurations)
+
         names(values$configurations)[names(values$configurations) == ".ID."] <- "ID"
         names(values$configurations)[names(values$configurations) == ".PARENT."] <- "PARENT"
-
-        configProxy %>%
-          replaceData(
-            data = values$configurations,
-            resetPaging = FALSE,
-            rownames = FALSE
-          )
       })
 
       observeEvent(input$addSandBox, {
@@ -279,13 +290,6 @@ FilterView <- R6::R6Class(
         sandBox <- unique(rbind(store$sandbox$getConfigurations(), rows))
         store$sandbox$setConfigurations(sandBox)
         values$sandbox <- store$sandbox$getConfigurations()
-        configProxy %>% selectRows(NULL)
-        sandboxProxy %>%
-          replaceData(
-            data = store$sandbox$getConfigurations(),
-            resetPaging = FALSE,
-            rownames = FALSE
-          )
       })
 
       observe({
@@ -322,9 +326,20 @@ FilterView <- R6::R6Class(
 
       sandboxProxy <- dataTableProxy(outputId = "sandboxTable")
 
+      observe({
+        req(values$sandbox)
+
+        names(values$sandbox)[names(values$sandbox) == ".ID."] <- "ID"
+        names(values$sandbox)[names(values$sandbox) == ".PARENT."] <- "PARENT"
+
+        store$updateSandbox <- isolate(store$updateSandbox + 1)
+        configProxy %>% selectRows(NULL)
+        sandboxProxy %>% selectRows(NULL)
+      })
+
       observeEvent(input$deleteSandBox, {
         store$sandbox$removeConfiguration(input$sandboxTable_rows_selected)
-        sandboxProxy %>% selectRows(NULL)
+        values$sandbox <- store$sandbox$getConfigurations()
       })
 
       observe({

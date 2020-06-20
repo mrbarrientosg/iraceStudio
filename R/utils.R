@@ -232,13 +232,16 @@ treePlot <- function(data, title) {
   Xn <- L[, 1]
   Yn <- L[, 2]
   
-  tree <- plot_ly(x = ~Xn,
+  tree <- plot_ly(
+    x = ~Xn,
     y = ~Yn,
+    type = "scatter",
     mode = "markers",
     text = vs$name,
     hoverinfo = "text",
     color = as.factor(node.data$name),
-    size = I(50))
+    size = I(50)
+  )
   
   edge_shapes <- list()
   

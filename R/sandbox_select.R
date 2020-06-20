@@ -58,6 +58,14 @@ SandboxSelect <- R6::R6Class(
         store$sandbox <- sandboxes$get_box(input$options)
       })
 
+      observeEvent(store$sandbox, {
+        updatePickerInput(
+          session = session,
+          inputId = "options",
+          selected = store$sandbox$getId()
+        )
+      })
+
       return(values)
     }
   )
