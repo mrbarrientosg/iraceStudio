@@ -30,13 +30,20 @@ PerformanceConfigView <- R6::R6Class(
         ),
         fluidRow(
           bs4Card(
-            title = strong("Box Plot"),
+            title = strong("Distance to best"),
             collapsible = FALSE,
             closable = FALSE,
             width = 12,
-            plotlyOutput(outputId = ns("boxPlotPerf")),
+            plotlyOutput(outputId = ns("distanceBestPlot")),
             br(),
             DTOutput(outputId = ns("selectedPointTable"))
+          ),
+          bs4Card(
+            title = strong("Configuration"),
+            collapsible = FALSE,
+            closable = FALSE,
+            width = 12,
+            plotlyOutput(outputId = ns("configurationPlot"))
           )
         )
       )
@@ -54,16 +61,15 @@ PerformanceConfigView <- R6::R6Class(
         store = store
       )
 
-
-      data <- eventReactive(store$iraceResults, {
+      best_data <- eventReactive(store$iraceResults, {
         future({
           config <- store$iraceResults$allConfigurations$.ID.
 
-          data <- self$configurationByInstances(store$iraceResults, config)
+          self$bestConfigurationByInstances(store$iraceResults, config)
         })
       })
 
-      filteredData <- reactive({
+      filtered_best_data <- reactive({
         req(store$updateSandbox)
         req(store$sandbox)
 
@@ -72,11 +78,10 @@ PerformanceConfigView <- R6::R6Class(
         if (length(config) == 0)
           config <- store$iraceResults$allConfigurations$.ID.
 
-        data() %...>% subset(conf %in% config)
+        best_data() %...>% subset(conf %in% config)
       })
 
-
-      output$boxPlotPerf <- renderPlotly({
+      output$distanceBestPlot <- renderPlotly({
         shiny::validate(
           need(store$sandbox, ""),
           need(store$iraceResults, "")
@@ -86,11 +91,11 @@ PerformanceConfigView <- R6::R6Class(
           title = list(text = "<b>Instance</b>")
         )
 
-        filteredData() %...>% {
+        filtered_best_data() %...>% {
           data <- .
 
           data %>%
-            plot_ly(source = "boxPlotPerf") %>%
+            plot_ly(source = "distanceBestPlot") %>%
             add_boxplot(
               x = ~instance,
               y = ~value,
@@ -112,7 +117,7 @@ PerformanceConfigView <- R6::R6Class(
               showlegend = FALSE
             ) %>%
             layout(
-              title = "Box plot",
+              title = "Distance to best vs Instance",
               xaxis = list(title = "Instance", tickvals = ~instance, ticktext = ~instance, fixedrange = T),
               yaxis = list(title = "Distance to best", type = "linear", fixedrange = T),
               legend = legend,
@@ -123,13 +128,13 @@ PerformanceConfigView <- R6::R6Class(
         }
       })
 
-      selectedData <- reactive({
+      selected_best_data <- reactive({
         req(store$updateSandbox)
         playground_emitter$value(playground_events$current_scenario)
 
-        event <- event_data("plotly_click", "boxPlotPerf")
+        event <- event_data("plotly_click", "distanceBestPlot")
 
-        filteredData() %...>% {
+        filtered_best_data() %...>% {
           if (is.null(event)) {
             return(data.frame())
           }
@@ -163,7 +168,7 @@ PerformanceConfigView <- R6::R6Class(
       })
 
       output$selectedPointTable <- renderDT({
-        selectedData() %...>% {
+        selected_best_data() %...>% {
           datatable(
             data = .,
             escape = FALSE,
@@ -181,12 +186,78 @@ PerformanceConfigView <- R6::R6Class(
           )
         }
       })
+
+      config_data <- eventReactive(store$iraceResults, {
+        future({
+          config <- store$iraceResults$allConfigurations$.ID.
+
+          self$configurationByIntances(store$iraceResults, config)
+        })
+      })
+
+      filtered_config_data <- reactive({
+        req(store$updateSandbox)
+        req(store$sandbox)
+
+        config <- store$sandbox$getConfigurations()$ID
+
+        if (length(config) == 0)
+          config <- store$iraceResults$allConfigurations$.ID.
+
+        config_data() %...>% subset(id %in% config)
+      })
+
+      output$configurationPlot <- renderPlotly({
+        shiny::validate(
+          need(store$sandbox, ""),
+          need(store$iraceResults, "")
+        )
+
+        legend <- list(
+          title = list(text = "<b>Instance</b>")
+        )
+
+        filtered_config_data() %...>% {
+          data <- .
+
+          data %>%
+            plot_ly() %>%
+            add_boxplot(
+              x = ~instance,
+              y = ~value,
+              color = ~instance,
+              boxpoints = FALSE,
+              hoverinfo = "none",
+              hoveron = "boxes",
+              legendgroup = ~instance,
+              showlegend = TRUE
+            ) %>%
+            add_markers(
+              x = ~jitter,
+              y = ~value,
+              marker = list(size = 5),
+              color = ~instance,
+              customdata = ~id,
+              hovertemplate = "<b>y:</b> %{y:.3f} <br><b>ID: %{customdata}</b><extra></extra>",
+              legendgroup = ~instance,
+              showlegend = FALSE
+            ) %>%
+            layout(
+              title = "Configuration vs Instance",
+              xaxis = list(title = "Instance", tickvals = ~instance, ticktext = ~instance, fixedrange = T),
+              yaxis = list(title = "Configuration", type = "linear", fixedrange = T),
+              legend = legend,
+              hovermode = "closest",
+              showlegend = TRUE
+            )
+        }
+      })
     },
 
-    configurationByInstances = function(iraceResults, configurations = iraceResults$allConfigurations$.ID.) {
+    bestConfigurationByInstances = function(iraceResults, configurations = iraceResults$allConfigurations$.ID.) {
       data <- data.frame()
 
-      experiments <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
+      experiments <- iraceResults$experiments
 
       min <- apply(experiments, 1, function(row) {
         if (all(is.na(row)))
@@ -195,18 +266,43 @@ PerformanceConfigView <- R6::R6Class(
           min(row, na.rm = T)
       })
 
+      experiments <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
+
       for (idx in seq_along(min)) {
+        if (is.na(min[idx])) {
+          next
+        }
+
         row <- experiments[idx, , drop = FALSE]
+        row <- row[, which(!is.na(row)), drop = F]
         values <- 100 * ((row - min[idx]) / min[idx])
+        conf <- colnames(values)
         values <- as.vector(values)
         instance <- iraceResults$state$.irace$instancesList[idx, "instance"]
-        na <- which(!is.na(values))
-        instances <- rep(instance, length(na))
-        data <- rbind(data, data.frame(instance = instances, conf = configurations[na], value = values[na]))
+        instances <- rep(instance, length(values))
+        data <- rbind(data, data.frame(instance = instances, conf = conf, value = values))
       }
 
       data$jitter <- jitter(as.numeric(data$instance))
       data$instance <- factor(data$instance)
+      data <- data[order(data$instance), ]
+
+      return(data)
+    },
+
+    configurationByIntances = function(iraceResults, configurations = iraceResults$allConfigurations$.ID.) {
+      experiments <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
+
+      id <- rownames(experiments)
+      instances <- iraceResults$state$.irace$instancesList[id, "instance"]
+      rownames(experiments) <- sort(instances)
+
+      data <- as.data.frame(as.table(experiments))
+      data <- na.omit(data)
+
+      colnames(data) <- c("instance", "id", "value")
+
+      data$jitter <- jitter(as.numeric(data$instance))
       data <- data[order(data$instance), ]
 
       return(data)

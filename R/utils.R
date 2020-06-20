@@ -239,8 +239,10 @@ treePlot <- function(data, title) {
     mode = "markers",
     text = vs$name,
     hoverinfo = "text",
-    color = as.factor(node.data$name),
-    size = I(50)
+    marker = list(
+      color = as.factor(node.data$name),
+      size = I(50)
+    )
   )
   
   edge_shapes <- list()
