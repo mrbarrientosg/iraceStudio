@@ -152,6 +152,19 @@ scenario <- R6::R6Class(
     get_executions = function() private$executions$get_executions(),
     get_execution = function(name) private$executions$get_execution(name),
 
+    clear_scenario_temp = function() {
+      self$add_irace_option("parameterFile", "")
+      self$add_irace_option("trainInstancesFile", "")
+      self$add_irace_option("trainInstancesDir", "")
+      self$add_irace_option("scenarioFile", "")
+      self$add_irace_option("execDir", "")
+      self$add_irace_option("logFile", "")
+      self$add_irace_option("configurationsFile", "")
+      self$add_irace_option("forbiddenFile", "")
+      self$add_irace_option("testInstancesFile", "")
+      self$add_irace_option("testInstancesDir", "")
+    },
+
     as_list = function() {
       data <- list()
       data$id <- private$id

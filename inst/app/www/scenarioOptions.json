@@ -372,13 +372,6 @@
     "name": "Testing",
     "options": [
       {
-        "id": "onlyTest",
-        "name": "Execute only testing phase",
-        "description": "Only test the configurations given in the file passed as argument.",
-        "type": "bool",
-        "default": false
-      },
-      {
         "id": "testNbElites",
         "name": "testNbElites",
         "description": "Number of elite configurations returned by irace that will be tested if test instances are provided.",

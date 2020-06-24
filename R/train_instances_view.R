@@ -55,14 +55,6 @@ TrainInstancesView <- R6::R6Class(
       )
       
       volum <- c(root = path_home())
-
-      observeEvent(store$pg, {
-        updateTextInput(
-          session = session,
-          inputId = "instances_dir",
-          value = gsub('"', "", store$pg$get_irace_option("trainInstancesDir"))
-        )
-      })
       
       shinyDirChoose(input, "dir_path", roots = volum)
       
@@ -72,6 +64,12 @@ TrainInstancesView <- R6::R6Class(
           log_debug("Adding trainInstancesDir {dir}")
           store$pg$add_irace_option(option = "trainInstancesDir", value = paste0('"', dir, '"'))
           updateTextInput(session = session, inputId = "instances_dir", value = dir)
+          files <- list.files(path = dir)
+          updateTextAreaInput(
+            session = session,
+            inputId = "source_instances_file",
+            value = paste(files, collapse = "\n")
+          )
         }
       })
       
@@ -106,25 +104,18 @@ TrainInstancesView <- R6::R6Class(
           )
         }
       })
-
-      observeEvent(input$instances_dir, {
-        value <- NULL
-
-        if (input$instances_dir != "") {
-          value <- paste0('"', input$instances_dir, '"')
-        }
-
-        store$pg$add_irace_option(
-          option = "trainInstancesDir",
-          value = value
-        )
-      })
       
       observeEvent(playground_emitter$value(playground_events$current_scenario), {
         updateTextAreaInput(
           session = session,
           inputId = "source_instances_file",
           value = store$pg$get_train_instances()
+        )
+
+        updateTextInput(
+          session = session,
+          inputId = "instances_dir",
+          value = gsub('"', "", store$pg$get_irace_option("trainInstancesDir"))
         )
       })
       
