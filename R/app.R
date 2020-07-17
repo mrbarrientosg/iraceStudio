@@ -39,6 +39,7 @@ App <- R6::R6Class(
       private$store$startIrace <- FALSE
       private$store$iraceAlive <- reactiveTimer(intervalMs = 1050)
       private$store$copy <- list(id = NULL, plot = NULL, table = NULL)
+      private$store$updateSandbox <- 0
 
       private$navbar$call(id = "navbar", store = private$store)
       private$body$setupModules(private$store)

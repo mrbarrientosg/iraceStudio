@@ -37,7 +37,7 @@ ConfigurationFilter <- R6::R6Class(
               inputId = ns("addCondition"),
               label = "Add",
               style = "margin-left: 15px; margin-top: 15px;",
-              type = "primary"
+              class = "btn-primary"
             )
           )
         ),
@@ -54,7 +54,7 @@ ConfigurationFilter <- R6::R6Class(
               inputId = ns("deleteCondition"),
               label = "Delete",
               icon = icon("trash"),
-              danger = TRUE
+              class = "btn-danger"
             )
           )
         ),

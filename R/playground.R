@@ -160,16 +160,7 @@ playground <- R6::R6Class(
     },
     
     clear_scenario_temp = function() {
-      private$current_scenario$add_irace_option("parameterFile", "")
-      private$current_scenario$add_irace_option("trainInstancesFile", "")
-      private$current_scenario$add_irace_option("trainInstancesDir", "")
-      private$current_scenario$add_irace_option("scenarioFile", "")
-      private$current_scenario$add_irace_option("execDir", "")
-      private$current_scenario$add_irace_option("logFile", "")
-      private$current_scenario$add_irace_option("configurationsFile", "")
-      private$current_scenario$add_irace_option("forbiddenFile", "")
-      private$current_scenario$add_irace_option("testInstancesFile", "")
-      private$current_scenario$add_irace_option("testInstancesDir", "")
+      private$current_scenario$clear_scenario_temp()
     },
     
     save = function(path) {

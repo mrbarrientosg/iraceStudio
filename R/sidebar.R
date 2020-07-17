@@ -72,8 +72,12 @@ Sidebar <- R6::R6Class(
             bs4Dash::bs4SidebarMenuItem(
               text = strong("Performance"),
               bs4SidebarMenuSubItem(
+                text = "Instance",
+                tabName = "visualization_by_instance"
+              ),
+              bs4SidebarMenuSubItem(
                 text = "Configuration",
-                tabName = "visualization_perf_config"
+                tabName = "visualization_by_config"
               )
             )
           ),

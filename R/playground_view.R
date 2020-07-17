@@ -1,6 +1,9 @@
 PlaygroundView <- R6::R6Class(
   classname = "PlaygroundView",
   inherit = View,
+  private = list(
+    scenario = NULL
+  ),
   public = list(
     ui = function() {
       ns <- NS(self$id)
@@ -19,7 +22,7 @@ PlaygroundView <- R6::R6Class(
               tabName = "Scenarios",
               fluidRow(
                 column(
-                  width = 12,
+                  width = 8,
                   style = "padding-left: 0px !important;",
                   actionButton(
                     inputId = ns("add"),
@@ -39,9 +42,14 @@ PlaygroundView <- R6::R6Class(
                     )
                   )
                 ),
-                br("\n"),
-                DTOutput(outputId = ns("scenarios"))
-              )
+                column(
+                  width = 4,
+                  class = "d-flex align-items-end justify-content-end",
+                  importButton(inputId = ns("load"))
+                )
+              ),
+              br(),
+              DTOutput(outputId = ns("scenarios"))
             ),
             bs4TabPanel(
               tabName = "Options",
@@ -65,6 +73,67 @@ PlaygroundView <- R6::R6Class(
       ns <- session$ns
       
       data <- reactiveValues(scenarios = self$scenarios_as_data_frame(store))
+
+      volum <- c(root = path_home())
+
+      shinyFileChoose(input, "load", roots = volum)
+
+      observeEvent(input$load, {
+        if (!is.integer(input$load)) {
+          file <- parseFilePaths(roots = volum, input$load)
+
+          if (grep(".Rdata", file$name)) {
+            load(file$datapath)
+            scenario <- iraceResults$scenario
+            private$scenario$add_parameter(extract.parameters(iraceResults$parameters))
+            rm(iraceResults)
+          } else {
+            scenario <- tryCatch(irace::readScenario(filename = file$datapath),
+              error = function(err) {
+                log_error("{err}")
+                alert.error(as.character(err))
+                return(NULL)
+              }
+            )
+          }
+
+          for (opt in names(scenario)) {
+            if (opt == "cappingType") {
+              # TODO: How to get cappingType from file
+            } else {
+              private$scenario$add_irace_option(opt, scenario[[opt]])
+            }
+          }
+
+
+          private$scenario$clear_scenario_temp()
+
+          store$pg$add_scenario(private$scenario)
+          data$scenarios <- self$scenarios_as_data_frame(store)
+          private$scenario <- NULL
+        } else {
+          shinyalert(
+            title = "Scenario name",
+            text = "Give a name to identify the scenario after.",
+            type = "input",
+            inputType = "text",
+            showCancelButton = TRUE,
+            closeOnEsc = FALSE,
+            callbackR = function(name) {
+              if (is.logical(name) && !name) {
+                return(invisible())
+              }
+
+              if (is.null(name) || name == "") {
+                alert.error("Give a name")
+                return(invisible())
+              }
+
+              private$scenario <- scenario$new(name = name)
+            }
+          )
+        }
+      })
   
       observeEvent(store$pg, {
         updateTextInput(
@@ -80,9 +149,7 @@ PlaygroundView <- R6::R6Class(
         )
       })
       
-      output$scenarios <- renderDT({
-        playground_emitter$value(playground_events$update_scenarios)
-
+      output$scenarios <- renderDT(
         datatable(
           data = data$scenarios,
           escape = FALSE,
@@ -99,7 +166,7 @@ PlaygroundView <- R6::R6Class(
             sort = FALSE
           )
         )
-      })
+      )
       
       observeEvent(input$add, {
         showModal(

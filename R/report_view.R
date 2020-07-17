@@ -94,15 +94,6 @@ ReportView <- R6::R6Class(
         return("An external log file will not be saved in the playground.")
       })
       
-      observeEvent(executions$option, {
-        req(executions$option != "")
-        
-        exe <- store$pg$get_execution(executions$option)
-        store$currentExecution <- exe
-        
-        store$iraceResults <- exe$get_irace_results()
-      })
-      
       observeEvent(input$pdf, {
         req(store$iraceResults)
         

@@ -20,6 +20,7 @@ Sandbox <- R6::R6Class(
       private$description <- description
       private$filters <- data.frame()
       private$configurations <- data.frame()
+      private$iterations <- c(0, 0)
 
       if (!is.null(sandbox)) {
         private$id <- sandbox$id

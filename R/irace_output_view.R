@@ -85,11 +85,6 @@ IraceOutputView <- R6::R6Class(
                 return(invisible())
               }
               
-              if (!is.null(store$pg$get_execution(name))) {
-                alert.error("The execution name is repeated.")
-                return(invisible())
-              }
-              
               run_irace(store, name)
               
               if (store$startIrace) {
@@ -128,6 +123,8 @@ IraceOutputView <- R6::R6Class(
               }
 
               store$pg$add_execution(self$execution)
+
+              shinyalert(title = "The execution has ended", type = "success", timer = 1500)
             } else {
               file.remove(log)
               file.remove(pkg$outputLog)

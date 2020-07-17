@@ -1,19 +1,21 @@
 on:
-  push:
-    branches:
-      - master
   pull_request:
     branches:
       - master
+      - dev
 
 name: R-CMD-check
 
 jobs:
   R-CMD-check:
-    runs-on: macOS-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@master
+        with:
+            r-version: "3.4"
+      - name: System dependencies
+        run: sudo apt-get install libcurl4-openssl-dev libpoppler-cpp-dev libmagick++-dev
       - name: Install dependencies
         run: |
           install.packages(c("remotes", "rcmdcheck"))
