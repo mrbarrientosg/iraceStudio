@@ -16,8 +16,9 @@ Body <- R6::R6Class(
     
     sandboxView = NULL,
     filterView = NULL,
+    performanceInstance = NULL,
     performanceConfig = NULL,
-    
+
     reportView = NULL,
     userSectionView = NULL,
     
@@ -36,7 +37,8 @@ Body <- R6::R6Class(
       
       self$sandboxView <- SandboxView$new("visualization_sandbox")
       self$filterView <- FilterView$new("visualization_filter")
-      self$performanceConfig <- PerformanceConfigView$new("visualization_perf_config")
+      self$performanceInstance <- PerformanceInstanceView$new("visualization_by_instance")
+      self$performanceConfig <- PerformanceConfigView$new("visualization_by_config")
       
       self$reportView <- ReportView$new("report")
       self$userSectionView <- UserSectionView$new("report_user_section")
@@ -99,7 +101,11 @@ Body <- R6::R6Class(
             self$filterView$ui()
           ),
           bs4TabItem(
-            tabName = "visualization_perf_config",
+            tabName = "visualization_by_instance",
+            self$performanceInstance$ui()
+          ),
+          bs4TabItem(
+            tabName = "visualization_by_config",
             self$performanceConfig$ui()
           ),
           bs4TabItem(
@@ -130,6 +136,7 @@ Body <- R6::R6Class(
       
       self$sandboxView$call(store = store)
       self$filterView$call(store = store)
+      self$performanceInstance$call(store = store)
       self$performanceConfig$call(store = store)
       
       self$reportView$call(store = store)
