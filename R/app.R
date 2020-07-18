@@ -111,7 +111,7 @@ App <- R6::R6Class(
     
       if (is.null(gui$workspacePath) ||
         gui$workspacePath == "") {
-        path <- file.path(getwd(), "workspace")
+        path <- file.path(fs::path_home(), "workspace")
       }
     
       if (!dir.exists(path)) {
