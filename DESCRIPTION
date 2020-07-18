@@ -47,3 +47,4 @@ Remotes:
     RinteRface/bs4Dash@eb867d1,
     daattali/shinyalert
 VignetteBuilder: knitr
+StagedInstall: no
