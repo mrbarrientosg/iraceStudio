@@ -12,13 +12,13 @@ App <- R6::R6Class(
   ),
 
   public = list(
-    initialize = function() {
+    initialize = function(path) {
       private$navbar <- Navbar$new()
       private$sidebar <- Sidebar$new()
       private$body <- Body$new()
       private$store <- reactiveValues(
         pg = playground$new(name = "dev-playground"),
-        gui = GUIOptions$new(),
+        gui = GUIOptions$new(path = path),
         app = self
       )
     },
