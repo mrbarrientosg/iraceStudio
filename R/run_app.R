@@ -17,6 +17,8 @@ scenarioOptions <- jsonlite::fromJSON(
 #' @importFrom shiny shinyApp
 #' @importFrom golem with_golem_options
 run_app <- function (...) {
+  setwd(fs::path_home())
+  
   app <- App$new()
 
   with_golem_options(
