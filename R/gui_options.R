@@ -5,7 +5,7 @@ GUIOptions <- R6::R6Class(
     workspacePath = character(0),
   
     initialize = function (path) {
-      workspacePath <- file.path(path, "workspace")
+      self$workspacePath <- file.path(path, "workspace")
     }
   )
 )
