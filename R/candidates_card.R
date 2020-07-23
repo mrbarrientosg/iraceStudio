@@ -192,7 +192,7 @@ CandidatesCard <- R6::R6Class(
             
             progress$inc(0.05, detail = "Making Plots...")
             
-            fixFormat <- store$iraceResults$parameters
+            fixFormat <- isolate(store$iraceResults$parameters)
             fixFormat$names <- params
             
             png(filename = sprintf(".Fimages/Rplot%03d.png", i), width = 550, height = 550, res = 80)
@@ -324,7 +324,7 @@ CandidatesCard <- R6::R6Class(
             
             parallelCoordinatesPlot(
               configurations = conf,
-              parameters = store$iraceResults$parameters,
+              parameters = isolate(store$iraceResults$parameters),
               param_names = params,
               hierarchy = FALSE
             )

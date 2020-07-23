@@ -42,8 +42,7 @@ ExecutionSelect <- R6::R6Class(
       
       observeEvent(input$options, values$option <- input$options)
 
-      observe({
-        req(store$pg)
+      observeEvent(c(store$pg, input$options), {
         req(input$options != "")
         exe <- store$pg$get_execution(input$options)
         store$currentExecution <- exe

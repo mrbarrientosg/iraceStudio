@@ -7,13 +7,13 @@ playground <- R6::R6Class(
     scenarios = NULL,
     last_scenario = NULL,
     current_scenario = NULL,
-    count = 0
+    last_insert = 0
   ),
   public = list(
     initialize = function(name = "", playground = NULL) {
       private$name <- name
       private$scenarios <- list()
-      private$count <- 0
+      private$last_insert <- 0
       if (!is.null(playground)) {
         private$name <- playground$name
         private$description <- playground$description
@@ -22,15 +22,15 @@ playground <- R6::R6Class(
           private$current_scenario <- private$scenarios[[name]]
         }
         private$last_scenario <- playground$last_scenario
-        private$count <- playground$count
+        private$last_insert <- playground$last_insert
       } else {
         self$add_scenario(scenario$new(name = "scenario-1"))
       }
     },
     
     add_scenario = function(new_scenario) {
-      private$count <- private$count + 1
-      id <- as.character(private$count)
+      private$last_insert <- private$last_insert + 1
+      id <- as.character(private$last_insert)
       
       if (is.null(private$scenarios)) {
         private$scenarios <- list()
@@ -47,7 +47,6 @@ playground <- R6::R6Class(
     },
     
     remove_scenario = function(id) {
-      private$count <- private$count - 1
       private$scenarios[[id]] <- NULL
       
       if (is.null(private$scenarios) || length(private$scenarios) == 0) {
@@ -172,7 +171,7 @@ playground <- R6::R6Class(
       for (name in names(private$scenarios)) {
         playground$scenarios[[name]] <- private$scenarios[[name]]$as_list()
       }
-      playground$count <- private$count
+      playground$last_insert <- private$last_insert
       saveRDS(playground, file = path)
     }
   )

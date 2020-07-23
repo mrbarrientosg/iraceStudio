@@ -77,23 +77,23 @@ executions <- R6::R6Class(
   cloneable = FALSE,
   private = list(
     executions = NULL,
-    count = NULL
+    last_insert = NULL
   ),
   public = list(
     initialize = function(data = NULL) {
       private$executions <- list()
-      private$count <- 0
+      private$last_insert <- 0
       if (!is.null(data)) {
         for (name in names(data$executions)) {
           private$executions[[name]] <- execution$new(execution = data$executions[[name]])
         }
-        private$count <- data$count
+        private$last_insert <- data$last_insert
       }
     },
     
     add_execution = function(id, execution) {
-      private$count <- private$count + 1
-      new_id <- paste0("execution-", id, "-", private$count)
+      private$last_insert <- private$last_insert + 1
+      new_id <- paste0("execution-", id, "-", private$last_insert)
       execution$set_id(new_id)
       private$executions[[new_id]] <- execution
       playground_emitter$emit(playground_events$update_executions)
@@ -114,16 +114,16 @@ executions <- R6::R6Class(
     remove_all = function() {
       private$executions <- NULL
       private$executions <- list()
-      private$count <- 0
+      private$last_insert <- 0
       playground_emitter$emit(playground_events$update_scenarios)
     },
     
-    is_empty = function() private$count == 0,
+    is_empty = function() length(private$executions) == 0,
     get_executions = function() private$executions,
     get_execution = function(id) {
       return(private$executions[[id]])
     },
-    get_count = function() private$count,
+    get_count = function() length(private$executions),
     
     as_list = function() {
       data <- list()
@@ -133,7 +133,7 @@ executions <- R6::R6Class(
         data$executions[[name]] <- private$executions[[name]]$as_list()
       }
       
-      data$count <- private$count
+      data$last_insert <- private$last_insert
       
       return(data)
     }

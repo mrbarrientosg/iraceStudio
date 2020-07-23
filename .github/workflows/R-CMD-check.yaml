@@ -1,13 +1,12 @@
 on:
-  pull_request:
+  push:
     branches:
       - master
-      - dev
 
 name: R-CMD-check
 
 jobs:
-  R-CMD-check:
+  ubuntu-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

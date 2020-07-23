@@ -152,9 +152,11 @@ FilterView <- R6::R6Class(
         store = store
       )
 
-      self$configurationFilter$call(id = "filter", store = store)
+      values <- reactiveValues(configurations = NULL,
+                               sandbox = NULL,
+                               updateConfig = 0)
 
-      values <- reactiveValues(configurations = NULL, sandbox = NULL)
+      self$configurationFilter$call(id = "filter", store = store, parent = values)
 
       updateValue <- observe({
         req(store$sandbox)
@@ -176,7 +178,8 @@ FilterView <- R6::R6Class(
         if (!is.null(store$sandbox)) {
           self$setupInputs(session, store)
           self$configurationFilter$setupInputs(store)
-
+          values$updateConfig <- isolate(values$updateConfig + 1)
+          
           if (!is.null(store$iraceResults)) {
             values$configurations <- store$iraceResults$allConfigurations[0, ]
           }
@@ -192,7 +195,7 @@ FilterView <- R6::R6Class(
         }
 
         updateValue$resume()
-      })
+      }, ignoreNULL = FALSE)
 
       output$descentTreePlot <- renderPlotly({
         shiny::validate(

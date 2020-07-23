@@ -34,7 +34,8 @@ PerformanceConfigView <- R6::R6Class(
             collapsible = FALSE,
             closable = FALSE,
             width = 12,
-            plotlyOutput(outputId = ns("solutionCostConfig"))
+            plotlyOutput(outputId = ns("solutionCostConfig")) %>%
+              shinycssloaders::withSpinner(type = 6)
           )
         )
       )
@@ -53,7 +54,7 @@ PerformanceConfigView <- R6::R6Class(
       )
 
       config_data <- eventReactive(store$iraceResults, {
-        future(self$configurationByPerformance(store$iraceResults))
+        future(self$configurationByPerformance(isolate(store$iraceResults)))
       })
 
       filtered_config_data <- reactive({

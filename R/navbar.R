@@ -53,8 +53,6 @@ Navbar <- R6::R6Class(
         req(input$scenarioPicker)
         store$pg$change_current_scenario(input$scenarioPicker)
         pkg$outputLog <- NULL
-
-        output$current_scenario <- renderUI(tags$p(strong("Current scenario: "), store$pg$get_scenario_name()))
       })
 
       observeEvent(store$startIrace, {

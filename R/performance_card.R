@@ -95,17 +95,15 @@ PerformanceCard <- R6::R6Class(
         
         iteration <- as.integer(input$iterations)
         
-        future({
-          configurationPerIteration <- convert_vector_to_string(store$iraceResults$allElites[iteration][[1]])
-          results <- store$iraceResults$experiments
-          intersectedColumns <- self$format_col_data(results, configurationPerIteration)
-          results <- subset(store$iraceResults$experiments, select = intersectedColumns)
-          na.omit(results)
-        }) %...>% {
-          plot <- irace::configurationsBoxplot(., ylab = "Solution cost", title = "Box Plot")
-          pkg$reportStore$performanceBoxPlot <- save_plot_as_base64()
-          plot
-        }
+        configurationPerIteration <- convert_vector_to_string(isolate(store$iraceResults$allElites[iteration][[1]]))
+        results <- isolate(store$iraceResults$experiments)
+        intersectedColumns <- self$format_col_data(results, configurationPerIteration)
+        results <- subset(isolate(store$iraceResults$experiments), select = intersectedColumns)
+        results <- na.omit(results)
+        
+        plot <- irace::configurationsBoxplot(results, ylab = "Solution cost", title = "Box Plot")
+        pkg$reportStore$performanceBoxPlot <- save_plot_as_base64()
+        plot
       })
       
       output$converge_plot <- renderPlot({

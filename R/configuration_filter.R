@@ -63,21 +63,22 @@ ConfigurationFilter <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, parent) {
       self$session <- session
       ns <- session$ns
 
       values <- reactiveValues(expressions = data.frame())
-
-      observe({
+      
+      observeEvent(parent$updateConfig, {
         req(input$paramNames)
         req(store$iraceResults)
-        req(store$currentExecution)
+
+        print(input$paramNames)
 
         type <- store$iraceResults$parameters$types[[input$paramNames]]
         domain <- store$iraceResults$parameters$domain[[input$paramNames]]
         conditions <- self$conditionsList(type)
-
+        
         updatePickerInput(
           session = session,
           inputId = "conditions",

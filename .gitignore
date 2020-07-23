@@ -10,3 +10,5 @@ Meta
 workspace/*
 .idea/*
 *.Rproj
+
+.DS_Store

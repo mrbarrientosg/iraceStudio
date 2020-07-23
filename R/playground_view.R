@@ -82,10 +82,13 @@ PlaygroundView <- R6::R6Class(
         if (!is.integer(input$load)) {
           file <- parseFilePaths(roots = volum, input$load)
 
-          if (grep(".Rdata", file$name)) {
+          if (grepl(".Rdata", file$name, fixed = TRUE)) {
             load(file$datapath)
             scenario <- iraceResults$scenario
             private$scenario$add_parameter(extract.parameters(iraceResults$parameters))
+            exe <- execution$new(name = "execution-1")
+            exe$set_irace_results(iraceResults)
+            private$scenario$add_execution(exe)
             rm(iraceResults)
           } else {
             scenario <- tryCatch(irace::readScenario(filename = file$datapath),
@@ -104,7 +107,6 @@ PlaygroundView <- R6::R6Class(
               private$scenario$add_irace_option(opt, scenario[[opt]])
             }
           }
-
 
           private$scenario$clear_scenario_temp()
 
