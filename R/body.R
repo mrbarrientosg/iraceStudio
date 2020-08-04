@@ -120,11 +120,11 @@ Body <- R6::R6Class(
       )
     },
     
-    setupModules = function(store) {
+    setupModules = function(store, storeR) {
       self$uiOptionsView$call(store = store)
       self$playgroundView$call(store = store)
       self$iraceOptionsView$call(store = store)
-      self$parametersView$call(store = store)
+      self$parametersView$call(store = store, storeR = storeR)
       self$trainInstancesView$call(store = store)
       self$targetScriptsView$call(store = store)
       self$initialConfigurationsView$call(store = store)

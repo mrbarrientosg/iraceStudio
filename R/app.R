@@ -7,6 +7,7 @@ App <- R6::R6Class(
     sidebar = NULL,
     body = NULL,
     store = NULL,
+    storeR = NULL,
     logs = NULL,
     logger_path = NULL
   ),
@@ -41,8 +42,8 @@ App <- R6::R6Class(
       private$store$copy <- list(id = NULL, plot = NULL, table = NULL)
       private$store$updateSandbox <- 0
 
-      private$navbar$call(id = "navbar", store = private$store)
-      private$body$setupModules(private$store)
+      private$navbar$call(id = "navbar", store = private$store, storeR = private$storeR)
+      private$body$setupModules(private$store, private$storeR)
       
       onSessionEnded(function() {
         #self$destroy()
@@ -95,6 +96,7 @@ App <- R6::R6Class(
       if (file.exists(path)) {
         pg <- readRDS(file = path)
         private$store$pg <- playground$new(playground = pg)
+        private$storeR <- Store$new(appReducer, AppState$new(isolate(private$store$pg), NULL), list(changeScenarioMiddleware))
       }
     
       private$logs <- file.path(gui$workspacePath, "logs")

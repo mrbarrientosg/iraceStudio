@@ -58,10 +58,14 @@ ParametersView <- R6::R6Class(
       )
     },
     
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, storeR) {
       ns <- session$ns
       
       values <- reactiveValues(parameters = NULL)
+      
+      storeR$subscribeTo(function(state) state$scenarioState, function(state) {
+        values$parameters <- state$scenario$get_parameters()
+      })
   
       clear <- callModule(
         module = clear_button_sv,
@@ -71,7 +75,7 @@ ParametersView <- R6::R6Class(
       
       output$parameters_table <- renderDT(
         datatable(
-          data = store$pg$get_parameters(),
+          data = values$parameters,
           escape = FALSE,
           selection = "single",
           rownames = FALSE,
@@ -90,9 +94,7 @@ ParametersView <- R6::R6Class(
       # Para poder modificar la tabla de parametros despues de instanciarse
       proxy <- dataTableProxy(outputId = "parameters_table")
       
-      observeEvent(playground_emitter$value(playground_events$current_scenario), {
-        values$parameters <- store$pg$get_parameters()
-      })
+
       
       observe({
         playground_emitter$emit(playground_events$update_parameters)

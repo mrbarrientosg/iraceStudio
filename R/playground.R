@@ -19,8 +19,8 @@ playground <- R6::R6Class(
         private$description <- playground$description
         for (name in names(playground$scenarios)) {
           private$scenarios[[name]] <- scenario$new(scenario = playground$scenarios[[name]])
-          private$current_scenario <- private$scenarios[[name]]
         }
+        private$current_scenario <- private$scenarios[[playground$last_scenario]]
         private$last_scenario <- playground$last_scenario
         private$last_insert <- playground$last_insert
       } else {
@@ -161,6 +161,8 @@ playground <- R6::R6Class(
     clear_scenario_temp = function() {
       private$current_scenario$clear_scenario_temp()
     },
+    
+    get_current = function() private$current_scenario,
     
     save = function(path) {
       playground <- list()

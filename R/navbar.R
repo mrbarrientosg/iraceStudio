@@ -46,12 +46,13 @@ Navbar <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, storeR) {
       output$playgroundName <- renderText(store$playgroundName)
 
       observeEvent(input$scenarioPicker, {
         req(input$scenarioPicker)
-        store$pg$change_current_scenario(input$scenarioPicker)
+        storeR$dispatch(scenarioActions$changeScenario(input$scenarioPicker))
+        #store$pg$change_current_scenario(input$scenarioPicker)
         pkg$outputLog <- NULL
       })
 
