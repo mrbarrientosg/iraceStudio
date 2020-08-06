@@ -46,8 +46,6 @@ IraceOptionsView <- R6::R6Class(
       })
       
       output$content <- renderUI({
-        playground_emitter$value(playground_events$current_scenario)
-
         args <- c(
           self$create_tabs(ns, store),
           id = ns("tab"),

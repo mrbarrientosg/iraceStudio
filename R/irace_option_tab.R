@@ -33,6 +33,13 @@ IraceOptionTab <- R6::R6Class(
         })
       }
       
+      observeEvent(playground_emitter$value(playground_events$current_scenario), {
+        for (row in seq_along(nrow(scenarioOptions[[section]]$options))) {
+          option <- scenarioOptions[[section]]$options[row, ]
+          private$updateInput(option, session, store)
+        }
+      })
+      
       observeEvent(input$elitist, {
         if (!input$elitist) {
           log_info("Disable elitistLimit and elitistNewInstances")
@@ -76,6 +83,39 @@ IraceOptionTab <- R6::R6Class(
         textAreaInput(inputId = ns(data$id), label = data$name, value = default)
       } else {
         pickerInput(inputId = ns(data$id), label = data$name, choices = data$values[[1]], selected = default)
+      }
+    },
+    
+    updateInput = function(option, session, store) {
+      default <- if (is.null(store$pg$get_irace_option(option$id)))
+        data$default 
+      else 
+        store$pg$get_irace_option(option$id)
+      
+      if (option$type == "numeric") {
+        updateNumericInput(
+          session = session,
+          inputId = option$id,
+          value = default
+        )
+      } else if (option$type == "bool") {
+        updateCheckboxInput(
+          session = session,
+          inputId = option$id,
+          value = as.logical(default)
+        )
+      } else if (option$type == "atext") {
+        updateTextAreaInput(
+          session = session,
+          inputId = option$id,
+          value = default
+        )
+      } else {
+        updatePickerInput(
+          session = session,
+          inputId = option$id,
+          selected = gsub('"', "", default)
+        )
       }
     }
   )
