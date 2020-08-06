@@ -2,7 +2,60 @@ PlaygroundView <- R6::R6Class(
   classname = "PlaygroundView",
   inherit = View,
   private = list(
-    scenario = NULL
+    scenario = NULL,
+    
+    importScenario = function(name, path) {
+      scenario <- if (grepl(".Rdata", name, fixed = TRUE)) {
+        load(file$datapath)
+        private$scenario$add_parameter(extract.parameters(iraceResults$parameters))
+        exe <- execution$new(name = "execution-1")
+        exe$set_irace_results(iraceResults)
+        private$scenario$add_execution(exe)
+        iraceResults$scenario
+      } else {
+        tryCatch(irace::readScenario(filename = path),
+                             error = function(err) {
+                               log_error("{err}")
+                               alert.error(as.character(err))
+                               return(NULL)
+                             }
+        )
+      }
+      
+      rm(iraceResults)
+      
+      print(scenario)
+      
+      if (is.null(scenario)) {
+        return(FALSE)
+      }
+      
+      path <- scenario$targetRunner
+      if (!is.null(path) && fs::is_absolute_path(path) && file.exists(path)) {
+        private$scenario$add_target_runner(
+          paste(readLines(path), collapse = "\n")
+        )
+      }
+      
+      path <- scenario$targetEvaluator
+      if (!is.null(path) && fs::is_absolute_path(path) && file.exists(path)) {
+        private$scenario$add_target_evaluator(
+          paste(readLines(path), collapse = "\n")
+        )
+      }
+      
+      for (opt in names(scenario)) {
+        if (opt == "cappingType") {
+          # TODO: How to get cappingType from file
+        } else {
+          private$scenario$add_irace_option(opt, scenario[[opt]])
+        }
+      }
+      
+      private$scenario$clear_scenario_temp()
+      
+      return(TRUE)
+    }
   ),
   public = list(
     ui = function() {
@@ -82,38 +135,6 @@ PlaygroundView <- R6::R6Class(
         if (!is.integer(input$load)) {
           file <- parseFilePaths(roots = volum, input$load)
 
-          if (grepl(".Rdata", file$name, fixed = TRUE)) {
-            load(file$datapath)
-            scenario <- iraceResults$scenario
-            private$scenario$add_parameter(extract.parameters(iraceResults$parameters))
-            exe <- execution$new(name = "execution-1")
-            exe$set_irace_results(iraceResults)
-            private$scenario$add_execution(exe)
-            rm(iraceResults)
-          } else {
-            scenario <- tryCatch(irace::readScenario(filename = file$datapath),
-              error = function(err) {
-                log_error("{err}")
-                alert.error(as.character(err))
-                return(NULL)
-              }
-            )
-          }
-
-          for (opt in names(scenario)) {
-            if (opt == "cappingType") {
-              # TODO: How to get cappingType from file
-            } else {
-              private$scenario$add_irace_option(opt, scenario[[opt]])
-            }
-          }
-
-          private$scenario$clear_scenario_temp()
-
-          store$pg$add_scenario(private$scenario)
-          data$scenarios <- self$scenarios_as_data_frame(store)
-          private$scenario <- NULL
-        } else {
           shinyalert(
             title = "Scenario name",
             text = "Give a name to identify the scenario after.",
@@ -125,16 +146,25 @@ PlaygroundView <- R6::R6Class(
               if (is.logical(name) && !name) {
                 return(invisible())
               }
-
+              
               if (is.null(name) || name == "") {
-                alert.error("Give a name")
                 return(invisible())
               }
-
+              
               private$scenario <- scenario$new(name = name)
+              
+              result <- private$importScenario(file$name, file$datapath)
+              
+              print(result)
+              
+              if (result) {
+                store$pg$add_scenario(private$scenario)
+                data$scenarios <- self$scenarios_as_data_frame(store)
+                private$scenario <- NULL
+              }
             }
           )
-        }
+        } 
       })
   
       observeEvent(store$pg, {

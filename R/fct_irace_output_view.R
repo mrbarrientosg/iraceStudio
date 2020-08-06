@@ -110,7 +110,17 @@ run_irace <- function(store, executionName = "") {
   if (!is.null(store$pg$get_target_evaluator()) && store$pg$get_target_evaluator() != "" &&
     length(store$pg$get_target_evaluator()) != 0) {
     create_target_evaluator_file(pkg$tempFolder, store$pg)
+    
+    store$pg$add_irace_option(
+      option = "targetEvaluator",
+      value = "./target-evaluator"
+    )
   }
+  
+  store$pg$add_irace_option(
+    option = "targetRunner",
+    value = "./target-runner"
+  )
 
   store$iraceProcess <- process$new(
     command = "Rscript",
@@ -123,9 +133,9 @@ run_irace <- function(store, executionName = "") {
     stdout = "|", stderr = "|"
   )
 
-  print(store$iraceProcess$poll_io(5000))
-  print(store$iraceProcess$read_output_lines())
-  print(store$iraceProcess$read_error_lines())
+  #print(store$iraceProcess$poll_io(5000))
+  #print(store$iraceProcess$read_output_lines())
+  #print(store$iraceProcess$read_error_lines())
 
   store$startIrace <- TRUE
   shinyalert(title = "IRACE is now running", type = "success", timer = 1500)

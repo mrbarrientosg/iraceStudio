@@ -30,7 +30,8 @@ App <- R6::R6Class(
         navbar = private$navbar$ui("navbar"),
         sidebar = private$sidebar$ui(),
         body = private$body$ui(),
-        enable_preloader = TRUE
+        enable_preloader = TRUE,
+        loading_background = "#242939"
       )
     },
 
