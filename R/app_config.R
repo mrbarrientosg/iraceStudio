@@ -58,8 +58,6 @@ add_external_resources <- function() {
     tags$script(src = "www/summernote-bs4.js"),
     tags$link(href = "www/summernote-bs4.css", rel = "stylesheet", type = "text/css"),
     tags$link(href = "www/app-styles.css", rel = "stylesheet", type = "text/css")
-    # Add here other external resources
-    # for example, you can add shinyalert::useShinyalert()
   )
 }
 

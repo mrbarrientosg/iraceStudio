@@ -31,7 +31,8 @@ run_app <- function (...) {
         })
       },
       options = list(
-        port = 4350
+        port = 4350,
+        launch.browser = TRUE
       )
     ),
     golem_opts = list(...)

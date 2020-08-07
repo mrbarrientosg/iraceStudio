@@ -99,9 +99,6 @@ IraceOptionTab <- R6::R6Class(
         content = option$description,
         placement = "right"
       ) 
-      
-      info[[2]] <- tagAppendAttributes(info[[2]], `data-trigger` = "focus")
-  
      
       if (option$type == "numeric" || option$type == "atext" || option$type == "list") {
         input$children[[1]] <- tagAppendChildren(input$children[[1]], info)
