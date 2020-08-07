@@ -11,7 +11,7 @@ IraceOptionTab <- R6::R6Class(
         local({
           option <- scenarioOptions[[section]]$options[row, ]
           my_id <- option$id
-          
+
           observeEvent(input[[my_id]], {
             if (my_id != "testType" && my_id != "boundType") {
               log_debug("Observing input: {my_id}, value: {input[[my_id]]}")
@@ -23,22 +23,18 @@ IraceOptionTab <- R6::R6Class(
                 value = paste0('"', input[[my_id]], '"')
               )
             }
-            bs4Dash::bs4TooltipServer(
-              title = option$description,
-              placement = "right",
-              target = session$ns(my_id),
-              session = session
-            )
           })
         })
       }
-      
+    
       observeEvent(playground_emitter$value(playground_events$current_scenario), {
         for (row in seq_along(nrow(scenarioOptions[[section]]$options))) {
-          option <- scenarioOptions[[section]]$options[row, ]
-          private$updateInput(option, session, store)
+          local({
+            option <- scenarioOptions[[section]]$options[row, ]
+            private$updateInput(option, session, store)
+          })
         }
-      })
+      }, ignoreInit = TRUE)
       
       observeEvent(input$elitist, {
         if (!input$elitist) {
@@ -73,9 +69,12 @@ IraceOptionTab <- R6::R6Class(
     create_input = function(inputId, data, store) {
       ns <- NS(inputId)
     
-      default <- if (is.null(store$pg$get_irace_option(data$id))) data$default else store$pg$get_irace_option(data$id)
+      default <- if (is.null(store$pg$get_irace_option(data$id)))
+        data$default
+      else
+        store$pg$get_irace_option(data$id)
     
-      if (data$type == "numeric") {
+      input <- if (data$type == "numeric") {
         numericInput(inputId = ns(data$id), label = data$name, value = default, min = data$min, step = data$step, max = data$max)
       } else if (data$type == "bool") {
         checkboxInput(inputId = ns(data$id), label = data$name, value = as.logical(default))
@@ -84,6 +83,33 @@ IraceOptionTab <- R6::R6Class(
       } else {
         pickerInput(inputId = ns(data$id), label = data$name, choices = data$values[[1]], selected = default)
       }
+      
+      private$addInputInfo(data, input, ns(data$id))
+    },
+    
+    addInputInfo = function(option, input, inputId) {
+      info <- bs4Dash::bs4PopoverUI(
+        actionButton(
+          inputId = paste0(inputId, "-info"),
+          label = NULL,
+          icon = icon("info-circle"),
+          class = "btn-link"
+        ),
+        title = option$name,
+        content = option$description,
+        placement = "right"
+      ) 
+      
+      info[[2]] <- tagAppendAttributes(info[[2]], `data-trigger` = "focus")
+  
+     
+      if (option$type == "numeric" || option$type == "atext" || option$type == "list") {
+        input$children[[1]] <- tagAppendChildren(input$children[[1]], info)
+      } else {
+        input$children[[1]]$children[[1]] <- tagAppendChildren(input$children[[1]]$children[[1]], info)
+      } 
+
+      input
     },
     
     updateInput = function(option, session, store) {
