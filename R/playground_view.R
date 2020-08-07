@@ -6,7 +6,7 @@ PlaygroundView <- R6::R6Class(
     
     importScenario = function(name, path) {
       scenario <- if (grepl(".Rdata", name, fixed = TRUE)) {
-        load(file$datapath)
+        load(path)
         private$scenario$add_parameter(extract.parameters(iraceResults$parameters))
         exe <- execution$new(name = "execution-1")
         exe$set_irace_results(iraceResults)
