@@ -1,5 +1,5 @@
-ConfigurationFilter <- R6::R6Class(
-  classname = "ConfigurationFilter",
+ParameterCondition <- R6::R6Class(
+  classname = "ParameterCondition",
   inherit = Component,
   public = list(
     session = NULL,
@@ -67,16 +67,11 @@ ConfigurationFilter <- R6::R6Class(
       self$session <- session
       ns <- session$ns
 
-      values <- reactiveValues(expressions = data.frame())
-      
-      observeEvent(parent$updateConfig, {
-        req(input$paramNames)
-        req(store$iraceResults)
+      observeEvent(c(parent$types, input$paramNames), {
+        req(input$paramNames != "")
 
-        print(input$paramNames)
-
-        type <- store$iraceResults$parameters$types[[input$paramNames]]
-        domain <- store$iraceResults$parameters$domain[[input$paramNames]]
+        type <- parent$types[[input$paramNames]]
+        domain <- parent$domain[[input$paramNames]]
         conditions <- self$conditionsList(type)
         
         updatePickerInput(
@@ -86,49 +81,44 @@ ConfigurationFilter <- R6::R6Class(
         )
       })
 
-      output$valueCondition <- renderUI({
-        playground_emitter$value(playground_events$current_scenario)
-        playground_emitter$value(playground_events$update_sandboxes)
-
-        shiny::validate(
-          need(input$paramNames, message = ""),
-          need(store$iraceResults, message = "")
-        )
-
-        type <- store$iraceResults$parameters$types[[input$paramNames]]
-        domain <- store$iraceResults$parameters$domain[[input$paramNames]]
-
-        if (type == "r" || type == "r,log") {
-          numericInput(
-            inputId = ns("paramValue"),
-            label = "Parameter value",
-            value = domain[1],
-            min = domain[1],
-            max = domain[2],
-            width = "100%"
-          )
-        } else if (type == "o" || type == "c") {
-          pickerInput(
-            inputId = ns("paramValue"),
-            label = "Parameter value",
-            choices = domain,
-            width = "100%"
-          )
-        } else {
-          sliderInput(
-            inputId = ns("paramValue"),
-            label = "Parameter value",
-            value = domain[1],
-            min = domain[1],
-            max = domain[2],
-            width = "100%"
-          )
-        }
+      observeEvent(c(input$paramNames,
+                     parent$types), {
+        output$valueCondition <- renderUI({
+          type <- isolate(parent$types[[input$paramNames]])
+          domain <- isolate(parent$domain[[input$paramNames]])
+          
+          if (type == "r" || type == "r,log") {
+            numericInput(
+              inputId = ns("paramValue"),
+              label = "Parameter value",
+              value = domain[1],
+              min = domain[1],
+              max = domain[2],
+              width = "100%"
+            )
+          } else if (type == "o" || type == "c") {
+            pickerInput(
+              inputId = ns("paramValue"),
+              label = "Parameter value",
+              choices = domain,
+              width = "100%"
+            )
+          } else {
+            sliderInput(
+              inputId = ns("paramValue"),
+              label = "Parameter value",
+              value = domain[1],
+              min = domain[1],
+              max = domain[2],
+              width = "100%"
+            )
+          }
+        })
       })
 
       output$expressionTable <- renderDT({
         datatable(
-          data = values$expressions,
+          data = parent$expressions,
           escape = FALSE,
           selection = "single",
           rownames = TRUE,
@@ -145,32 +135,50 @@ ConfigurationFilter <- R6::R6Class(
         )
       })
 
-      filterProxy <- dataTableProxy(outputId = "expressionTable")
-
-      observe({
-        if (is.null(store$sandbox))
-          data <- data.frame()
-        else
-          data <- store$sandbox$getFilters()
-
-        values$expressions <- data
-
-        filterProxy %>%
-          replaceData(
-            data,
-            resetPaging = FALSE,
-            rownames = FALSE
-          )
+      observeEvent(input$conditions, {
+        req(input$conditions != "")
+        
+        type <- isolate(parent$types[[input$paramNames]])
+        domain <- isolate(parent$domain[[input$paramNames]])
+        
+        if (type == "o" || type == "c") {
+          if (input$conditions == "in" || input$conditions == "not in") {
+            output$valueCondition <- renderUI(
+              pickerInput(
+                inputId = ns("paramValue"),
+                label = "Parameter value",
+                choices = domain,
+                width = "100%",
+                multiple = TRUE,
+                options = list(
+                  `actions-box` = TRUE
+                )
+              )
+            )
+          } else {
+            output$valueCondition <- renderUI(
+              pickerInput(
+                inputId = ns("paramValue"),
+                label = "Parameter value",
+                choices = domain,
+                width = "100%"
+              )
+            )
+          }
+        }
       })
 
       observeEvent(input$addCondition, {
-        expr <- ""
-        if (input$conditions == "in") {
-          expr <- paste0(input$paramNames, " %in% ", '"', input$paramValue, '"')
+        req(input$paramValue != "")
+        
+        expr <- if (input$conditions == "in") {
+          valuesC <- paste0(paste0('"', input$paramValue, '"'), collapse = ", ")
+          paste0(input$paramNames, " %in% ", "c(", valuesC, ")")
         } else if (input$conditions == "not in") {
-          expr <- paste0("!(", input$paramNames, " %in% ", '"', input$paramValue, '"', ")")
+          valuesC <- paste0(paste0('"', input$paramValue, '"'), collapse = ", ")
+          paste0("!(", input$paramNames, " %in% ", "c(", valuesC, ")", ")")
         } else {
-          expr <- paste(input$paramNames, input$conditions, input$paramValue)
+          paste(input$paramNames, input$conditions, input$paramValue)
         }
 
         if (nrow(store$sandbox$getFilters()) > 0) {
@@ -180,64 +188,52 @@ ConfigurationFilter <- R6::R6Class(
           )
 
           if (nrow(data) > 0) {
+            # TODO: Error alert
             return(invisible())
           }
         }
 
         newRow <- data.frame(condition = expr)
 
-        store$sandbox$addFilter(newRow)
-        values$expressions <- store$sandbox$getFilters()
-
-        filterProxy %>%
-          replaceData(
-            data = store$sandbox$getFilters(),
-            resetPaging = FALSE,
-            rownames = FALSE
-          )
+        parent$expressions <- rbind(parent$expressions, newRow)
       })
 
       observeEvent(input$deleteCondition, {
-        store$sandbox$removeFilter(input$expressionTable_rows_selected)
-        values$expressions <- store$sandbox$getFilters()
-        filterProxy %>%
-          replaceData(
-            data = store$sandbox$getFilters(),
-            resetPaging = FALSE,
-            rownames = FALSE
-          )
+        row <- input$expressionTable_rows_selected
+        parent$expressions <- parent$expressions[-row, ,drop = FALSE]
       })
 
       observe({
         toggleState(
           id = "deleteCondition",
-          condition = nrow(values$expressions) > 0 & !is.null(input$expressionTable_rows_selected))
+          condition = nrow(parent$expressions) > 0 & !is.null(input$expressionTable_rows_selected))
       })
     },
 
     conditionsList = function(type) {
+      common <- c("==", "!=")
       if (type == "r" || type == "i" || type == "i,log" || type == "r,log") {
         return(c(
           ">",
           ">=",
           "<",
           "<=",
-          "!=",
-          "=="
+          common
         ))
       } else {
         return(c(
           "in",
-          "not in"
+          "not in",
+          common
         ))
       }
     },
 
-    setupInputs = function(store) {
+    setupInputs = function(names) {
       updatePickerInput(
         session = self$session,
         inputId = "paramNames",
-        choices = store$iraceResults$parameters$names
+        choices = names
       )
     },
 

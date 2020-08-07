@@ -10,7 +10,7 @@ FilterView <- R6::R6Class(
       super$initialize(id)
       self$executionSelect <- ExecutionSelect$new()
       self$sandboxSelect <- SandboxSelect$new()
-      self$configurationFilter <- ConfigurationFilter$new()
+      self$configurationFilter <- ParameterCondition$new()
     },
 
     ui = function() {
@@ -154,7 +154,9 @@ FilterView <- R6::R6Class(
 
       values <- reactiveValues(configurations = NULL,
                                sandbox = NULL,
-                               updateConfig = 0)
+                               expressions = data.frame(),
+                               types = NULL,
+                               domain = NULL)
 
       self$configurationFilter$call(id = "filter", store = store, parent = values)
 
@@ -176,14 +178,16 @@ FilterView <- R6::R6Class(
         values$configurations <- data.frame()
 
         if (!is.null(store$sandbox)) {
-          self$setupInputs(session, store)
-          self$configurationFilter$setupInputs(store)
-          values$updateConfig <- isolate(values$updateConfig + 1)
-          
           if (!is.null(store$iraceResults)) {
+            self$setupInputs(session, store)
+            self$configurationFilter$setupInputs(store$iraceResults$parameters$names)
             values$configurations <- store$iraceResults$allConfigurations[0, ]
+            values$types <- store$iraceResults$parameters$types
+            values$domain <- store$iraceResults$parameters$domain
           }
-
+          
+          values$expressions <- store$sandbox$getFilters()
+          
           if (nrow(store$sandbox$getConfigurations()) == 0)
             values$sandbox <- values$configurations
           else
@@ -196,6 +200,10 @@ FilterView <- R6::R6Class(
 
         updateValue$resume()
       }, ignoreNULL = FALSE)
+      
+      observeEvent(values$expressions, {
+        store$sandbox$setFilters(isolate(values$expressions))
+      })
 
       output$descentTreePlot <- renderPlotly({
         shiny::validate(

@@ -107,6 +107,7 @@ Sandbox <- R6::R6Class(
     setElites = function(elites) private$elites <- elites,
     setIterations = function(iterations) private$iterations <- iterations,
     setIds = function(ids) private$ids <- ids,
+    setFilters = function(filters) private$filters <- filters,
     setDescentId = function(descentId) private$descentId <- descentId,
     setTrajectoryId = function(trajectoryId) private$trajectoryId <- trajectoryId,
     setConfigurations = function(configurations) private$configurations <- configurations,
