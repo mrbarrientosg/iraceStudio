@@ -111,7 +111,7 @@ IraceOptionTab <- R6::R6Class(
     
     updateInput = function(option, session, store) {
       default <- if (is.null(store$pg$get_irace_option(option$id)))
-        data$default 
+        option$default 
       else 
         store$pg$get_irace_option(option$id)
       
