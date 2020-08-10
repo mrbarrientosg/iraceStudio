@@ -202,6 +202,7 @@ FilterView <- R6::R6Class(
       }, ignoreNULL = FALSE)
       
       observeEvent(values$expressions, {
+        req(store$sandbox)
         store$sandbox$setFilters(isolate(values$expressions))
       })
 

@@ -370,7 +370,8 @@ configurations <- R6::R6Class(
     },
     
     updateColumn = function(oldName, newName) {
-      private$data <- dplyr::rename(private$data, oldName = newName)
+      if (oldName != newName)
+        private$data <- dplyr::rename(private$data, oldName = newName)
     },
     
     removeColumn = function(name) {
@@ -395,13 +396,18 @@ parameters <- R6::R6Class(
   private = list(
     data = NULL,
     
-    check_parameter_repeat = function(parameter) {
-      if (nrow(private$data) > 0) {
+    check_parameter_repeat = function(parameter, idx = -1) {
+      data <- if (idx == -1)
+        private$data
+      else
+        private$data[-idx, ]
+      
+      
+      if (nrow(data) > 0) {
         condition <- subset(
-          private$data,
-          names == parameter$names ||
-            switches == parameter$switches,
-          select = c("names", "switches")
+          data,
+          (names == parameter$names |
+            switches == parameter$switches)
         )
         
         if (nrow(condition) > 0) {
@@ -412,10 +418,12 @@ parameters <- R6::R6Class(
       return(FALSE)
     },
     
-    check_parameter_value_repeat = function(parameter) {
-      result <- dplyr::semi_join(private$data, parameter)
+    check_parameter_value_repeat = function(parameter, idx) {
+      data <- private$data[-idx, ]
       
-      if (nrow(result) > 1) {
+      result <- base::merge(data, parameter)
+      
+      if (nrow(result) > 0) {
         return(TRUE)
       }
       
@@ -432,7 +440,8 @@ parameters <- R6::R6Class(
           types = character(0),
           domain = character(0),
           conditions = character(0),
-          stringsAsFactors = FALSE
+          stringsAsFactors = FALSE,
+          check.names = FALSE
         )
       else
         private$data <- parameters
@@ -449,7 +458,12 @@ parameters <- R6::R6Class(
     },
     
     update_parameter = function(row, new_parameter) {
-      if (private$check_parameter_value_repeat(new_parameter)) {
+      if (private$check_parameter_repeat(new_parameter, row)) {
+        stop("The parameter name or flag is repeated")
+        return(NULL)
+      }
+      
+      if (private$check_parameter_value_repeat(new_parameter, row)) {
         return(NULL)
       }
       
@@ -532,6 +546,8 @@ scenario <- R6::R6Class(
       
       if (v)
         private$configurations$addColumn(new_parameter$names)
+      
+      return(v)
     },
     
     update_parameter = function(row, new_parameter) {
@@ -539,6 +555,8 @@ scenario <- R6::R6Class(
       
       if (!is.null(old))
         private$configurations$updateColumn(old$names, new_parameter$names)
+      
+      return(!is.null(old))
     },
     
     remove_parameter = function(row) {

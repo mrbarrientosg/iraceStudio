@@ -24,8 +24,6 @@ PlaygroundView <- R6::R6Class(
       
       rm(iraceResults)
       
-      print(scenario)
-      
       if (is.null(scenario)) {
         return(FALSE)
       }

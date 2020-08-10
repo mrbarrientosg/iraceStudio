@@ -45,25 +45,11 @@ write.list <- function(x, file, export) {
   write(x = paste0(data), sep = "\n", file = file)
 }
 
-validate_parameters_input <- function(input) {
-  # FIXME: Valid flag and domain correctly
-  shiny::validate(
-    need(input$parameter_name != "", "Please insert a name"),
-    need(input$parameter_flag != "", "Please insert a flag"),
-    need(input$parameter_type != "", "Please insert a type"),
-    need(input$parameter_domain != "", "Please insert domain")
-  )
-  
-  newRow <- data.frame(
-    names = input$parameter_name,
-    switches = paste0('"', input$parameter_flag, '"'),
-    types = input$parameter_type,
-    domain = input$parameter_domain,
-    conditions = input$parameter_conditions,
-    stringsAsFactors = FALSE
-  )
-  
-  return(newRow)
+checkNull <- function(x, default) {
+  if (is.null(x))
+    default
+  else
+    x
 }
 
 save_plot_as_base64 <- function(width = 550, height = 550) {
