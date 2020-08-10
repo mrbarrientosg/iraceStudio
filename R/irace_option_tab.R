@@ -28,11 +28,9 @@ IraceOptionTab <- R6::R6Class(
       }
     
       observeEvent(playground_emitter$value(playground_events$current_scenario), {
-        for (row in seq_along(nrow(scenarioOptions[[section]]$options))) {
-          local({
-            option <- scenarioOptions[[section]]$options[row, ]
-            private$updateInput(option, session, store)
-          })
+        for (i in seq_len(nrow(scenarioOptions[[section]]$options))) {
+          option <- scenarioOptions[[section]]$options[i, ]
+          private$updateInput(option, session, store)
         }
       }, ignoreInit = TRUE)
       

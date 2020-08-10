@@ -153,8 +153,6 @@ PlaygroundView <- R6::R6Class(
               
               result <- private$importScenario(file$name, file$datapath)
               
-              print(result)
-              
               if (result) {
                 store$pg$add_scenario(private$scenario)
                 data$scenarios <- self$scenarios_as_data_frame(store)
