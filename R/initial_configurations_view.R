@@ -152,48 +152,68 @@ InitialConfigurationsView <- R6::R6Class(
       observeEvent(input$add_config, {
         log_debug("Adding a new configuration")
         
-        data <- list()
-        
-        for (row in seq_len(nrow(store$pg$get_parameters()))) {
-          param <- store$pg$get_parameter(row)
-          name <- as.character(param$names)
-          data[[name]] <- input[[name]]
-        }
-        
-        row <- data.frame(data, stringsAsFactors = FALSE)
-        
-        store$pg$add_configuration(row)
-        
-        values$configurations <- store$pg$get_configurations()
-        
-        log_debug("Configuration added")
-        
+        tryCatch({
+          data <- list()
+          changed <- c()
+          
+          parameters <- store$pg$get_parameters()
+          parameters <- capture.output(
+            write.table(
+              parameters,
+              row.names = FALSE,
+              col.names = FALSE,
+              sep = "\t",
+              quote = F
+            )
+          )
+          parameters <- paste0(parameters, collapse = "\n")
+          parameters <- irace::readParameters(text = parameters)
+
+          for (name in parameters$names) {
+              data[[name]] <- input[[name]]
+          }
+          
+          for (name in parameters$names) {
+            if (!irace:::conditionsSatisfied(parameters, data, name)) {
+              changed <- c(changed, name)
+              data[[name]] <- NA
+            }
+          }
+
+          newRow <- data.frame(data, stringsAsFactors = FALSE)
+          
+          store$pg$add_configuration(newRow)
+          
+          values$configurations <- store$pg$get_configurations()
+          
+          shinyalert::shinyalert(title = "Warning", 
+                                 text = sprintf("These (%s) configuration has been set NA by parameter condition.", paste0(changed, collapse = ", ")),
+                                 type = "warning")
+          
+          log_debug("Configuration added")
+        },
+        error = function(err) {
+          log_error("{err}")
+          alert.error(err$message)
+        })
+
         removeModal()
       })
       
       observeEvent(input$edit, {
-        if (is.null(input$initial_config_table_rows_selected) ||
-          is.na(input$initial_config_table_rows_selected)) {
-          shinyalert(
-            title = "Error",
-            text = "Please select the configuration that you want to edit!",
-            type = "error"
-          )
-        } else {
-          configuration <- store$pg$get_configuration(input$initial_config_table_rows_selected)
-          
-          showModal(
-            modalDialog(
-              title = "Add a new configuration",
-              create_initial_modal_content(ns, configuration, store),
-              style = "overflow-y:scroll; max-height:650px;",
-              footer = tagList(
-                actionButton(inputId = ns("confirm_update"), label = "Update", class = "btn-primary"),
-                modalButton(label = "Cancel")
-              )
+        configuration <- store$pg$get_configuration(input$initial_config_table_rows_selected)
+        
+        showModal(
+          modalDialog(
+            title = "Add a new configuration",
+            create_initial_modal_content(ns, configuration, store),
+            style = "overflow-y:scroll; max-height:650px;",
+            footer = tagList(
+              actionButton(inputId = ns("confirm_update"), label = "Update", class = "btn-primary"),
+              modalButton(label = "Cancel")
             )
           )
-        }
+        )
       })
       
       observeEvent(input$confirm_update, {
