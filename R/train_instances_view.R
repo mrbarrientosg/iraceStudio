@@ -23,6 +23,13 @@ TrainInstancesView <- R6::R6Class(
               label = "Import File",
               style = "margin-left: 5px;"
             ),
+            shinyDirButton(
+              id = ns("absolute"),
+              label = "Add path",
+              title = "Select a directory",
+              buttonType = "outline-primary",
+              style = "margin-left: 5px;"
+            ),
             exportButton(
               inputId = ns("export"),
               filename = "instances.txt",
@@ -39,7 +46,6 @@ TrainInstancesView <- R6::R6Class(
             width = 12,
             tags$textarea(
               id = ns("source_instances_file"),
-              class = "ant-input",
               style = "width: 100%; height: 500px;"
             )
           )
@@ -57,6 +63,9 @@ TrainInstancesView <- R6::R6Class(
       volum <- c(root = path_home())
       
       shinyDirChoose(input, "dir", roots = volum)
+      shinyDirChoose(input, "absolute", roots = volum)
+      shinyFileSave(input = input, id = "export", roots = volum)
+      shinyFileChoose(input, "load", roots = volum)
       
       observeEvent(input$dir, {
         if (!is.integer(input$dir)) {
@@ -71,7 +80,27 @@ TrainInstancesView <- R6::R6Class(
         }
       })
       
-      shinyFileSave(input = input, id = "export", roots = volum)
+      observeEvent(input$absolute, {
+        if (!is.integer(input$absolute)) {
+          dir <- parseDirPath(roots = volum, input$absolute)
+          lines <- strsplit(input$source_instances_file, "\n")
+          output <- c()
+          
+          for (line in lines[[1]]) {
+            .line <- line
+            if (!fs::is_absolute_path(line)) {
+              .line <- file.path(dir, line)
+            }
+            output <- c(output, .line)
+          }
+          
+          updateTextAreaInput(
+            session = session,
+            inputId = "source_instances_file",
+            value = paste0(output, collapse = "\n")
+          )
+        }
+      })
       
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
@@ -87,12 +116,10 @@ TrainInstancesView <- R6::R6Class(
         }
       })
       
-      shinyFileChoose(input, "load", roots = volum)
-      
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
           file <- parseFilePaths(roots = volum, input$load)
-          log_info("Importing paremeter file from {file$datapath}")
+          log_info("Importing testing instances file from {file$datapath}")
           source <- readLines(file$datapath)
           source <- paste(source, collapse = "\n")
           updateTextAreaInput(
@@ -111,7 +138,9 @@ TrainInstancesView <- R6::R6Class(
         )
       })
       
-      observeEvent(input$source_instances_file, store$pg$set_train_instances(input$source_instances_file))
+      observeEvent(input$source_instances_file,
+                   store$pg$set_train_instances(input$source_instances_file),
+                   ignoreInit = TRUE)
       
       observeEvent(clear$action, {
         log_debug("Removing all data from instances")

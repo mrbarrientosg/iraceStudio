@@ -43,16 +43,24 @@ PlaygroundView <- R6::R6Class(
       }
       
       for (opt in names(scenario)) {
-        if (opt == "cappingType") {
-          # TODO: How to get cappingType from file
-        } else {
-          private$scenario$add_irace_option(opt, scenario[[opt]])
-        }
+        if (!private$availableOption(opt))
+          next
+        
+        private$scenario$add_irace_option(opt, as.character(scenario[[opt]]))
       }
       
       private$scenario$clear_scenario_temp()
       
       return(TRUE)
+    },
+    
+    availableOption = function(option) {
+      for (section in scenarioOptions) {
+        if (option %in% section$options$id) {
+          return(TRUE)
+        }
+      }
+      return(FALSE)
     }
   ),
   public = list(

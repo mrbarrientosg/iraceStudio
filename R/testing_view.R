@@ -45,6 +45,13 @@ TestingView <- R6::R6Class(
                   label = "Import File",
                   style = "margin-left: 5px;"
                 ),
+                shinyDirButton(
+                  id = ns("absolute"),
+                  label = "Add path",
+                  title = "Select a directory",
+                  buttonType = "outline-primary",
+                  style = "margin-left: 5px;"
+                ),
                 exportButton(
                   inputId = ns("export"),
                   filename = "instances.txt",
@@ -55,7 +62,6 @@ TestingView <- R6::R6Class(
             ),
             tags$textarea(
               id = ns("source_instances_file"),
-              class = "ant-input",
               style = "width: 100%; height: 500px;"
             )
           )
@@ -77,6 +83,9 @@ TestingView <- R6::R6Class(
       volum <- c(root = path_home())
 
       shinyDirChoose(input, "dir", roots = volum)
+      shinyDirChoose(input, "absolute", roots = volum)
+      shinyFileSave(input = input, id = "export", roots = volum)
+      shinyFileChoose(input, "load", roots = volum)
       
       observeEvent(input$dir, {
         if (!is.integer(input$dirPath)) {
@@ -90,7 +99,27 @@ TestingView <- R6::R6Class(
         }
       })
       
-      shinyFileSave(input = input, id = "export", roots = volum)
+      observeEvent(input$absolute, {
+        if (!is.integer(input$absolute)) {
+          dir <- parseDirPath(roots = volum, input$absolute)
+          lines <- strsplit(input$source_instances_file, "\n")
+          output <- c()
+          
+          for (line in lines[[1]]) {
+            .line <- line
+            if (!fs::is_absolute_path(line)) {
+              .line <- file.path(dir, line)
+            }
+            output <- c(output, .line)
+          }
+          
+          updateTextAreaInput(
+            session = session,
+            inputId = "source_instances_file",
+            value = paste0(output, collapse = "\n")
+          )
+        }
+      })
       
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
@@ -105,8 +134,6 @@ TestingView <- R6::R6Class(
           )
         }
       })
-      
-      shinyFileChoose(input, "load", roots = volum)
       
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
@@ -129,11 +156,6 @@ TestingView <- R6::R6Class(
         self$testingOptions$ui(inputId = ns("testing"), "testing", store)
       })
       
-      observeEvent(input$source_instances_file, {
-        req(input$source_instances_file != "")
-        store$pg$set_test_instances(input$source_instances_file)
-      })
-
       observeEvent(playground_emitter$value(playground_events$current_scenario), {
         updateTextAreaInput(
           session = session,
@@ -141,6 +163,10 @@ TestingView <- R6::R6Class(
           value = store$pg$get_test_instances()
         )
       })
+      
+      observeEvent(input$source_instances_file, 
+                   store$pg$set_test_instances(input$source_instances_file), 
+                   ignoreInit = TRUE)
       
       observe({
         if (obs_value()) {
