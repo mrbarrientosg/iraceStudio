@@ -10,19 +10,19 @@ TrainInstancesView <- R6::R6Class(
         fluidRow(
           class = "sub-header",
           column(
-            width = 8,
-            directoryInput(
-              idButton = ns("dir_path"),
-              idInput = ns("instances_dir"),
-              label = "Train Instances Dir",
-              title = "Train Instances Directory",
-              width = "auto"
-            )
-          ),
-          column(
-            width = 4,
+            width = 12,
             class = "d-flex align-items-end justify-content-end",
-            importButton(inputId = ns("load")),
+            shinyDirButton(
+              id = ns("dir"),
+              label = "Import Dir",
+              title = "Select a directory",
+              buttonType = "outline-primary"
+            ),
+            importButton(
+              inputId = ns("load"),
+              label = "Import File",
+              style = "margin-left: 5px;"
+            ),
             exportButton(
               inputId = ns("export"),
               filename = "instances.txt",
@@ -56,15 +56,13 @@ TrainInstancesView <- R6::R6Class(
       
       volum <- c(root = path_home())
       
-      shinyDirChoose(input, "dir_path", roots = volum)
+      shinyDirChoose(input, "dir", roots = volum)
       
-      observeEvent(input$dir_path, {
-        if (!is.integer(input$dir_path)) {
-          dir <- parseDirPath(roots = volum, input$dir_path)
+      observeEvent(input$dir, {
+        if (!is.integer(input$dir)) {
+          dir <- parseDirPath(roots = volum, input$dir)
           log_debug("Adding trainInstancesDir {dir}")
-          store$pg$add_irace_option(option = "trainInstancesDir", value = paste0('"', dir, '"'))
-          updateTextInput(session = session, inputId = "instances_dir", value = dir)
-          files <- list.files(path = dir)
+          files <- list.files(path = dir, full.names = TRUE)
           updateTextAreaInput(
             session = session,
             inputId = "source_instances_file",
@@ -89,7 +87,7 @@ TrainInstancesView <- R6::R6Class(
         }
       })
       
-      shinyFileChoose(input, "load", roots = volum, filetypes = "txt")
+      shinyFileChoose(input, "load", roots = volum)
       
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
@@ -110,12 +108,6 @@ TrainInstancesView <- R6::R6Class(
           session = session,
           inputId = "source_instances_file",
           value = store$pg$get_train_instances()
-        )
-
-        updateTextInput(
-          session = session,
-          inputId = "instances_dir",
-          value = gsub('"', "", store$pg$get_irace_option("trainInstancesDir"))
         )
       })
       

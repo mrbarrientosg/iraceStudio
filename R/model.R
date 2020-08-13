@@ -663,6 +663,8 @@ scenario <- R6::R6Class(
       self$add_irace_option("testInstancesDir", "")
       self$add_irace_option("targetEvaluator", "")
       self$add_irace_option("targetRunner", "")
+      self$add_irace_option("testInstances", NULL)
+      self$add_irace_option("instances", NULL)
     },
     
     as_list = function() {

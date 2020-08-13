@@ -64,19 +64,25 @@ ForbiddenView <- R6::R6Class(
         }
       })
       
-      shinyFileChoose(input, "load", roots = volum, filetypes = c("txt"))
+      shinyFileChoose(input, "load", roots = volum)
       
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
           file <- parseFilePaths(roots = volum, input$load)
           
-          source <- readLines(file$datapath)
-          
-          updateAceEditor(
-            session = session,
-            editorId = "conditions",
-            value = paste(source, collapse = "\n")
-          )
+          tryCatch({
+            irace:::readForbiddenFile(file$datapath)
+            source <- readLines(file$datapath)
+            
+            updateAceEditor(
+              session = session,
+              editorId = "conditions",
+              value = paste(source, collapse = "\n")
+            )
+          }, error = function(err) {
+            log_error("{err}")
+            alert.error(err$message)
+          })
         }
       })
       

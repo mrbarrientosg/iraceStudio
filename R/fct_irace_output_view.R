@@ -121,6 +121,9 @@ run_irace <- function(store, executionName = "") {
     option = "targetRunner",
     value = "./target-runner"
   )
+  
+  store$pg$add_irace_option(option = "trainInstancesDir", value = '""')
+  store$pg$add_irace_option(option = "testInstancesDir", value = '""')
 
   store$iraceProcess <- process$new(
     command = "Rscript",

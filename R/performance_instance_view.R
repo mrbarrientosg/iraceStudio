@@ -4,16 +4,16 @@ PerformanceInstanceView <- R6::R6Class(
   public = list(
     executionSelect = NULL,
     sandboxSelect = NULL,
-
+    
     initialize = function(id) {
       super$initialize(id)
       self$executionSelect <- ExecutionSelect$new()
       self$sandboxSelect <- SandboxSelect$new()
     },
-
+    
     ui = function() {
       ns <- NS(self$id)
-
+      
       tagList(
         fluidRow(
           column(
@@ -50,41 +50,41 @@ PerformanceInstanceView <- R6::R6Class(
         )
       )
     },
-
+    
     server = function(input, output, session, store) {
       self$executionSelect$call(
         id = "executions",
         store = store
       )
-
+      
       self$sandboxSelect$call(
         id = "sandboxes",
         store = store
       )
-
+      
       best_data <- eventReactive(c(store$iraceResults, store$updateSandbox), {
         future({
           config <- isolate(store$sandbox$getConfigurations()$ID)
           
           if (length(config) == 0)
             config <- isolate(store$iraceResults$allConfigurations$.ID.)
-
+          
           self$bestConfigurationByInstances(isolate(store$iraceResults), config)
         })
       })
-
+      
       output$distanceBestPlot <- renderPlotly({
         shiny::validate(
           need(store$sandbox, ""),
           need(store$iraceResults, "")
         )
-
+        
         legend <- list(
           title = list(text = "<b>Instance</b>")
         )
-
+        
         best_data() %...>% {
-            plot_ly(., source = "distanceBestPlot") %>%
+          plot_ly(., source = "distanceBestPlot") %>%
             add_boxplot(
               x = ~instance,
               y = ~value,
@@ -116,32 +116,32 @@ PerformanceInstanceView <- R6::R6Class(
             event_register("plotly_click")
         }
       })
-
+      
       selected_best_data <- reactive({
         req(store$updateSandbox)
         playground_emitter$value(playground_events$current_scenario)
-
+        
         event <- event_data("plotly_click", "distanceBestPlot")
-
+        
         best_data() %...>% {
           if (is.null(event)) {
             return(data.frame())
           }
-
+          
           return(subset(., conf %in% event$customdata))
         } %...>% {
           if (is.null(event)) {
             return(data.frame())
           }
-
+          
           data <- .
-
+          
           if (nrow(data) == 0) {
             return(data.frame())
           }
-
+          
           data <- data[, !(colnames(data) %in% "jitter"), drop = F]
-
+          
           repeated <- data %>%
             dplyr::group_by(instance) %>%
             summarise(
@@ -151,11 +151,11 @@ PerformanceInstanceView <- R6::R6Class(
               max = max(value),
               nbExecutions = length(value)
             )
-
+          
           return(repeated)
         }
       })
-
+      
       output$selectedPointTable <- renderDT({
         selected_best_data() %...>% {
           datatable(
@@ -175,30 +175,30 @@ PerformanceInstanceView <- R6::R6Class(
           )
         }
       })
-
+      
       config_data <- eventReactive(c(store$iraceResults, store$updateSandbox), {
         future({
           config <- isolate(store$sandbox$getConfigurations()$ID)
           
           if (length(config) == 0)
             config <- isolate(store$iraceResults$allConfigurations$.ID.)
-
+          
           self$configurationByIntances(isolate(store$iraceResults), config)
         })
       })
-
+      
       output$configurationPlot <- renderPlotly({
         shiny::validate(
           need(store$sandbox, ""),
           need(store$iraceResults, "")
         )
-
+        
         legend <- list(
           title = list(text = "<b>Instance</b>")
         )
-
+        
         config_data() %...>% {
-            plot_ly(.) %>%
+          plot_ly(.) %>%
             add_boxplot(
               x = ~instance,
               y = ~value,
@@ -229,25 +229,33 @@ PerformanceInstanceView <- R6::R6Class(
             )
         }
       })
+      
+      observeEvent(session$userData$sidebar(), {
+        sidebar <- session$userData$sidebar()
+        if (sidebar == "visualization_by_instance") {
+          js$resizePlotly(session$ns("configurationPlot"))
+          js$resizePlotly(session$ns("distanceBestPlot"))
+        }
+      })
     },
-
+    
     bestConfigurationByInstances = function(iraceResults, configurations = iraceResults$allConfigurations$.ID.) {
       data <- data.frame()
-
+      
       experiments <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
-
+      
       min <- apply(experiments, 1, function(row) {
         if (all(is.na(row)))
           return(NA)
         else
           min(row, na.rm = T)
       })
-
+      
       for (idx in seq_along(min)) {
         if (is.na(min[idx])) {
           next
         }
-
+        
         row <- experiments[idx, , drop = FALSE]
         row <- row[, which(!is.na(row)), drop = F]
         values <- 100 * ((row - min[idx]) / min[idx])
@@ -257,29 +265,29 @@ PerformanceInstanceView <- R6::R6Class(
         instances <- rep(instance, length(values))
         data <- rbind(data, data.frame(instance = instances, conf = conf, value = values))
       }
-
+      
       data$jitter <- jitter(as.numeric(data$instance))
       data$instance <- factor(data$instance)
       data <- data[order(data$instance), ]
-
+      
       return(data)
     },
-
+    
     configurationByIntances = function(iraceResults, configurations = iraceResults$allConfigurations$.ID.) {
       experiments <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
-
+      
       id <- rownames(experiments)
       instances <- iraceResults$state$.irace$instancesList[id, "instance"]
       rownames(experiments) <- sort(instances)
-
+      
       data <- as.data.frame(as.table(experiments))
       data <- na.omit(data)
-
+      
       colnames(data) <- c("instance", "id", "value")
-
+      
       data$jitter <- jitter(as.numeric(data$instance))
       data <- data[order(data$instance), ]
-
+      
       return(data)
     }
   )

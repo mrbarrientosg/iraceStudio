@@ -45,6 +45,12 @@ add_external_resources <- function() {
   add_resource_path(
     'www', app_sys('app/www')
   )
+  
+  plotlyResize <- "
+  shinyjs.resizePlotly = function(params) {
+    Plotly.Plots.resize(params[0]);
+  }
+  "
 
   tags$head(
     favicon(),
@@ -54,6 +60,7 @@ add_external_resources <- function() {
     ),
     shinyalert::useShinyalert(),
     shinyjs::useShinyjs(),
+    extendShinyjs(text = plotlyResize),
     tags$script(src = "www/summernote_binding.js"),
     tags$script(src = "www/summernote-bs4.js"),
     tags$link(href = "www/summernote-bs4.css", rel = "stylesheet", type = "text/css"),

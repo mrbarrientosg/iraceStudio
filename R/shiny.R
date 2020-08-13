@@ -42,7 +42,7 @@ exportButton <- function(inputId, filename, style = NULL, size = "default") {
   return(btn)
 }
 
-importButton <- function(inputId, style = NULL, size = "default") {
+importButton <- function(inputId, label = "Import", style = NULL, size = "default") {
   size <- match.arg(
     arg = size,
     choices = c("large", "default", "small")
@@ -62,7 +62,7 @@ importButton <- function(inputId, style = NULL, size = "default") {
   
   btn <- shinyFilesButton(
     id = inputId,
-    label = "Import",
+    label = label,
     title = "Select a file",
     multiple = FALSE,
     style = style,

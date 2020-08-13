@@ -1,4 +1,4 @@
-plan("future::multiprocess")
+plan("future::sequential")
 
 pkg <- new.env(parent = emptyenv())
 pkg$reportStore <- list()

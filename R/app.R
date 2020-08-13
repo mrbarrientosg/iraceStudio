@@ -45,6 +45,9 @@ App <- R6::R6Class(
       private$navbar$call(id = "navbar", store = private$store)
       private$body$setupModules(private$store)
       
+      
+      session$userData$sidebar <- reactive(input$sidebar)
+      
       onSessionEnded(function() {
         #self$destroy()
       })

@@ -6,7 +6,9 @@ Sidebar <- R6::R6Class(
         title = h1("Irace Studio", style = "text-align:center; margin-bottom: 0;"),
         fixed = FALSE,
         elevation = 0,
+        inputId = "sidebarState",
         bs4Dash::bs4SidebarMenu(
+          id = "sidebar",
           bs4Dash::bs4SidebarMenuItem(
             text = "UI Options",
             tabName = "ui_options"

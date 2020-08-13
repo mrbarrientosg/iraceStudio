@@ -32,19 +32,19 @@ TestingView <- R6::R6Class(
             fluidRow(
               class = "sub-header",
               column(
-                width = 8,
-                directoryInput(
-                  idButton = ns("dirPath"),
-                  idInput = ns("instances_dir"),
-                  label = "Test Instances Dir",
-                  title = "Test Instances Directory",
-                  width = "auto"
-                )
-              ),
-              column(
-                width = 4,
+                width = 12,
                 class = "d-flex align-items-end justify-content-end",
-                importButton(inputId = ns("load")),
+                shinyDirButton(
+                  id = ns("dir"),
+                  label = "Import Dir",
+                  title = "Select a directory",
+                  buttonType = "outline-primary"
+                ),
+                importButton(
+                  inputId = ns("load"),
+                  label = "Import File",
+                  style = "margin-left: 5px;"
+                ),
                 exportButton(
                   inputId = ns("export"),
                   filename = "instances.txt",
@@ -76,24 +76,17 @@ TestingView <- R6::R6Class(
       
       volum <- c(root = path_home())
 
-      observeEvent(store$pg, {
-        updateTextInput(
-          session = session,
-          inputId = "instances_dir",
-          value = gsub('"', "", store$pg$get_irace_option("testInstancesDir"))
-        )
-      })
-
-      shinyDirChoose(input, "dirPath", roots = volum)
+      shinyDirChoose(input, "dir", roots = volum)
       
-      observeEvent(input$dirPath, {
+      observeEvent(input$dir, {
         if (!is.integer(input$dirPath)) {
-          dir <- parseDirPath(roots = volum, input$dirPath)
-          store$pg$add_irace_option(
-            option = "testInstancesDir",
-            value = paste0('"', dir, '"')
+          dir <- parseDirPath(roots = volum, input$dir)
+          files <- list.files(path = dir, full.names = TRUE)
+          updateTextAreaInput(
+            session = session,
+            inputId = "source_instances_file",
+            value = paste(files, collapse = "\n")
           )
-          updateTextInput(session = session, inputId = "instances_dir", value = dir)
         }
       })
       
@@ -113,7 +106,7 @@ TestingView <- R6::R6Class(
         }
       })
       
-      shinyFileChoose(input, "load", roots = volum, filetypes = c("txt"))
+      shinyFileChoose(input, "load", roots = volum)
       
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
@@ -141,19 +134,6 @@ TestingView <- R6::R6Class(
         store$pg$set_test_instances(input$source_instances_file)
       })
 
-      observeEvent(input$instances_dir, {
-        value <- NULL
-
-        if (input$instances_dir != "") {
-          value <- paste0('"', input$instances_dir, '"')
-        }
-
-        store$pg$add_irace_option(
-          option = "testInstancesDir",
-          value = value
-        )
-      })
-      
       observeEvent(playground_emitter$value(playground_events$current_scenario), {
         updateTextAreaInput(
           session = session,

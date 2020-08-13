@@ -73,7 +73,7 @@ InitialConfigurationsView <- R6::R6Class(
         }
       })
       
-      shinyFileChoose(input, "load", roots = volum, filetypes = "txt")
+      shinyFileChoose(input, "load", roots = volum)
       
       observeEvent(input$load, {
         if (!is.integer(input$load)) {

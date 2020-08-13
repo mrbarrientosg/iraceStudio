@@ -115,7 +115,7 @@ ParametersView <- R6::R6Class(
       
       volum <- c(root = path_home())
       
-      shinyFileChoose(input, "load", roots = volum, filetypes = "txt")
+      shinyFileChoose(input, "load", roots = volum)
       
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
@@ -194,6 +194,8 @@ ParametersView <- R6::R6Class(
       
       # Show modal to add a new parameter
       observeEvent(input$add, {
+        values$parameter <- NULL
+        
         showModal(
           self$modal$ui(ns, "New parameter")
         )
@@ -313,10 +315,10 @@ ModalParameter <- R6::R6Class(
       types <- c(
         "Real" = "r",
         "Integer" = "i",
-        "Cardinal" = "c",
-        "Ordinal" = "o",
-        "RealLog" = "r,log",
-        "IntegerLog" = "i,log"
+        "Categorical" = "c",
+        "Ordered" = "o",
+        "Real Log" = "r,log",
+        "Integer Log" = "i,log"
       )
       
       modalDialog(
@@ -453,6 +455,8 @@ ModalParameter <- R6::R6Class(
       })
       
       observeEvent(input$parameterSave, {
+        shinyjs::disable("parameterSave")
+        
         domain <- if (input$parameterType == "o" || input$parameterType == "c") {
           if (length(parent$domainList) == 0) {
             alert.error("Domain cannot be empty")
@@ -463,8 +467,10 @@ ModalParameter <- R6::R6Class(
           paste0("(", input$domainMin, ", ", input$domainMax, ")")
         }
         
-        if (is.null(domain))
+        if (is.null(domain)) {
+          shinyjs::enable("parameterSave")
           return(NULL)
+        }
         
         flag <- gsub('"', "", input$parameterFlag)
         condition <- if (is.null(input$parameterCondition) || input$parameterCondition == "")
@@ -482,10 +488,9 @@ ModalParameter <- R6::R6Class(
           check.names = FALSE
         )
         
-        check <- data.table(newRow)
         check <- capture.output(
           write.table(
-            check,
+            newRow,
             row.names = FALSE,
             col.names = FALSE,
             sep = "\t",
@@ -493,9 +498,22 @@ ModalParameter <- R6::R6Class(
           )
         )
         
-        tryCatch({
+        result <- tryCatch({
           irace::readParameters(text = check)
-          
+          TRUE
+        },
+        error = function(err) {
+          if (!grepl("A parameter definition is missing!", err$message, fixed = TRUE)) {
+            log_error("{err}")
+            alert.error(err$message)
+            shinyjs::enable("parameterSave")
+            FALSE
+          } else {
+            TRUE
+          }
+        })
+        
+        if (result) {
           log_debug(
             paste(
               "Save a new parameter with",
@@ -503,29 +521,32 @@ ModalParameter <- R6::R6Class(
             )
           )
           
-          if (is.null(parent$parameter)) {
-            store$pg$add_parameter(newRow)
-          } else {
-            store$pg$update_parameter(
-              row = input$parameters_table_rows_selected,
-              new_parameter = newRow
-            )
-          }
-          
-          log_debug("Parameter saved")
-          parent$parameters <- store$pg$get_parameters()
-          
-          clear()
-          
-          removeModal()
-        },
-        error = function(err) {
-          if (!grepl("A parameter definition is missing!", err$message, fixed = TRUE)) {
+          added <- tryCatch({
+            if (is.null(parent$parameter)) {
+              store$pg$add_parameter(newRow)
+            } else {
+              store$pg$update_parameter(
+                row = input$parameters_table_rows_selected,
+                new_parameter = newRow
+              )
+            }
+          },
+          error = function(err) {
             log_error("{err}")
             alert.error(err$message)
-          }
-        })
+            shinyjs::enable("parameterSave")
+            FALSE
+          })
 
+          if (added) {
+            log_debug("Parameter saved")
+            parent$parameters <- store$pg$get_parameters()
+            
+            clear()
+            
+            removeModal()
+          }
+        }
       }, ignoreInit = TRUE)
       
       observeEvent(input$parameterCancel, {
