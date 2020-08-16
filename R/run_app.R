@@ -16,7 +16,7 @@ scenarioOptions <- jsonlite::fromJSON(
 #' @export
 #' @importFrom shiny shinyApp
 #' @importFrom golem with_golem_options
-run_app <- function (...) {
+run_app <- function(...) {
   app <- App$new()
 
   with_golem_options(
@@ -25,14 +25,15 @@ run_app <- function (...) {
       server = app$server,
       onStart = function() {
         app$setup()
-        
+
         onStop(function() {
           app$destroy()
         })
       },
       options = list(
         port = 4350,
-        launch.browser = TRUE
+        launch.browser = TRUE,
+        minified = TRUE
       )
     ),
     golem_opts = list(...)

@@ -11,7 +11,7 @@ SummonerInput <- R6::R6Class(
         )
       )
     },
-    
+
     updateSummernoteInput = function(inputId, value, session = getDefaultReactiveDomain()) {
       session$sendCustomMessage("updateSummernoteInput", list(inputId = inputId, value = value))
     }

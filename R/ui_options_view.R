@@ -4,7 +4,7 @@ UIOptionsView <- R6::R6Class(
   public = list(
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         div(class = "sub-header", h2("UI Options")),
         fluidRow(
@@ -32,10 +32,10 @@ UIOptionsView <- R6::R6Class(
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       volum <- list(root = path_home())
-      
+
       shinyDirChoose(input = input, id = "workspaceButton", roots = volum)
       shinyDirChoose(input = input, id = "iraceButton", roots = volum)
 
@@ -48,14 +48,14 @@ UIOptionsView <- R6::R6Class(
           inputId = "iracePath",
           value = store$gui$iracePath
         )
-  
+
         updateTextInput(
           session = session,
           inputId = "workspacePath",
           value = store$gui$workspacePath
         )
       })
-      
+
       observeEvent(input$workspaceButton, {
         if (!is.integer(input$workspaceButton)) {
           dir <- parseDirPath(roots = volum, input$workspaceButton)
@@ -92,7 +92,7 @@ UIOptionsView <- R6::R6Class(
           store$gui$iracePath <- input$iracePath
         }
       })
-      
+
     }
   ),
   private = list(

@@ -7,10 +7,10 @@ ParametersView <- R6::R6Class(
       super$initialize(id)
       self$modal <- ModalParameter$new()
     },
-    
+
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         div(class = "sub-header", h2("Parameters")),
         fluidRow(
@@ -57,54 +57,52 @@ ParametersView <- R6::R6Class(
             width = 12,
             htmlOutput(outputId = ns("tip")),
             br(),
-            DTOutput(outputId = ns("parameters_table")),
+            DT::dataTableOutput(outputId = ns("parameters_table")),
             br()
           )
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       ns <- session$ns
-      
-      values <- reactiveValues(parameters = NULL, 
+
+      values <- reactiveValues(parameters = NULL,
                                domainList = c(),
                                parameter = NULL)
-      
+
       clear <- callModule(
         module = clear_button_sv,
         id = "clear",
         message = "This action will remove all parameters. Are you sure?."
       )
-      
-      output$parameters_table <- renderDT(
-        datatable(
-          data = store$pg$get_parameters(),
-          escape = FALSE,
-          selection = "single",
-          rownames = FALSE,
-          style = "bootstrap4",
-          class = "table-condensed table-striped cell-border",
-          options = list(
-            language = list(
-              zeroRecords = "There is no parameters to show"
-            )
+
+      output$parameters_table <- DT::renderDataTable(
+        store$pg$get_parameters(),
+        escape = FALSE,
+        selection = "single",
+        rownames = FALSE,
+        style = "bootstrap4",
+        class = "table-condensed table-striped cell-border",
+        options = list(
+          language = list(
+            zeroRecords = "There is no parameters to show"
           )
         )
       )
-      
+
       output$tip <- renderUI(strong("* Select a row to delete or edit."))
-      
+
       # Para poder modificar la tabla de parametros despues de instanciarse
       proxy <- dataTableProxy(outputId = "parameters_table")
-      
+
       observeEvent(playground_emitter$value(playground_events$current_scenario), {
         values$parameters <- store$pg$get_parameters()
       })
-      
+
       observe({
         playground_emitter$emit(playground_events$update_parameters)
-        
+
         proxy %>%
           replaceData(
             data = values$parameters,
@@ -112,21 +110,21 @@ ParametersView <- R6::R6Class(
             rownames = FALSE
           )
       })
-      
+
       volum <- c(root = path_home())
-      
+
       shinyFileChoose(input, "load", roots = volum)
-      
+
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
           file <- parseFilePaths(roots = volum, input$load)
           log_info("Importing paremeter file from {file$datapath}")
-          
+
           tryCatch({
             data <- readParameters(file = file$datapath)
-            
+
             store$pg$add_parameter(extract.parameters(data))
-            
+
             values$parameters <- store$pg$get_parameters()
           },
           error = function(err) {
@@ -135,9 +133,9 @@ ParametersView <- R6::R6Class(
           })
         }
       })
-      
+
       shinyFileSave(input = input, id = "export", roots = volum)
-      
+
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
           file <- parseSavePath(roots = volum, selection = input$export)
@@ -151,7 +149,7 @@ ParametersView <- R6::R6Class(
           )
         }
       })
-      
+
       observe({
         condition <- !is.null(input$parameters_table_rows_selected) & nrow(values$parameters) > 0
         toggleState(id = "edit", condition)
@@ -159,7 +157,7 @@ ParametersView <- R6::R6Class(
         toggleState(id = "check", nrow(values$parameters) > 0)
         toggle(id = "tip", condition = nrow(values$parameters) > 0)
       })
-      
+
       observeEvent(input$check, {
         parameters <- data.table(store$pg$get_parameters())
         parameters <- capture.output(
@@ -171,15 +169,15 @@ ParametersView <- R6::R6Class(
             quote = F
           )
         )
-        
+
         parameters <- paste0(parameters, collapse = "\n")
-        
+
         log_debug("Checking parameters")
         tryCatch({
           irace::readParameters(text = parameters)
-          
+
           log_debug("Parameters check successfully")
-          
+
           shinyalert(
             title = "Check",
             text = "The check is successfully.",
@@ -191,20 +189,20 @@ ParametersView <- R6::R6Class(
           alert.error(err$message)
         })
       })
-      
+
       # Show modal to add a new parameter
       observeEvent(input$add, {
         values$parameter <- NULL
-        
+
         showModal(
           self$modal$ui(ns, "New parameter")
         )
-        
+
         #self$modal$server(input, output, session, store = store, values)
       })
 
       self$modal$server(input, output, session, store = store, values)
-      
+
       # show modal to edit a parameter
       observeEvent(input$edit, {
         parameter <- as.list(store$pg$get_parameter(input$parameters_table_rows_selected))
@@ -213,10 +211,10 @@ ParametersView <- R6::R6Class(
         showModal(
           self$modal$ui(ns, "Edit", parameter)
         )
-        
+
         #self$modal$server(input, output, session, store = store, values, parameter)
       })
-      
+
       # show modal to delete a parameter
       observeEvent(input$delete, {
         if (is.null(input$parameters_table_rows_selected) ||
@@ -247,32 +245,32 @@ ParametersView <- R6::R6Class(
           )
         }
       })
-      
+
       # handle to delete a parameter
       observeEvent(input$confirm_delete, {
         param <- store$pg$get_parameter(input$parameters_table_rows_selected)
         log_debug("Deleting a parameter with name: {param$names}")
-        
+
         store$pg$remove_parameter(input$parameters_table_rows_selected)
-        
+
         values$parameters <- store$pg$get_parameters()
-        
+
         log_debug("Parameter deleted")
-        
+
         removeModal()
       })
-      
+
       observeEvent(clear$action, {
         log_debug("Removing all parameters from table")
-        
+
         store$pg$clear_parameters()
-        
+
         values$parameters <- store$pg$get_parameters()
-        
+
         log_debug("All parameters removed")
       })
     },
-    
+
     remove_shiny_inputs = function(id, .input, ns) {
       invisible(
         lapply(grep(id, names(.input), value = TRUE), function(i) {
@@ -291,7 +289,7 @@ ModalParameter <- R6::R6Class(
     checkValue = function(key, values) {
       if (is.null(values))
         return(NULL)
-      
+
       if (key == "domain") {
         result <- gsub("[\\s+\\)\\(]", "", as.character(values[[key]]), perl = TRUE)
         result <- strsplit(result, ",", perl = TRUE)
@@ -301,17 +299,17 @@ ModalParameter <- R6::R6Class(
       } else if (key == "conditions") {
         return(substring(values[[key]], 2))
       }
-      
+
       return(values[[key]])
     },
-    
+
     clearValue = function(key, .input, ns) {
       .subset2(.input, "impl")$.values$remove(ns(key))
     }
   ),
   public = list(
     ui = function(ns, title, values = NULL) {
-      
+
       types <- c(
         "Real" = "r",
         "Integer" = "i",
@@ -320,7 +318,7 @@ ModalParameter <- R6::R6Class(
         "Real Log" = "r,log",
         "Integer Log" = "i,log"
       )
-      
+
       modalDialog(
         title = title,
         easyClose = FALSE,
@@ -362,10 +360,10 @@ ModalParameter <- R6::R6Class(
         )
       )
     },
-    
+
     server = function(input, output, session, store, parent) {
       ns <- session$ns
-    
+
       output$domainOutput <- renderUI({
         type <- input$parameterType
         param <- parent$parameter
@@ -405,7 +403,7 @@ ModalParameter <- R6::R6Class(
           )
         }
       })
-      
+
       output$domainList <- renderUI({
         shiny::validate(
           need(length(parent$domainList) != 0, "Empty domain")
@@ -428,14 +426,14 @@ ModalParameter <- R6::R6Class(
           )
         )
       })
-      
+
       observeEvent(input$addDomain, {
         if (input$domainName %in% isolate(parent$domainList))
           return()
-        
+
         id <- as.character(input$domainName)
         parent$domainList <- c(parent$domainList, input$domainName)
-      
+
         local({
           myId <- id
           name <- input$domainName
@@ -446,17 +444,17 @@ ModalParameter <- R6::R6Class(
             private$clearValue(buttonId, input, ns)
           }, ignoreInit = TRUE, once = TRUE)
         })
-        
+
         shinyjs::reset("domainName")
       })
-      
+
       observeEvent(input$sortable, {
         parent$domainList <- isolate(input$sortable)
       })
-      
+
       observeEvent(input$parameterSave, {
         shinyjs::disable("parameterSave")
-        
+
         domain <- if (input$parameterType == "o" || input$parameterType == "c") {
           if (length(parent$domainList) == 0) {
             alert.error("Domain cannot be empty")
@@ -466,18 +464,18 @@ ModalParameter <- R6::R6Class(
         } else {
           paste0("(", input$domainMin, ", ", input$domainMax, ")")
         }
-        
+
         if (is.null(domain)) {
           shinyjs::enable("parameterSave")
           return(NULL)
         }
-        
+
         flag <- gsub('"', "", input$parameterFlag)
         condition <- if (is.null(input$parameterCondition) || input$parameterCondition == "")
           ""
         else
           paste("|", input$parameterCondition)
-        
+
         newRow <- data.frame(
           names = input$parameterName,
           switches = paste0('"', flag, '"'),
@@ -487,7 +485,7 @@ ModalParameter <- R6::R6Class(
           stringsAsFactors = FALSE,
           check.names = FALSE
         )
-        
+
         check <- capture.output(
           write.table(
             newRow,
@@ -497,7 +495,7 @@ ModalParameter <- R6::R6Class(
             quote = F
           )
         )
-        
+
         result <- tryCatch({
           irace::readParameters(text = check)
           TRUE
@@ -512,7 +510,7 @@ ModalParameter <- R6::R6Class(
             TRUE
           }
         })
-        
+
         if (result) {
           log_debug(
             paste(
@@ -520,7 +518,7 @@ ModalParameter <- R6::R6Class(
               "name: {input$parameter_name}, flag: {input$parameter_flag}"
             )
           )
-          
+
           added <- tryCatch({
             if (is.null(parent$parameter)) {
               store$pg$add_parameter(newRow)
@@ -541,19 +539,19 @@ ModalParameter <- R6::R6Class(
           if (added) {
             log_debug("Parameter saved")
             parent$parameters <- store$pg$get_parameters()
-            
+
             clear()
-            
+
             removeModal()
           }
         }
       }, ignoreInit = TRUE)
-      
+
       observeEvent(input$parameterCancel, {
         clear()
         removeModal()
       }, ignoreInit = TRUE)
-      
+
       clear <- function() {
         for (value in isolate(parent$domainList)) {
           private$clearValue(paste0(value, "-delete"), input, ns)

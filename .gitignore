@@ -12,3 +12,5 @@ workspace/*
 *.Rproj
 
 .DS_Store
+
+.vscode/

@@ -4,7 +4,7 @@ InitialConfigurationsView <- R6::R6Class(
   public = list(
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         div(class = "sub-header", h2("Initial Configurations")),
         fluidRow(
@@ -44,47 +44,47 @@ InitialConfigurationsView <- R6::R6Class(
             width = 12,
             htmlOutput(outputId = ns("tip")),
             br(),
-            DTOutput(outputId = ns("initial_config_table")),
+            DT::dataTableOutput(outputId = ns("initial_config_table")),
             br()
           )
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       ns <- session$ns
-      
+
       clear <- callModule(
         module = clear_button_sv,
         id = "clear",
         message = "This action will remove all configurations. Are you sure?."
       )
-      
+
       values <- reactiveValues(configurations = NULL)
-      
+
       volum <- c(root = path_home())
-      
+
       shinyFileSave(input = input, id = "export", roots = volum)
-      
+
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
           file <- parseSavePath(roots = volum, selection = input$export)
           export_initial_configurations(file, store)
         }
       })
-      
+
       shinyFileChoose(input, "load", roots = volum)
-      
+
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
           import_initial_configurations(input, store)
         }
       })
-      
+
       observeEvent(playground_emitter$value(playground_events$current_scenario), {
         values$configurations <- store$pg$get_configurations()
       })
-      
+
       observeEvent(values$configurations, {
         proxy %>%
           replaceData(
@@ -93,14 +93,14 @@ InitialConfigurationsView <- R6::R6Class(
             rownames = FALSE
           )
       })
-      
-      output$initial_config_table <- renderDT({
+
+      output$initial_config_table <- DT::renderDataTable({
         playground_emitter$value(playground_events$update_parameters)
 
         shiny::validate(
           need(nrow(store$pg$get_parameters()) > 0, "Empty parameters")
         )
-        
+
         datatable(
           data = store$pg$get_configurations(),
           escape = FALSE,
@@ -116,18 +116,18 @@ InitialConfigurationsView <- R6::R6Class(
           )
         )
       })
-  
+
       proxy <- dataTableProxy("initial_config_table")
-  
+
       observe({
         condition <- !is.null(input$initial_config_table_rows_selected) & nrow(values$configurations) > 0
         toggleState(id = "edit", condition)
         toggleState(id = "delete", condition)
         toggle(id = "tip", condition = nrow(values$configurations) > 0)
       })
-      
+
       output$tip <- renderUI(strong("* Select a row to delete or edit."))
-      
+
       observeEvent(input$add, {
         if (nrow(store$pg$get_parameters()) == 0) {
           alert.error(
@@ -135,7 +135,7 @@ InitialConfigurationsView <- R6::R6Class(
           )
           return(invisible())
         }
-        
+
         showModal(
           modalDialog(
             title = "Add a new configuration",
@@ -148,14 +148,14 @@ InitialConfigurationsView <- R6::R6Class(
           )
         )
       })
-      
+
       observeEvent(input$add_config, {
         log_debug("Adding a new configuration")
-        
+
         tryCatch({
           data <- list()
           changed <- c()
-          
+
           parameters <- store$pg$get_parameters()
           parameters <- capture.output(
             write.table(
@@ -172,7 +172,7 @@ InitialConfigurationsView <- R6::R6Class(
           for (name in parameters$names) {
               data[[name]] <- input[[name]]
           }
-          
+
           for (name in parameters$names) {
             if (!irace:::conditionsSatisfied(parameters, data, name)) {
               changed <- c(changed, name)
@@ -181,15 +181,15 @@ InitialConfigurationsView <- R6::R6Class(
           }
 
           newRow <- data.frame(data, stringsAsFactors = FALSE)
-          
+
           store$pg$add_configuration(newRow)
-          
+
           values$configurations <- store$pg$get_configurations()
-          
-          shinyalert::shinyalert(title = "Warning", 
+
+          shinyalert::shinyalert(title = "Warning",
                                  text = sprintf("These (%s) configuration has been set NA by parameter condition.", paste0(changed, collapse = ", ")),
                                  type = "warning")
-          
+
           log_debug("Configuration added")
         },
         error = function(err) {
@@ -199,10 +199,10 @@ InitialConfigurationsView <- R6::R6Class(
 
         removeModal()
       })
-      
+
       observeEvent(input$edit, {
         configuration <- store$pg$get_configuration(input$initial_config_table_rows_selected)
-        
+
         showModal(
           modalDialog(
             title = "Add a new configuration",
@@ -215,28 +215,28 @@ InitialConfigurationsView <- R6::R6Class(
           )
         )
       })
-      
+
       observeEvent(input$confirm_update, {
         log_debug("Editing a configuration")
-        
+
         data <- list()
-        
+
         for (row in seq_len(nrow(store$pg$get_parameters()))) {
           param <- store$pg$get_parameter(row)
           name <- as.character(param$names)
           data[[name]] <- input[[name]]
         }
-        
+
         row <- data.frame(data, stringsAsFactors = FALSE)
-        
+
         store$pg$update_configuration(input$initial_config_table_rows_selected, row)
-        
+
         values$configurations <- store$pg$get_configurations()
-        
+
         log_debug("Configuration edited")
         removeModal()
       })
-      
+
       observeEvent(input$delete, {
         if (is.null(input$initial_config_table_rows_selected) ||
           is.na(input$initial_config_table_rows_selected)) {
@@ -265,26 +265,26 @@ InitialConfigurationsView <- R6::R6Class(
           )
         }
       })
-      
+
       # handle to delete a parameter
       observeEvent(input$confirm_delete, {
         log_debug("Deleting a configuration")
-        
+
         store$pg$remove_configuration(input$initial_config_table_rows_selected)
-        
+
         values$configurations <- store$pg$get_configurations()
-        
+
         log_debug("Configuration deleted")
         removeModal()
       })
-      
+
       observeEvent(clear$action, {
         log_debug("Removing all configurations from table")
-        
+
         store$pg$clear_configurations()
-        
+
         values$configurations <- store$pg$get_configurations()
-        
+
         log_debug("All configurations removed")
       })
     }

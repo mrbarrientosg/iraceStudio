@@ -42,7 +42,7 @@ PerformanceConfigView <- R6::R6Class(
     },
 
     server = function(input, output, session, store) {
-      
+
       self$executionSelect$call(
         id = "executions",
         store = store
@@ -114,7 +114,7 @@ PerformanceConfigView <- R6::R6Class(
             )
         }
       })
-      
+
       observeEvent(session$userData$sidebar(), {
         sidebar <- session$userData$sidebar()
         if (sidebar == "visualization_by_config") {

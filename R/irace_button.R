@@ -3,10 +3,10 @@ IraceButton <- R6::R6Class(
   inherit = Component,
   public = list(
     state = FALSE,
-    
+
     ui = function(inputId, label = " Start Irace", ...) {
       ns <- NS(inputId)
-      
+
       actionButton(
         inputId = ns("action"),
         label = label,
@@ -15,10 +15,10 @@ IraceButton <- R6::R6Class(
         ...
       )
     },
-    
+
     server = function(input, output, session, store) {
       values <- reactiveValues()
-      
+
       observeEvent(input$action, {
         if (store$startIrace) {
           shinyalert(
@@ -38,15 +38,15 @@ IraceButton <- R6::R6Class(
           )
           return(invisible())
         }
-        
+
         values$action <- input$action
       }, ignoreInit = TRUE)
-      
+
       observeEvent(store$startIrace, self$changeState(session), ignoreInit = TRUE)
-      
+
       return(values)
     },
-    
+
     changeState = function(session) {
       if (self$state) {
         addClass(id = "action", class = "btn-primary")

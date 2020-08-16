@@ -10,10 +10,10 @@ Body <- R6::R6Class(
     initialConfigurationsView = NULL,
     forbiddenView = NULL,
     testingView = NULL,
-    
+
     iraceOutputView = NULL,
     executionsHistoryView = NULL,
-    
+
     sandboxView = NULL,
     filterView = NULL,
     performanceInstance = NULL,
@@ -21,7 +21,7 @@ Body <- R6::R6Class(
 
     reportView = NULL,
     userSectionView = NULL,
-    
+
     initialize = function() {
       self$uiOptionsView <- UIOptionsView$new("ui_options")
       self$playgroundView <- PlaygroundView$new("playground")
@@ -34,19 +34,19 @@ Body <- R6::R6Class(
       self$testingView <- TestingView$new("scenario_testing")
       self$iraceOutputView <- IraceOutputView$new("execution_irace_output")
       self$executionsHistoryView <- ExecutionsHistoryView$new("execution_history")
-      
+
       self$sandboxView <- SandboxView$new("visualization_sandbox")
       self$filterView <- FilterView$new("visualization_filter")
       self$performanceInstance <- PerformanceInstanceView$new("visualization_by_instance")
       self$performanceConfig <- PerformanceConfigView$new("visualization_by_config")
-      
+
       self$reportView <- ReportView$new("report")
       self$userSectionView <- UserSectionView$new("report_user_section")
     },
-    
+
     ui = function() {
       bs4Dash::bs4DashBody(
-        add_external_resources(),
+        addExternalResources(),
         bs4TabItems(
           bs4TabItem(
             tabName = "ui_options",
@@ -119,7 +119,7 @@ Body <- R6::R6Class(
         )
       )
     },
-    
+
     setupModules = function(store) {
       self$uiOptionsView$call(store = store)
       self$playgroundView$call(store = store)
@@ -130,15 +130,15 @@ Body <- R6::R6Class(
       self$initialConfigurationsView$call(store = store)
       self$forbiddenView$call(store = store)
       self$testingView$call(store = store)
-      
+
       self$iraceOutputView$call(store = store)
       self$executionsHistoryView$call(store = store)
-      
+
       self$sandboxView$call(store = store)
       self$filterView$call(store = store)
       self$performanceInstance$call(store = store)
       self$performanceConfig$call(store = store)
-      
+
       self$reportView$call(store = store)
       self$userSectionView$call(store = store)
     }

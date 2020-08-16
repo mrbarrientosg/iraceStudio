@@ -4,7 +4,7 @@ TrainInstancesView <- R6::R6Class(
   public = list(
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         div(class = "sub-header", h2("Train Instances")),
         fluidRow(
@@ -52,21 +52,21 @@ TrainInstancesView <- R6::R6Class(
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       clear <- callModule(
         module = clear_button_sv,
         id = "clear",
         message = "This action will remove all instances. Are you sure?."
       )
-      
+
       volum <- c(root = path_home())
-      
+
       shinyDirChoose(input, "dir", roots = volum)
       shinyDirChoose(input, "absolute", roots = volum)
       shinyFileSave(input = input, id = "export", roots = volum)
       shinyFileChoose(input, "load", roots = volum)
-      
+
       observeEvent(input$dir, {
         if (!is.integer(input$dir)) {
           dir <- parseDirPath(roots = volum, input$dir)
@@ -79,13 +79,13 @@ TrainInstancesView <- R6::R6Class(
           )
         }
       })
-      
+
       observeEvent(input$absolute, {
         if (!is.integer(input$absolute)) {
           dir <- parseDirPath(roots = volum, input$absolute)
           lines <- strsplit(input$source_instances_file, "\n")
           output <- c()
-          
+
           for (line in lines[[1]]) {
             .line <- line
             if (!fs::is_absolute_path(line)) {
@@ -93,7 +93,7 @@ TrainInstancesView <- R6::R6Class(
             }
             output <- c(output, .line)
           }
-          
+
           updateTextAreaInput(
             session = session,
             inputId = "source_instances_file",
@@ -101,7 +101,7 @@ TrainInstancesView <- R6::R6Class(
           )
         }
       })
-      
+
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
           file <- parseSavePath(roots = volum, selection = input$export)
@@ -115,7 +115,7 @@ TrainInstancesView <- R6::R6Class(
           )
         }
       })
-      
+
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
           file <- parseFilePaths(roots = volum, input$load)
@@ -129,7 +129,7 @@ TrainInstancesView <- R6::R6Class(
           )
         }
       })
-      
+
       observeEvent(playground_emitter$value(playground_events$current_scenario), {
         updateTextAreaInput(
           session = session,
@@ -137,20 +137,20 @@ TrainInstancesView <- R6::R6Class(
           value = store$pg$get_train_instances()
         )
       })
-      
+
       observeEvent(input$source_instances_file,
                    store$pg$set_train_instances(input$source_instances_file),
                    ignoreInit = TRUE)
-      
+
       observeEvent(clear$action, {
         log_debug("Removing all data from instances")
-        
+
         updateTextAreaInput(
           session = session,
           inputId = "source_instances_file",
           value = ""
         )
-        
+
         reset(id = "instances_file")
         reset(id = "source_instances_file")
         reset(id = "instances_dir")

@@ -4,7 +4,7 @@ ForbiddenView <- R6::R6Class(
   public = list(
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         fluidRow(
           class = "sub-header",
@@ -41,15 +41,15 @@ ForbiddenView <- R6::R6Class(
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       # Don't remove this line it's used by aceEditor
       ns <- session$ns
-      
+
       volum <- c(root = path_home())
-      
+
       shinyFileSave(input = input, id = "export", roots = volum)
-      
+
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
           file <- parseSavePath(roots = volum, selection = input$export)
@@ -63,17 +63,17 @@ ForbiddenView <- R6::R6Class(
           )
         }
       })
-      
+
       shinyFileChoose(input, "load", roots = volum)
-      
+
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
           file <- parseFilePaths(roots = volum, input$load)
-          
+
           tryCatch({
             irace:::readForbiddenFile(file$datapath)
             source <- readLines(file$datapath)
-            
+
             updateAceEditor(
               session = session,
               editorId = "conditions",
@@ -85,11 +85,11 @@ ForbiddenView <- R6::R6Class(
           })
         }
       })
-      
+
       observeEvent(input$conditions, {
         store$pg$add_forbidden(input$conditions)
       }, ignoreInit = TRUE)
-      
+
       observeEvent(playground_emitter$value(playground_events$current_scenario), {
         updateAceEditor(
           session = session,
@@ -97,16 +97,16 @@ ForbiddenView <- R6::R6Class(
           value = store$pg$get_forbidden()
         )
       })
-      
+
       observeEvent(input$clear, {
         log_debug("Removing forbidden code")
-        
+
         updateAceEditor(
           session = session,
           editorId = "conditions",
           value = ""
         )
-        
+
         store$pg$add_forbidden("")
       })
     }

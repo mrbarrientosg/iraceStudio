@@ -107,7 +107,7 @@ FilterView <- R6::R6Class(
                 label = "Deselect All"
               )
             ),
-            DTOutput(outputId = ns("configurationsTable"), width = "100%"),
+            DT::dataTableOutput(outputId = ns("configurationsTable"), width = "100%"),
             br()
           ),
           bs4Card(
@@ -132,7 +132,7 @@ FilterView <- R6::R6Class(
                 label = "Delete"
               ),
             ),
-            DTOutput(outputId = ns("sandboxTable"), width = "100%"),
+            DT::dataTableOutput(outputId = ns("sandboxTable"), width = "100%"),
             br()
           )
         )
@@ -185,9 +185,9 @@ FilterView <- R6::R6Class(
             values$types <- store$iraceResults$parameters$types
             values$domain <- store$iraceResults$parameters$domain
           }
-          
+
           values$expressions <- store$sandbox$getFilters()
-          
+
           if (nrow(store$sandbox$getConfigurations()) == 0)
             values$sandbox <- values$configurations
           else
@@ -200,7 +200,7 @@ FilterView <- R6::R6Class(
 
         updateValue$resume()
       }, ignoreNULL = FALSE)
-      
+
       observeEvent(values$expressions, {
         req(store$sandbox)
         store$sandbox$setFilters(isolate(values$expressions))
@@ -218,7 +218,7 @@ FilterView <- R6::R6Class(
         treePlot(data, paste("Descent Configuration Tree"))
       })
 
-      output$configurationsTable <- renderDT({
+      output$configurationsTable <- DT::renderDataTable({
         datatable(
           values$configurations,
           escape = FALSE,
@@ -320,7 +320,7 @@ FilterView <- R6::R6Class(
       })
 
       ## SANDBOX
-      output$sandboxTable <- renderDT({
+      output$sandboxTable <- DT::renderDataTable({
         datatable(
           data = values$sandbox,
           escape = FALSE,

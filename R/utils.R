@@ -16,13 +16,13 @@ write.list <- function(x, file, export) {
   x[sapply(x, is.na)] <- NULL
   x[sapply(x, is.empty)] <- NULL
   names(x)[names(x) == "onlyTest"] <- ".onlytest"
-  
+
   lines <- lapply(names(x), function(name) {
     paste(name, "=", if (is.logical(x[[name]])) as.integer(x[[name]]) else x[[name]])
   })
-  
+
   data <- ""
-  
+
   if (export) {
     data <- "# The value of these parameter must be set manually"
     data <- c(
@@ -39,9 +39,9 @@ write.list <- function(x, file, export) {
       'testInstancesDir = ""'
     )
   }
-  
+
   data <- c(data, "\n", lines)
-  
+
   write(x = paste0(data), sep = "\n", file = file)
 }
 
@@ -68,11 +68,11 @@ create_scenario_file <- function(path, pg, name = "scenario.txt", export = FALSE
   if (!is.null(name) && name != "") {
     path <- file.path(path, name)
   }
-  
+
   if (export) {
     pg$clear_scenario_temp()
   }
-  
+
   write.list(pg$get_irace_options(), file = path, export)
 }
 
@@ -88,7 +88,7 @@ create_instances_file <- function(path, pg, name = "instances.txt") {
   if (!is.null(name) && name != "") {
     path <- file.path(path, name)
   }
-  
+
   write(paste(pg$get_train_instances(), collapse = "\n"), file = path)
 }
 
@@ -112,7 +112,7 @@ create_initial_config_file <- function(path, pg, name = "configurations.txt") {
   if (!is.null(name) && name != "") {
     path <- file.path(path, name)
   }
-  
+
   if (nrow(pg$get_configurations()) > 0) {
     configurations <- data.table(pg$get_configurations(), stringsAsFactors = FALSE)
     write.table(configurations, path, row.names = FALSE, col.names = TRUE, sep = "\t")
@@ -151,9 +151,9 @@ extract.parameters <- function(parameters) {
       conditions <- c(conditions, "")
     }
   }
-  
+
   df <- data.frame(list(names = parameters$names, switches = switches, types = types, domain = domain, conditions = conditions), stringsAsFactors = FALSE)
-  
+
   return(df)
 }
 
@@ -166,58 +166,58 @@ convert_vector_to_string <- function(vector) {
 }
 
 descentConfigurationTree <- function(iraceResults, configuration_id) {
-  
+
   recursiveChilds <- function(id) {
     ids <- data.frame()
     childs <- subset(iraceResults$allConfigurations, .PARENT. == id, select = ".ID.")
-    
+
     if (nrow(childs) == 0)
       return(ids)
-    
+
     ids <- data.frame(from = id, to = childs$.ID.)
-    
+
     for (row in seq_len(nrow(childs))) {
       childId <- childs[row, ]
       ids <- rbind(ids, recursiveChilds(childId))
     }
-    
+
     return(ids)
   }
-  
+
   return(unique(recursiveChilds(configuration_id)))
 }
 
 configurationTrajectory <- function(iraceResults, configuration_id) {
-  
+
   recursiveParents <- function(id) {
     ids <- data.frame()
     parent <- subset(iraceResults$allConfigurations, .ID. == id, select = ".PARENT.")$.PARENT.
-    
+
     if (length(parent) == 0 || is.na(parent))
       return(ids)
-    
+
     ids <- data.frame(from = id, to = parent)
     ids <- rbind(ids, recursiveParents(parent))
-    
+
     return(ids)
   }
-  
+
   return(recursiveParents(configuration_id))
 }
 
 treePlot <- function(data, title) {
   G <- graph_from_data_frame(data)
-  
+
   vs <- V(G)
   es <- as.data.frame(get.edgelist(G, names = FALSE))
   node.data <- get.data.frame(G, what = "vertices")
-  
+
   ne <- length(es[1]$V1)
-  
+
   L <- layout_as_tree(G)
   Xn <- L[, 1]
   Yn <- L[, 2]
-  
+
   tree <- plot_ly(
     x = ~Xn,
     y = ~Yn,
@@ -230,16 +230,16 @@ treePlot <- function(data, title) {
       size = I(50)
     )
   )
-  
+
   edge_shapes <- list()
-  
+
   for (i in seq_len(ne)) {
     v0 <- es[i, ]$V1
     v1 <- es[i, ]$V2
-    
+
     if (v0 == v1)
       next
-    
+
     edge_shape <- list(
       type = "line",
       layer = "below",
@@ -249,12 +249,12 @@ treePlot <- function(data, title) {
       x1 = Xn[v1],
       y1 = Yn[v1]
     )
-    
+
     edge_shapes[[i]] <- edge_shape
   }
-  
+
   axis <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
-  
+
   plot_tree <- layout(
     tree,
     title = title,
@@ -263,6 +263,6 @@ treePlot <- function(data, title) {
     yaxis = axis,
     showlegend = FALSE
   )
-  
+
   return(plot_tree)
 }

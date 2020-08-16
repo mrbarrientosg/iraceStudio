@@ -8,7 +8,7 @@ ReportView <- R6::R6Class(
     performanceCard = NULL,
     detailByIterationCard = NULL,
     executionSelect = NULL,
-    
+
     initialize = function(id) {
       super$initialize(id)
       self$summaryCard <- SummaryCard$new()
@@ -18,10 +18,10 @@ ReportView <- R6::R6Class(
       self$detailByIterationCard <- DetailByIterationCard$new()
       self$executionSelect <- ExecutionSelect$new()
     },
-    
+
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         fluidRow(
           class = "justify-content-between",
@@ -60,21 +60,21 @@ ReportView <- R6::R6Class(
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       self$summaryCard$call(id = "summary", store = store)
       self$bestConfigurationCard$call(id = "best_config", store = store)
       self$candidatesCard$call(id = "candidates", store = store)
       self$performanceCard$call(id = "performance", store = store)
       self$detailByIterationCard$call(id = "detail_by_iteration", store = store)
-      
+
       executions <- self$executionSelect$call(id = "executions", store = store)
-      
+
       volum <- c(root = path_home())
-      
+
       shinyFileChoose(input, "load", roots = volum, filetypes = "Rdata")
       shinyDirChoose(input, "pdf", roots = volum, filetypes = "pdf")
-      
+
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
           file <- parseFilePaths(roots = volum, input$load)
@@ -84,24 +84,24 @@ ReportView <- R6::R6Class(
           store$currentExecution <- NULL
         }
       })
-      
+
       output$importLabel <- renderText({
         shiny::validate(
           need(store$iraceResults, message = ""),
           need(is.null(store$currentExecution), message = "")
         )
-        
+
         return("An external log file will not be saved in the playground.")
       })
-      
+
       observeEvent(input$pdf, {
         req(store$iraceResults)
-        
+
         if (!is.integer(input$pdf)) {
           make_pdf_report(store, input, volum)
         }
       })
-      
+
       observeEvent(store$iraceResults, {
         if (is.null(store$iraceResults)) {
           disable(id = "pdf")
@@ -112,3 +112,4 @@ ReportView <- R6::R6Class(
     }
   )
 )
+

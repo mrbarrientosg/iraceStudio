@@ -58,7 +58,7 @@ ParameterCondition <- R6::R6Class(
             )
           )
         ),
-        DTOutput(outputId = ns("expressionTable"), width = "100%"),
+        DT::dataTableOutput(outputId = ns("expressionTable"), width = "100%"),
         br()
       )
     },
@@ -73,7 +73,7 @@ ParameterCondition <- R6::R6Class(
         type <- parent$types[[input$paramNames]]
         domain <- parent$domain[[input$paramNames]]
         conditions <- self$conditionsList(type)
-        
+
         updatePickerInput(
           session = session,
           inputId = "conditions",
@@ -86,7 +86,7 @@ ParameterCondition <- R6::R6Class(
         output$valueCondition <- renderUI({
           type <- isolate(parent$types[[input$paramNames]])
           domain <- isolate(parent$domain[[input$paramNames]])
-          
+
           if (type == "r" || type == "r,log") {
             numericInput(
               inputId = ns("paramValue"),
@@ -116,7 +116,7 @@ ParameterCondition <- R6::R6Class(
         })
       })
 
-      output$expressionTable <- renderDT({
+      output$expressionTable <- DT::renderDataTable({
         datatable(
           data = parent$expressions,
           escape = FALSE,
@@ -137,10 +137,10 @@ ParameterCondition <- R6::R6Class(
 
       observeEvent(input$conditions, {
         req(input$conditions != "")
-        
+
         type <- isolate(parent$types[[input$paramNames]])
         domain <- isolate(parent$domain[[input$paramNames]])
-        
+
         if (type == "o" || type == "c") {
           if (input$conditions == "in" || input$conditions == "not in") {
             output$valueCondition <- renderUI(
@@ -170,7 +170,7 @@ ParameterCondition <- R6::R6Class(
 
       observeEvent(input$addCondition, {
         req(input$paramValue != "")
-        
+
         expr <- if (input$conditions == "in") {
           valuesC <- paste0(paste0('"', input$paramValue, '"'), collapse = ", ")
           paste0(input$paramNames, " %in% ", "c(", valuesC, ")")

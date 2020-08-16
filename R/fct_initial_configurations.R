@@ -16,7 +16,7 @@ import_initial_configurations <- function(input, store) {
     )
     return(invisible())
   }
-  
+
   parameters <- data.table(store$pg$get_parameters())
   parameters <- capture.output(
     write.table(
@@ -28,7 +28,7 @@ import_initial_configurations <- function(input, store) {
     )
   )
   parameters <- paste0(parameters, collapse = "\n")
-  
+
   parameters <- tryCatch(readParameters(text = parameters),
     error = function(err) {
       log_error("{err}")
@@ -36,9 +36,9 @@ import_initial_configurations <- function(input, store) {
       return(NULL)
     }
   )
-  
+
   file <- parseFilePaths(roots = volum, input$load)
-  
+
   if (!is.null(data)) {
     config <- tryCatch(irace::readConfigurationsFile(
       filename = file$datapath,
@@ -50,21 +50,21 @@ import_initial_configurations <- function(input, store) {
         return(NULL)
       }
     )
-    
+
     store$pg$add_configuration(config)
-    
+
     values$configurations <- store$pg$get_configurations()
   }
 }
 
 create_initial_modal_content <- function(ns, configuration, store) {
   inputs <- list()
-  
+
   for (row in seq_len(nrow(store$pg$get_parameters()))) {
     param <- store$pg$get_parameter(row)
     inputs[[row]] <- create_initial_modal_input(param, ns, configuration)
   }
-  
+
   return(tagList(inputs))
 }
 
@@ -76,10 +76,10 @@ create_initial_modal_input <- function(param, ns, configuration) {
   } else {
     configuration[[as.character(param$names)]]
   }
-  
+
   input <- NULL
   label <- ""
-  
+
   if (param$type == "c" || param$type == "o") {
     input <- pickerInput(
       inputId = ns(param$names),
@@ -127,7 +127,7 @@ create_initial_modal_input <- function(param, ns, configuration) {
       as.integer(values[[1]][2])
     )
   }
-  
+
   fluidRow(
     column(
       width = 8,

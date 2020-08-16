@@ -12,10 +12,10 @@ ExecutionSelect <- R6::R6Class(
         ...
       )
     },
-    
+
     server = function(input, output, session, store) {
       values <- reactiveValues()
-      
+
       observeEvent(c(playground_emitter$value(playground_events$current_scenario),
         playground_emitter$value(playground_events$update_executions)), {
 
@@ -39,14 +39,15 @@ ExecutionSelect <- R6::R6Class(
           choices = executions_id
         )
       })
-      
+
       observeEvent(input$options, values$option <- input$options)
 
       observeEvent(c(store$pg, input$options), {
         req(input$options != "")
         exe <- store$pg$get_execution(input$options)
         store$currentExecution <- exe
-        store$iraceResults <- exe$get_irace_results()
+        if (!is.null(exe))
+          store$iraceResults <- exe$get_irace_results()
       })
 
       observeEvent(store$currentExecution, {
@@ -56,7 +57,7 @@ ExecutionSelect <- R6::R6Class(
           selected = store$currentExecution$get_id()
         )
       })
-      
+
       return(values)
     }
   )
