@@ -77,8 +77,13 @@ ParametersView <- R6::R6Class(
         message = "This action will remove all parameters. Are you sure?."
       )
 
-      output$parameters_table <- DT::renderDataTable(
-        store$pg$get_parameters(),
+      output$parameters_table <- DT::renderDataTable({
+        shiny::validate(
+          need(store$pg, "")
+        )
+
+        store$pg$get_parameters()
+      },
         escape = FALSE,
         selection = "single",
         rownames = FALSE,

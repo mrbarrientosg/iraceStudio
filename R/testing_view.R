@@ -150,7 +150,12 @@ TestingView <- R6::R6Class(
       })
 
       output$content <- renderUI({
+        shiny::validate(
+          need(store$pg, "")
+        )
+
         playground_emitter$value(playground_events$current_scenario)
+
 
         obs_value(TRUE)
         self$testingOptions$ui(inputId = ns("testing"), "testing", store)

@@ -84,6 +84,9 @@ ParameterCondition <- R6::R6Class(
       observeEvent(c(input$paramNames,
                      parent$types), {
         output$valueCondition <- renderUI({
+          shiny::validate(
+            need(store$pg, "")
+          )
           type <- isolate(parent$types[[input$paramNames]])
           domain <- isolate(parent$domain[[input$paramNames]])
 

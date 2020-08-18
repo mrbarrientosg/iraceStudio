@@ -46,6 +46,10 @@ IraceOptionsView <- R6::R6Class(
       })
 
       output$content <- renderUI({
+        shiny::validate(
+          need(store$pg, "")
+        )
+
         args <- c(
           self$create_tabs(ns, store),
           id = ns("tab"),

@@ -131,7 +131,11 @@ PlaygroundView <- R6::R6Class(
     server = function(input, output, session, store) {
       ns <- session$ns
 
-      data <- reactiveValues(scenarios = self$scenarios_as_data_frame(store))
+      data <- reactiveValues(scenarios = data.frame())
+
+      observeEvent(store$pg, {
+        data$scenarios <- self$scenarios_as_data_frame(store)
+      })
 
       volum <- c(root = path_home())
 
@@ -345,14 +349,19 @@ PlaygroundView <- R6::R6Class(
       observeEvent(input$playgroundName, {
         store$pg$set_name(input$playgroundName)
         store$playgroundName <- input$playgroundName
-      })
+      }, ignoreInit = TRUE)
 
-      observeEvent(input$playgroundDescription, store$pg$set_description(input$playgroundDescription))
+      observeEvent(input$playgroundDescription,
+       store$pg$set_description(input$playgroundDescription), ignoreInit = TRUE)
     },
 
     scenarios_as_data_frame = function(store) {
       data <- data.frame(stringsAsFactors = FALSE)
       pg <- isolate(store$pg)
+
+      if (is.null(pg))
+        return(data)
+
       scenarios <- pg$get_scenarios()
 
       for (name in names(scenarios)) {

@@ -693,6 +693,7 @@ playground <- R6::R6Class(
   private = list(
     name = "",
     description = "",
+    iracePath = "",
     scenarios = NULL,
     last_scenario = NULL,
     current_scenario = NULL,
@@ -703,15 +704,18 @@ playground <- R6::R6Class(
       private$name <- name
       private$scenarios <- list()
       private$last_insert <- 0
+      private$iracePath <- .libPaths()[1]
       if (!is.null(playground)) {
         private$name <- playground$name
         private$description <- playground$description
+        private$iracePath <- playground$iracePath
         for (name in names(playground$scenarios)) {
           private$scenarios[[name]] <- scenario$new(scenario = playground$scenarios[[name]])
-          private$current_scenario <- private$scenarios[[name]]
         }
+        private$current_scenario <- private$scenarios[[playground$last_scenario]]
         private$last_scenario <- playground$last_scenario
         private$last_insert <- playground$last_insert
+        playground_emitter$emit(playground_events$update_scenarios)
       } else {
         self$add_scenario(scenario$new(name = "scenario-1"))
       }
@@ -841,6 +845,9 @@ playground <- R6::R6Class(
     get_last_scenario = function() private$last_scenario,
     set_last_scenario = function(value) private$last_scenario <- value,
 
+    get_irace_path = function() private$iracePath,
+    set_irace_path = function(path) private$iracePath <- path,
+
     change_current_scenario = function(id) {
       scenario <- private$scenarios[[id]]
       private$current_scenario <- scenario
@@ -857,11 +864,12 @@ playground <- R6::R6Class(
       playground$description <- private$description
       playground$last_scenario <- private$current_scenario$get_id()
       playground$scenarios <- list()
+      playground$iracePath <- private$iracePath
       for (name in names(private$scenarios)) {
         playground$scenarios[[name]] <- private$scenarios[[name]]$as_list()
       }
       playground$last_insert <- private$last_insert
-      print("aqui")
+      playground$.iraceStudio <- TRUE
       saveRDS(playground, file = path, version = 2)
     }
   )

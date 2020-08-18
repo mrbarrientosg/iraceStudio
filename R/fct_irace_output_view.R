@@ -1,7 +1,7 @@
 run_irace <- function(store, executionName = "") {
 
   createFolders <- function(store) {
-    workspacePath <- store$app$createWorkspaceDirectory()
+    workspacePath <- store$gui$createWorkspaceDirectory()
     playgroundPath <- file.path(workspacePath, store$pg$get_name())
 
     if (!dir.exists(playgroundPath)) {
@@ -129,7 +129,7 @@ run_irace <- function(store, executionName = "") {
     command = "Rscript",
     args = c(
       system.file("inst/app/script/run_irace.R", package = packageName()),
-      store$gui$iracePath,
+      store$pg$get_irace_path(),
       pkg$tempFolder,
       pkg$outputLog
     ),

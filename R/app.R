@@ -17,7 +17,7 @@ App <- R6::R6Class(
       private$sidebar <- Sidebar$new()
       private$body <- Body$new()
       private$store <- reactiveValues(
-        pg = playground$new(name = "dev-playground"),
+        pg = NULL,
         gui = GUIOptions$new(),
         app = self
       )
@@ -47,8 +47,118 @@ App <- R6::R6Class(
 
       session$userData$sidebar <- reactive(input$sidebar)
 
+      workspaceVolume <- list(workspace = isolate(private$store$gui$workspacePath))
+      importVolume <- list(root = getVolumes()())
+      delay(0, {
+        if (is.null(isolate(private$store$pg))) {
+          showModal(
+            modalDialog(
+              title = "Welcome to Irace Studio",
+              "Create, select or import a playground in your workspace.",
+              footer = tagList(
+                actionButton(inputId = "new", label = "New", class = "btn-primary"),
+                shinyFilesButton(
+                  id = "select",
+                  label = "Select",
+                  title = "Select a Playground",
+                  multiple = FALSE,
+                  buttonType = "outline-primary"
+                ),
+                shinyFilesButton(
+                  id = "import",
+                  label = "Import",
+                  title = "Import a Playground",
+                  multiple = FALSE,
+                  buttonType = "outline-primary"
+                )
+              )
+            )
+          )
+
+          shinyFileChoose(
+            input = input,
+            id = "select",
+            roots = workspaceVolume,
+            filetypes = "rds"
+          )
+          shinyFileChoose(
+            input = input,
+            id = "import",
+            roots = importVolume,
+            filetypes = "rds"
+          )
+        }
+      })
+
+      observeEvent(input$new, {
+        removeModal()
+        shinyalert(
+          title = "Playground name",
+          text = "Give a name to identify the playground.",
+          type = "input",
+          inputType = "text",
+          showCancelButton = TRUE,
+          closeOnEsc = FALSE,
+          callbackR = function(name) {
+            if (is.logical(name) && !name) {
+              return(invisible())
+            }
+
+            if (is.null(name) || name == "") {
+              return(invisible())
+            }
+
+            private$store$pg <- playground$new(name = name)
+          }
+        )
+      })
+
+      observeEvent(input$select, {
+        if (!is.integer(input$select)) {
+          file <- parseFilePaths(roots = workspaceVolume, input$select)
+          pg <- readRDS(file = file$datapath)
+
+          if (is.null(pg$.iraceStudio) || !pg$.iraceStudio) {
+            alert.error("Bad Irace Studio playground.")
+          }
+
+          private$store$pg <- playground$new(playground = pg)
+
+          removeModal()
+        }
+      })
+
+      observeEvent(input$import, {
+        if (!is.integer(input$import)) {
+          file <- parseFilePaths(roots = workspaceVolume, input$import)
+          pg <- readRDS(file = file$datapath)
+
+          if (is.null(pg$.iraceStudio) || !pg$.iraceStudio) {
+            alert.error("Bad Irace Studio playground.")
+          }
+
+          private$store$pg <- playground$new(playground = pg)
+
+          removeModal()
+        }
+      })
+
+      # Javascript code: Before the user closes the browser tab, a warning
+      # alert will prompt indicating if he wants close all irace studio and
+      # irace, if this is still running.
+      runjs(code = '
+          window.addEventListener("beforeunload", (event) => {
+            event.preventDefault();
+
+            event.returnValue = "If Irace is running, will stop the execution.";
+
+            return "If Irace is running, will stop the execution.";
+          })
+      ')
+
       onSessionEnded(function() {
-        #self$destroy()
+        self$destroy()
+        stopApp()
       })
     },
 
@@ -60,7 +170,7 @@ App <- R6::R6Class(
 
       time <- format(Sys.time(), "%d%m%Y%H%M%S")
 
-      path <- file.path(gui$workspacePath, "logs")
+      path <- file.path(gui$optionsPath, "logs")
 
       if (!dir.exists(path)) {
         dir.create(path)
@@ -73,55 +183,22 @@ App <- R6::R6Class(
     },
 
     setup = function() {
-      self$createWorkspaceDirectory()
-      private$logger_path <- self$setupLogger()
-
-      log_info("Shiny app start")
-
-      log_info("Check gui-data exists")
-      if (file.exists(".gui-data.Rdata")) {
-        log_info("Load gui-data.Rdata")
-        # load(file = ".gui-data.Rdata")
-      }
-
-      log_info("Create workspace directory")
+      log_threshold(FATAL)
 
       gui <- isolate(private$store$gui)
       pg <- isolate(private$store$pg)
 
-      # FIXME: This works only in dev mode
-      path <- file.path(
-        gui$workspacePath, pg$get_name(),
-        paste0(pg$get_name(), ".rds")
-      )
+      gui$createWorkspaceDirectory()
 
-      if (file.exists(path)) {
-        pg <- readRDS(file = path, version = 2)
-        private$store$pg <- playground$new(playground = pg)
-      }
+      # TODO: Implements logger in a correct way.
+      #private$logger_path <- self$setupLogger()
 
-      private$logs <- file.path(gui$workspacePath, "logs")
+      log_info("Shiny app start")
+
       # output <- file.path(logs, "output.log")
       # output <- file(output, open = "w")
 
       # sink(file = output, type = "message")
-    },
-
-    createWorkspaceDirectory = function() {
-      gui <- isolate(private$store$gui)
-
-      path <- gui$workspacePath
-
-      if (is.null(gui$workspacePath) ||
-        gui$workspacePath == "") {
-        path <- file.path(getwd(), "workspace")
-      }
-
-      if (!dir.exists(path)) {
-        dir.create(path)
-      }
-
-      return(path)
     },
 
     destroy = function() {
@@ -142,46 +219,33 @@ App <- R6::R6Class(
       #  file.remove(output)
       # }
 
-      save(gui, file = ".gui-data.Rdata")
+      gui$save()
 
-      path <- file.path(
-        gui$workspacePath, pg$get_name()
-      )
+      if (!is.null(pg)) {
+        path <- file.path(gui$workspacePath, pg$get_name())
 
-      if (!dir.exists(path)) {
-        dir.create(path)
+        if (!dir.exists(path)) {
+          dir.create(path)
+        }
+
+        path <- file.path(path, paste0(pg$get_name(), ".rds"))
+
+        if (file.exists(path)) {
+          file.remove(path)
+        }
+
+        pg$save(path)
       }
 
-      path <- file.path(path, paste0(pg$get_name(), ".rds"))
+      iraceProcess <- isolate(private$store$iraceProcess)
 
-      if (file.exists(path)) {
-        file.remove(path)
-      }
-
-      pg$save(path)
-
-      if (exists("iraceProcess")) {
+      if (!is.null(iraceProcess)) {
         iraceProcess$kill()
         iraceProcess$finalize()
       }
 
-      reportFolder <- file.path(
-        gui$workspacePath, pg$get_name(),
-        pg$get_scenario_name(), "Reports"
-      )
-
-      unlink(file.path(reportFolder, "figure"), recursive = TRUE)
-
-      if (file.exists(file.path(reportFolder, "irace_report.tex"))) {
-        file.remove(file.path(reportFolder, "irace_report.tex"))
-      }
-
-      if (file.exists(file.path(reportFolder, "irace_report.pdf"))) {
-        file.remove(file.path(reportFolder, "irace_report.pdf"))
-      }
-
-      unlink(".Fimages", recursive = TRUE, force = TRUE)
-      unlink(".Pimages", recursive = TRUE, force = TRUE)
+      unlink(file.path(gui$optionsPath, ".Fimages"), recursive = TRUE, force = TRUE)
+      unlink(file.path(gui$optionsPath, ".Pimages"), recursive = TRUE, force = TRUE)
       # unlink(pkg_env$tempFolder, recursive = TRUE, force = TRUE)
     }
   )

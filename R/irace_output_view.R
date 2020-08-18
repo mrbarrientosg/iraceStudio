@@ -141,6 +141,7 @@ IraceOutputView <- R6::R6Class(
 
           store$pg$clear_scenario_temp()
 
+          store$iraceProcess <- NULL
           store$startIrace <- FALSE
         }
       })

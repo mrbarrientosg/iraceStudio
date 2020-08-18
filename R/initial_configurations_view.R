@@ -98,7 +98,8 @@ InitialConfigurationsView <- R6::R6Class(
         playground_emitter$value(playground_events$update_parameters)
 
         shiny::validate(
-          need(nrow(store$pg$get_parameters()) > 0, "Empty parameters")
+          need(nrow(store$pg$get_parameters()) > 0, "Empty parameters"),
+          need(store$pg, "")
         )
 
         datatable(

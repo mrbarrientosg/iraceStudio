@@ -39,15 +39,17 @@ UIOptionsView <- R6::R6Class(
       shinyDirChoose(input = input, id = "workspaceButton", roots = volum)
       shinyDirChoose(input = input, id = "iraceButton", roots = volum)
 
-      observeEvent(store$gui, {
+      observeEvent(c(store$gui, store$pg), {
         shinyjs::disable(id = "workspacePath")
         shinyjs::disable(id = "iracePath")
 
-        updateTextInput(
-          session = session,
-          inputId = "iracePath",
-          value = store$gui$iracePath
-        )
+        if (!is.null(store$pg)) {
+          updateTextInput(
+            session = session,
+            inputId = "iracePath",
+            value = store$pg$get_irace_path()
+          )
+        }
 
         updateTextInput(
           session = session,
@@ -68,8 +70,10 @@ UIOptionsView <- R6::R6Class(
             value = path
           )
 
+          # TODO: Move all files inside of workspace to the new path and
+          # validating if another workspace do not exist
           store$gui$workspacePath <- path
-          store$app$createWorkspaceDirectory()
+          store$gui$createWorkspaceDirectory()
         }
       })
 
@@ -89,7 +93,7 @@ UIOptionsView <- R6::R6Class(
             value = path
           )
 
-          store$gui$iracePath <- input$iracePath
+          store$pg$set_irace_path(input$iracePath)
         }
       })
 

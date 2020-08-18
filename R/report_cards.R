@@ -426,7 +426,7 @@ CandidatesCard <- R6::R6Class(
 
         disable(id = "update")
 
-        createHiddenDirectory(".Fimages")
+        createHiddenDirectory(file.path(gui$optionsPath, ".Fimages"))
 
         nb_plots_freq(0)
 
@@ -565,7 +565,7 @@ CandidatesCard <- R6::R6Class(
 
         disable(id = "update")
 
-        createHiddenDirectory(".Pimages")
+        createHiddenDirectory(file.path(gui$optionsPath, ".Pimages"))
 
         nb_plots_parall(0)
         parameters <- input$parameters
