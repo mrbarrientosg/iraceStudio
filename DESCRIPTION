@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "matias.barrientosg@gmail.com")
 Description: What the package does (one paragraph).
-License: What license is it under?
+License: GPL-3
 Imports:
     config (>= 0.3),
     golem (>= 0.2.1),
