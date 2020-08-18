@@ -8,7 +8,51 @@ App <- R6::R6Class(
     body = NULL,
     store = NULL,
     logs = NULL,
-    logger_path = NULL
+    logger_path = NULL,
+
+    initialModal = function(input) {
+      if (is.null(isolate(private$store$pg))) {
+        workspaceVolume <- list(workspace = isolate(private$store$gui$workspacePath))
+        importVolume <- list(root = getVolumes()())
+
+        showModal(
+          modalDialog(
+            title = "Welcome to Irace Studio",
+            "Create, select or import a playground in your workspace.",
+            footer = tagList(
+              actionButton(inputId = "new", label = "New", class = "btn-primary"),
+              shinyFilesButton(
+                id = "select",
+                label = "Select",
+                title = "Select a Playground",
+                multiple = FALSE,
+                buttonType = "outline-primary"
+              ),
+              shinyFilesButton(
+                id = "import",
+                label = "Import",
+                title = "Import a Playground",
+                multiple = FALSE,
+                buttonType = "outline-primary"
+              )
+            )
+          )
+        )
+
+        shinyFileChoose(
+          input = input,
+          id = "select",
+          roots = workspaceVolume,
+          filetypes = "rds"
+        )
+        shinyFileChoose(
+          input = input,
+          id = "import",
+          roots = importVolume,
+          filetypes = "rds"
+        )
+      }
+    }
   ),
 
   public = list(
@@ -47,47 +91,8 @@ App <- R6::R6Class(
 
       session$userData$sidebar <- reactive(input$sidebar)
 
-      workspaceVolume <- list(workspace = isolate(private$store$gui$workspacePath))
-      importVolume <- list(root = getVolumes()())
-      delay(0, {
-        if (is.null(isolate(private$store$pg))) {
-          showModal(
-            modalDialog(
-              title = "Welcome to Irace Studio",
-              "Create, select or import a playground in your workspace.",
-              footer = tagList(
-                actionButton(inputId = "new", label = "New", class = "btn-primary"),
-                shinyFilesButton(
-                  id = "select",
-                  label = "Select",
-                  title = "Select a Playground",
-                  multiple = FALSE,
-                  buttonType = "outline-primary"
-                ),
-                shinyFilesButton(
-                  id = "import",
-                  label = "Import",
-                  title = "Import a Playground",
-                  multiple = FALSE,
-                  buttonType = "outline-primary"
-                )
-              )
-            )
-          )
-
-          shinyFileChoose(
-            input = input,
-            id = "select",
-            roots = workspaceVolume,
-            filetypes = "rds"
-          )
-          shinyFileChoose(
-            input = input,
-            id = "import",
-            roots = importVolume,
-            filetypes = "rds"
-          )
-        }
+      delay(200, {
+        private$initialModal(input)
       })
 
       observeEvent(input$new, {
@@ -101,10 +106,12 @@ App <- R6::R6Class(
           closeOnEsc = FALSE,
           callbackR = function(name) {
             if (is.logical(name) && !name) {
+              private$initialModal(input)
               return(invisible())
             }
 
             if (is.null(name) || name == "") {
+              alert.error("Playground name is empty.")
               return(invisible())
             }
 
