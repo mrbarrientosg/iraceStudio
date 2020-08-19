@@ -4,7 +4,7 @@ CopyInput <- R6::R6Class(
   public = list(
     ui = function(inputId, label, choices = c()) {
       ns <- NS(inputId)
-      
+
       fluidRow(
         column(
           width = 10,
@@ -12,7 +12,10 @@ CopyInput <- R6::R6Class(
             inputId = ns("select_input"),
             label = label,
             choices = choices,
-            width = "100%"
+            width = "100%",
+            options = list(
+                size = 8
+            )
           )
         ),
         column(
@@ -27,12 +30,12 @@ CopyInput <- R6::R6Class(
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       values <- reactiveValues()
       observe(values$section <- input$select_input)
       observe(values$action <- input$action)
-      
+
       observe({
         if (is.null(store$currentExecution)) {
           updatePickerInput(
@@ -46,13 +49,13 @@ CopyInput <- R6::R6Class(
           playground_emitter$value(playground_events$update_report)
 
           data <- report$get_data()
-          
+
           if (length(data) == 0) {
             data <- c("")
           } else {
             data <- unlist(lapply(data, function(d) d$title), use.names = FALSE)
           }
-          
+
           updatePickerInput(
             session = session,
             inputId = "select_input",
@@ -61,7 +64,7 @@ CopyInput <- R6::R6Class(
           )
         }
       })
-      
+
       return(values)
     }
   )

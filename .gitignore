@@ -9,3 +9,8 @@ Meta
 .gui-data.Rdata
 workspace/*
 .idea/*
+*.Rproj
+
+.DS_Store
+
+.vscode/

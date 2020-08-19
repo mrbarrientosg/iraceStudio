@@ -4,25 +4,32 @@ TrainInstancesView <- R6::R6Class(
   public = list(
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         div(class = "sub-header", h2("Train Instances")),
         fluidRow(
           class = "sub-header",
           column(
-            width = 8,
-            directoryInput(
-              idButton = ns("dir_path"),
-              idInput = ns("instances_dir"),
-              label = "Train Instances Dir",
-              title = "Train Instances Directory",
-              width = "auto"
-            )
-          ),
-          column(
-            width = 4,
+            width = 12,
             class = "d-flex align-items-end justify-content-end",
-            importButton(inputId = ns("load")),
+            shinyDirButton(
+              id = ns("dir"),
+              label = "Import Dir",
+              title = "Select a directory",
+              buttonType = "outline-primary"
+            ),
+            importButton(
+              inputId = ns("load"),
+              label = "Import File",
+              style = "margin-left: 5px;"
+            ),
+            shinyDirButton(
+              id = ns("absolute"),
+              label = "Add path",
+              title = "Select a directory",
+              buttonType = "outline-primary",
+              style = "margin-left: 5px;"
+            ),
             exportButton(
               inputId = ns("export"),
               filename = "instances.txt",
@@ -39,32 +46,32 @@ TrainInstancesView <- R6::R6Class(
             width = 12,
             tags$textarea(
               id = ns("source_instances_file"),
-              class = "ant-input",
               style = "width: 100%; height: 500px;"
             )
           )
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       clear <- callModule(
         module = clear_button_sv,
         id = "clear",
         message = "This action will remove all instances. Are you sure?."
       )
-      
-      volum <- c(root = path_home())
-      
-      shinyDirChoose(input, "dir_path", roots = volum)
-      
-      observeEvent(input$dir_path, {
-        if (!is.integer(input$dir_path)) {
-          dir <- parseDirPath(roots = volum, input$dir_path)
+
+      volumes <- getVolumes()()
+
+      shinyDirChoose(input, "dir", roots = volumes)
+      shinyDirChoose(input, "absolute", roots = volumes)
+      shinyFileSave(input = input, id = "export", roots = volumes)
+      shinyFileChoose(input, "load", roots = volumes)
+
+      observeEvent(input$dir, {
+        if (!is.integer(input$dir)) {
+          dir <- parseDirPath(roots = volumes, input$dir)
           log_debug("Adding trainInstancesDir {dir}")
-          store$pg$add_irace_option(option = "trainInstancesDir", value = paste0('"', dir, '"'))
-          updateTextInput(session = session, inputId = "instances_dir", value = dir)
-          files <- list.files(path = dir)
+          files <- list.files(path = dir, full.names = TRUE)
           updateTextAreaInput(
             session = session,
             inputId = "source_instances_file",
@@ -72,12 +79,32 @@ TrainInstancesView <- R6::R6Class(
           )
         }
       })
-      
-      shinyFileSave(input = input, id = "export", roots = volum)
-      
+
+      observeEvent(input$absolute, {
+        if (!is.integer(input$absolute)) {
+          dir <- parseDirPath(roots = volumes, input$absolute)
+          lines <- strsplit(input$source_instances_file, "\n")
+          output <- c()
+
+          for (line in lines[[1]]) {
+            .line <- line
+            if (!fs::is_absolute_path(line)) {
+              .line <- file.path(dir, line)
+            }
+            output <- c(output, .line)
+          }
+
+          updateTextAreaInput(
+            session = session,
+            inputId = "source_instances_file",
+            value = paste0(output, collapse = "\n")
+          )
+        }
+      })
+
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
-          file <- parseSavePath(roots = volum, selection = input$export)
+          file <- parseSavePath(roots = volumes, selection = input$export)
           log_debug("Exporting instances file to {file$datapath}")
           create_instances_file(path = file$datapath, pg = store$pg, name = NULL)
           log_debug("Instances file exported successfully")
@@ -88,13 +115,11 @@ TrainInstancesView <- R6::R6Class(
           )
         }
       })
-      
-      shinyFileChoose(input, "load", roots = volum, filetypes = "txt")
-      
+
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volum, input$load)
-          log_info("Importing paremeter file from {file$datapath}")
+          file <- parseFilePaths(roots = volumes, input$load)
+          log_info("Importing testing instances file from {file$datapath}")
           source <- readLines(file$datapath)
           source <- paste(source, collapse = "\n")
           updateTextAreaInput(
@@ -104,32 +129,28 @@ TrainInstancesView <- R6::R6Class(
           )
         }
       })
-      
+
       observeEvent(playground_emitter$value(playground_events$current_scenario), {
         updateTextAreaInput(
           session = session,
           inputId = "source_instances_file",
           value = store$pg$get_train_instances()
         )
-
-        updateTextInput(
-          session = session,
-          inputId = "instances_dir",
-          value = gsub('"', "", store$pg$get_irace_option("trainInstancesDir"))
-        )
       })
-      
-      observeEvent(input$source_instances_file, store$pg$set_train_instances(input$source_instances_file))
-      
+
+      observeEvent(input$source_instances_file,
+                   store$pg$set_train_instances(input$source_instances_file),
+                   ignoreInit = TRUE)
+
       observeEvent(clear$action, {
         log_debug("Removing all data from instances")
-        
+
         updateTextAreaInput(
           session = session,
           inputId = "source_instances_file",
           value = ""
         )
-        
+
         reset(id = "instances_file")
         reset(id = "source_instances_file")
         reset(id = "instances_dir")

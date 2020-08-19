@@ -1,4 +1,3 @@
-
 #' @import config
 #' @import golem
 #' @import shiny
@@ -30,4 +29,7 @@
 #' @import shinybusy
 #' @import plotly
 #' @import igraph
+#' @import shinycssloaders
+#' @import sortable
+#' @import htmlwidgets
 NULL

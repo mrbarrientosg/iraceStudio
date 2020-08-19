@@ -8,7 +8,7 @@ ReportView <- R6::R6Class(
     performanceCard = NULL,
     detailByIterationCard = NULL,
     executionSelect = NULL,
-    
+
     initialize = function(id) {
       super$initialize(id)
       self$summaryCard <- SummaryCard$new()
@@ -18,10 +18,10 @@ ReportView <- R6::R6Class(
       self$detailByIterationCard <- DetailByIterationCard$new()
       self$executionSelect <- ExecutionSelect$new()
     },
-    
+
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         fluidRow(
           class = "justify-content-between",
@@ -35,13 +35,13 @@ ReportView <- R6::R6Class(
             width = 7,
             class = "d-flex align-items-center justify-content-end",
             self$executionSelect$ui(inputId = ns("executions")),
-            disabled(
-              importButton(
-                inputId = ns("load"),
-                style = "margin-left: 5px; margin-top: 15px;",
-                size = "default"
-              )
-            ),
+            #disabled(
+            #  importButton(
+            #    inputId = ns("load"),
+            #    style = "margin-left: 5px; margin-top: 15px;",
+            #    size = "default"
+            #  )
+            #),
             shinyDirButton(
               id = ns("pdf"),
               title = "Select a directory to save PDF Report",
@@ -60,48 +60,48 @@ ReportView <- R6::R6Class(
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       self$summaryCard$call(id = "summary", store = store)
       self$bestConfigurationCard$call(id = "best_config", store = store)
       self$candidatesCard$call(id = "candidates", store = store)
       self$performanceCard$call(id = "performance", store = store)
       self$detailByIterationCard$call(id = "detail_by_iteration", store = store)
-      
+
       executions <- self$executionSelect$call(id = "executions", store = store)
-      
-      volum <- c(root = path_home())
-      
-      shinyFileChoose(input, "load", roots = volum, filetypes = "Rdata")
-      shinyDirChoose(input, "pdf", roots = volum, filetypes = "pdf")
-      
+
+      volumes <- getVolumes()()
+
+      shinyFileChoose(input, "load", roots = volumes, filetypes = "Rdata")
+      shinyDirChoose(input, "pdf", roots = volumes, filetypes = "pdf")
+
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volum, input$load)
+          file <- parseFilePaths(roots = volumes, input$load)
           load(file = file$datapath)
           store$iraceResults <- iraceResults
           rm(iraceResults)
           store$currentExecution <- NULL
         }
       })
-      
+
       output$importLabel <- renderText({
         shiny::validate(
           need(store$iraceResults, message = ""),
           need(is.null(store$currentExecution), message = "")
         )
-        
+
         return("An external log file will not be saved in the playground.")
       })
-      
+
       observeEvent(input$pdf, {
         req(store$iraceResults)
-        
+
         if (!is.integer(input$pdf)) {
-          make_pdf_report(store, input, volum)
+          make_pdf_report(store, input, volumes)
         }
       })
-      
+
       observeEvent(store$iraceResults, {
         if (is.null(store$iraceResults)) {
           disable(id = "pdf")

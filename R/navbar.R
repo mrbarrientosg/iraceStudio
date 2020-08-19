@@ -53,8 +53,6 @@ Navbar <- R6::R6Class(
         req(input$scenarioPicker)
         store$pg$change_current_scenario(input$scenarioPicker)
         pkg$outputLog <- NULL
-
-        output$current_scenario <- renderUI(tags$p(strong("Current scenario: "), store$pg$get_scenario_name()))
       })
 
       observeEvent(store$startIrace, {
@@ -68,7 +66,7 @@ Navbar <- R6::R6Class(
       observeEvent(playground_emitter$value(playground_events$update_scenarios), {
         scenarios <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_name())
         scenarios_id <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_id())
-  
+
         if (length(scenarios) == 0) {
           scenarios_id <- ""
         } else {
@@ -76,7 +74,7 @@ Navbar <- R6::R6Class(
         }
 
         selected <- NULL
-  
+
         if (!is.null(store$pg$get_last_scenario())) {
           selected <- store$pg$get_last_scenario()
           store$pg$set_last_scenario(NULL)

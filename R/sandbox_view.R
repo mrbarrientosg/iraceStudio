@@ -55,7 +55,7 @@ SandboxView <- R6::R6Class(
                 )
               ),
               br("\n"),
-              DTOutput(outputId = ns("boxes"))
+              DT::dataTableOutput(outputId = ns("boxes"))
             )
           )
         )
@@ -69,7 +69,7 @@ SandboxView <- R6::R6Class(
 
       self$executionSelect$call(id = "executions", store = store)
 
-      output$boxes <- renderDT(
+      output$boxes <- DT::renderDataTable(
         datatable(
           data = data$sandbox,
           escape = FALSE,

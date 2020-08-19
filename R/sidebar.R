@@ -6,7 +6,9 @@ Sidebar <- R6::R6Class(
         title = h1("Irace Studio", style = "text-align:center; margin-bottom: 0;"),
         fixed = FALSE,
         elevation = 0,
+        inputId = "sidebarState",
         bs4Dash::bs4SidebarMenu(
+          id = "sidebar",
           bs4Dash::bs4SidebarMenuItem(
             text = "UI Options",
             tabName = "ui_options"
@@ -46,7 +48,7 @@ Sidebar <- R6::R6Class(
               tabName = "scenario_testing"
             )
           ),
-  
+
           bs4Dash::bs4SidebarMenuItem(
             text = strong("Execution"),
             bs4Dash::bs4SidebarMenuSubItem(
@@ -58,7 +60,7 @@ Sidebar <- R6::R6Class(
               tabName = "execution_history"
             )
           ),
-  
+
           bs4Dash::bs4SidebarMenuItem(
             text = strong("Visualization"),
             bs4Dash::bs4SidebarMenuSubItem(
@@ -81,7 +83,7 @@ Sidebar <- R6::R6Class(
               )
             )
           ),
-  
+
           bs4Dash::bs4SidebarMenuItem(
             text = strong("Report"),
             bs4Dash::bs4SidebarMenuSubItem(

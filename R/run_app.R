@@ -1,4 +1,4 @@
-plan(sequential)
+plan("future::sequential")
 
 pkg <- new.env(parent = emptyenv())
 pkg$reportStore <- list()
@@ -9,31 +9,25 @@ scenarioOptions <- jsonlite::fromJSON(
   flatten = TRUE
 )
 
-#' Run the Shiny Application
+#' Run Irace Studio
 #'
-#' @param ... A series of options to be used inside the app.
+#' @param port A port number that Irace Studio will listen on.
 #'
 #' @export
-#' @importFrom shiny shinyApp
-#' @importFrom golem with_golem_options
-run_app <- function (...) {
+runIraceStudio <- function(port = 4350) {
   app <- App$new()
 
-  with_golem_options(
-    app = shinyApp(
-      ui = app$ui,
-      server = app$server,
-      onStart = function() {
-        app$setup()
-        
-        onStop(function() {
-          app$destroy()
-        })
-      },
-      options = list(
-        port = 4350
-      )
-    ),
-    golem_opts = list(...)
+  shinyApp(
+    ui = app$ui,
+    server = app$server,
+    onStart = function() {
+      app$setup()
+    },
+    options = list(
+      port = port,
+      launch.browser = TRUE,
+      minified = TRUE,
+      deprecation.message = FALSE
+    )
   )
 }

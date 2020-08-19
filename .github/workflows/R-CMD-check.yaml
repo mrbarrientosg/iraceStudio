@@ -1,26 +1,41 @@
+name: R-CMD-check
+
 on:
   pull_request:
     branches:
       - master
-      - dev
-
-name: R-CMD-check
 
 jobs:
-  R-CMD-check:
-    runs-on: ubuntu-latest
+  check:
+    strategy:
+        matrix:
+          os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@master
         with:
             r-version: "3.4"
+
       - name: System dependencies
-        run: sudo apt-get install libcurl4-openssl-dev libpoppler-cpp-dev libmagick++-dev
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt-get install libcurl4-openssl-dev libpoppler-cpp-dev libmagick++-dev pandoc pandoc-citeproc
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            brew install poppler libmagic openssl pandoc pandoc-citeproc imagemagick@6
+          else
+            echo "$RUNNER_OS not supported"
+            exit 1
+          fi
+        shell: bash
+
       - name: Install dependencies
         run: |
-          install.packages(c("remotes", "rcmdcheck"))
+          install.packages(c("remotes", "rcmdcheck", "stringi", "Rcpp"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
+
       - name: Check
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}

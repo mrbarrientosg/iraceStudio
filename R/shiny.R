@@ -15,19 +15,19 @@ exportButton <- function(inputId, filename, style = NULL, size = "default") {
     arg = size,
     choices = c("large", "default", "small")
   )
-  
+
   class <- "btn btn-primary"
-  
+
   if (size != "default") {
     if (size == "large") {
       size <- "lg"
     } else {
       size <- "sm"
     }
-    
+
     class <- paste(class, paste0("btn-", size))
   }
-  
+
   btn <- shinySaveButton(
     id = inputId,
     label = "Export",
@@ -36,39 +36,39 @@ exportButton <- function(inputId, filename, style = NULL, size = "default") {
     style = style,
     class = class
   )
-  
+
   btn[[2]]$attribs$class <- gsub("btn-default", "", btn[[2]]$attribs$class)
-  
+
   return(btn)
 }
 
-importButton <- function(inputId, style = NULL, size = "default") {
+importButton <- function(inputId, label = "Import", style = NULL, size = "default") {
   size <- match.arg(
     arg = size,
     choices = c("large", "default", "small")
   )
-  
+
   class <- "btn-outline-primary"
-  
+
   if (size != "default") {
     if (size == "large") {
       size <- "lg"
     } else {
       size <- "sm"
     }
-    
+
     class <- paste(class, paste0("btn-", size))
   }
-  
+
   btn <- shinyFilesButton(
     id = inputId,
-    label = "Import",
+    label = label,
     title = "Select a file",
     multiple = FALSE,
     style = style,
     class = class
   )
-  
+
   btn[[2]]$attribs$class <- gsub("btn-default", "", btn[[2]]$attribs$class)
   return(btn)
 }

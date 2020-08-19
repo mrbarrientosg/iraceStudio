@@ -4,7 +4,7 @@ UIOptionsView <- R6::R6Class(
   public = list(
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         div(class = "sub-header", h2("UI Options")),
         fluidRow(
@@ -32,50 +32,56 @@ UIOptionsView <- R6::R6Class(
         )
       )
     },
-    
-    server = function(input, output, session, store) {
-      volum <- list(root = path_home())
-      
-      shinyDirChoose(input = input, id = "workspaceButton", roots = volum)
-      shinyDirChoose(input = input, id = "iraceButton", roots = volum)
 
-      observeEvent(store$gui, {
+    server = function(input, output, session, store) {
+      volumes <- getVolumes()()
+
+      shinyDirChoose(input = input, id = "workspaceButton", roots = volumes)
+      shinyDirChoose(input = input, id = "iraceButton", roots = volumes)
+
+      observeEvent(c(store$gui, store$pg), {
         shinyjs::disable(id = "workspacePath")
         shinyjs::disable(id = "iracePath")
 
-        updateTextInput(
-          session = session,
-          inputId = "iracePath",
-          value = store$gui$iracePath
-        )
-  
+        if (!is.null(store$pg)) {
+          updateTextInput(
+            session = session,
+            inputId = "iracePath",
+            value = store$pg$get_irace_path()
+          )
+        }
+
         updateTextInput(
           session = session,
           inputId = "workspacePath",
           value = store$gui$workspacePath
         )
       })
-      
+
       observeEvent(input$workspaceButton, {
         if (!is.integer(input$workspaceButton)) {
-          dir <- parseDirPath(roots = volum, input$workspaceButton)
+          dir <- parseDirPath(roots = volumes, input$workspaceButton)
 
           path <- private$getWorkspacePath(dir)
 
-          updateTextInput(
-            session = session,
-            inputId = "workspacePath",
-            value = path
-          )
-
-          store$gui$workspacePath <- path
-          store$app$createWorkspaceDirectory()
+          # TODO: Move all files inside of workspace to the new path and
+          # validating if another workspace do not exist
+          if (store$gui$createWorkspaceDirectory(path)) {
+            store$gui$workspacePath <- path
+            updateTextInput(
+              session = session,
+              inputId = "workspacePath",
+              value = path
+            )
+          } else {
+            alert.error("Cannot create workspace directory. Make sure there is no another folder called workspace name folder.")
+          }
         }
       })
 
       observeEvent(input$iraceButton, {
         if (!is.integer(input$iraceButton)) {
-          dir <- parseDirPath(roots = volum, input$iraceButton)
+          dir <- parseDirPath(roots = volumes, input$iraceButton)
 
           path <- .libPaths()[1]
 
@@ -89,24 +95,24 @@ UIOptionsView <- R6::R6Class(
             value = path
           )
 
-          store$gui$iracePath <- input$iracePath
+          store$pg$set_irace_path(input$iracePath)
         }
       })
-      
+
     }
   ),
   private = list(
     checkPath = function(path) {
       if (is.null(path) || path == "") {
-        return(false)
+        return(FALSE)
       }
 
-      return(true)
+      return(TRUE)
     },
 
     getWorkspacePath = function(path) {
       if (!private$checkPath(path)) {
-        return(file.path(getwd(), "workspace"))
+        return(file.path(fs::path_home(), "workspace"))
       }
 
       return(file.path(path, "workspace"));

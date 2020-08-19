@@ -4,15 +4,15 @@ IraceOutputView <- R6::R6Class(
   public = list(
     iraceButton = NULL,
     execution = NULL,
-    
+
     initialize = function(id) {
       super$initialize(id)
       self$iraceButton <- IraceButton$new()
     },
-    
+
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         fluidRow(
           class = "sub-header",
@@ -53,15 +53,15 @@ IraceOutputView <- R6::R6Class(
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       values <- reactiveValues(
         source = NULL,
         timer = reactiveTimer(intervalMs = 900) # Change refresh timer for running log
       )
-      
+
       start <- self$iraceButton$call(id = "start_irace", store = store)
-      
+
       observeEvent(start$action, {
         if (store$startIrace) {
           store$startIrace <- FALSE
@@ -84,9 +84,9 @@ IraceOutputView <- R6::R6Class(
                 alert.error("Give a name.")
                 return(invisible())
               }
-              
+
               run_irace(store, name)
-              
+
               if (store$startIrace) {
                 self$execution <- execution$new(name = name)
               }
@@ -94,19 +94,19 @@ IraceOutputView <- R6::R6Class(
           )
         }
       })
-      
+
       observe({
         if (!store$startIrace) {
           return(invisible())
         }
-        
+
         store$iraceAlive()
-        
+
         if (!store$iraceProcess$is_alive()) {
           enable(id = "scenarioPicker")
-          
+
           unlink(store$tempFolder, recursive = TRUE, force = TRUE)
-          
+
           store$iraceProcess$poll_io(1000)
           error <- store$iraceProcess$read_all_error_lines()
 
@@ -140,11 +140,12 @@ IraceOutputView <- R6::R6Class(
           }
 
           store$pg$clear_scenario_temp()
-          
+
+          store$iraceProcess <- NULL
           store$startIrace <- FALSE
         }
       })
-      
+
       observe({
         playground_emitter$value(playground_events$current_scenario)
 
@@ -156,9 +157,9 @@ IraceOutputView <- R6::R6Class(
           }
           return(invisible())
         }
-        
+
         values$timer()
-        
+
         future({
           if (file.exists(pkg$outputLog)) {
             paste(readLines(pkg$outputLog), collapse = "\n")
@@ -168,10 +169,10 @@ IraceOutputView <- R6::R6Class(
         }) %...>% {
           values$source <- .
         }
-        
+
         # session$sendCustomMessage(type = "iraceOuputScroll", 1)
       })
-      
+
       output$irace_output <- renderText({
         shiny::validate(
           need(values$source, message = "Irace is not running yet.")

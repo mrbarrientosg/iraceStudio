@@ -4,7 +4,7 @@ IraceOptionsView <- R6::R6Class(
   public = list(
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         fluidRow(
           class = "sub-header",
@@ -23,17 +23,17 @@ IraceOptionsView <- R6::R6Class(
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       ns <- session$ns
-      
-      volum <- c(root = path_home())
-      
-      shinyFileSave(input = input, id = "export", roots = volum)
-      
+
+      volumes <- getVolumes()()
+
+      shinyFileSave(input = input, id = "export", roots = volumes)
+
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
-          file <- parseSavePath(roots = volum, selection = input$export)
+          file <- parseSavePath(roots = volumes, selection = input$export)
           log_debug("Exporting scenario file to {file$datapath}")
           create_scenario_file(path = file$datapath, pg = store$pg, name = NULL, export = TRUE)
           log_debug("Scenario file exported successfully")
@@ -44,9 +44,11 @@ IraceOptionsView <- R6::R6Class(
           )
         }
       })
-      
+
       output$content <- renderUI({
-        playground_emitter$value(playground_events$current_scenario)
+        shiny::validate(
+          need(store$pg, "")
+        )
 
         args <- c(
           self$create_tabs(ns, store),
@@ -57,31 +59,31 @@ IraceOptionsView <- R6::R6Class(
           side = "left",
           width = 12
         )
-        
+
         do.call(bs4TabCard, args)
       })
     },
-    
+
     create_tabs = function(ns, store) {
       tabs <- list()
-      
+
       option <- IraceOptionTab$new()
-      
+
       for (name in names(scenarioOptions)) {
         if (name == "testing") {
           next
         }
-        
+
         tab <- bs4TabPanel(
           tabName = scenarioOptions[[name]]$name,
           option$ui(inputId = ns(name), section = name, store = store)
         )
-        
+
         tabs[[name]] <- tab
-        
+
         option$call(id = name, store = store, section = name)
       }
-      
+
       return(tabs)
     }
   )

@@ -34,23 +34,24 @@ PerformanceInstanceView <- R6::R6Class(
             collapsible = FALSE,
             closable = FALSE,
             width = 12,
-            plotlyOutput(outputId = ns("distanceBestPlot")),
+            plotlyOutput(outputId = ns("distanceBestPlot")) %>%
+              shinycssloaders::withSpinner(type = 6),
             br(),
-            DTOutput(outputId = ns("selectedPointTable"))
+            DT::dataTableOutput(outputId = ns("selectedPointTable"))
           ),
           bs4Card(
             title = strong("Configuration"),
             collapsible = FALSE,
             closable = FALSE,
             width = 12,
-            plotlyOutput(outputId = ns("configurationPlot"))
+            plotlyOutput(outputId = ns("configurationPlot")) %>%
+              shinycssloaders::withSpinner(type = 6)
           )
         )
       )
     },
 
     server = function(input, output, session, store) {
-
       self$executionSelect$call(
         id = "executions",
         store = store
@@ -61,24 +62,15 @@ PerformanceInstanceView <- R6::R6Class(
         store = store
       )
 
-      best_data <- eventReactive(store$iraceResults, {
+      best_data <- eventReactive(c(store$iraceResults, store$updateSandbox), {
         future({
-          config <- store$iraceResults$allConfigurations$.ID.
+          config <- isolate(store$sandbox$getConfigurations()$ID)
 
-          self$bestConfigurationByInstances(store$iraceResults, config)
+          if (length(config) == 0)
+            config <- isolate(store$iraceResults$allConfigurations$.ID.)
+
+          self$bestConfigurationByInstances(isolate(store$iraceResults), config)
         })
-      })
-
-      filtered_best_data <- reactive({
-        req(store$updateSandbox)
-        req(store$sandbox)
-
-        config <- store$sandbox$getConfigurations()$ID
-
-        if (length(config) == 0)
-          config <- store$iraceResults$allConfigurations$.ID.
-
-        best_data() %...>% subset(conf %in% config)
       })
 
       output$distanceBestPlot <- renderPlotly({
@@ -91,11 +83,8 @@ PerformanceInstanceView <- R6::R6Class(
           title = list(text = "<b>Instance</b>")
         )
 
-        filtered_best_data() %...>% {
-          data <- .
-
-          data %>%
-            plot_ly(source = "distanceBestPlot") %>%
+        best_data() %...>% {
+          plot_ly(., source = "distanceBestPlot") %>%
             add_boxplot(
               x = ~instance,
               y = ~value,
@@ -134,7 +123,7 @@ PerformanceInstanceView <- R6::R6Class(
 
         event <- event_data("plotly_click", "distanceBestPlot")
 
-        filtered_best_data() %...>% {
+        best_data() %...>% {
           if (is.null(event)) {
             return(data.frame())
           }
@@ -167,7 +156,7 @@ PerformanceInstanceView <- R6::R6Class(
         }
       })
 
-      output$selectedPointTable <- renderDT({
+      output$selectedPointTable <- DT::renderDataTable({
         selected_best_data() %...>% {
           datatable(
             data = .,
@@ -187,24 +176,15 @@ PerformanceInstanceView <- R6::R6Class(
         }
       })
 
-      config_data <- eventReactive(store$iraceResults, {
+      config_data <- eventReactive(c(store$iraceResults, store$updateSandbox), {
         future({
-          config <- store$iraceResults$allConfigurations$.ID.
+          config <- isolate(store$sandbox$getConfigurations()$ID)
 
-          self$configurationByIntances(store$iraceResults, config)
+          if (length(config) == 0)
+            config <- isolate(store$iraceResults$allConfigurations$.ID.)
+
+          self$configurationByIntances(isolate(store$iraceResults), config)
         })
-      })
-
-      filtered_config_data <- reactive({
-        req(store$updateSandbox)
-        req(store$sandbox)
-
-        config <- store$sandbox$getConfigurations()$ID
-
-        if (length(config) == 0)
-          config <- store$iraceResults$allConfigurations$.ID.
-
-        config_data() %...>% subset(id %in% config)
       })
 
       output$configurationPlot <- renderPlotly({
@@ -217,11 +197,8 @@ PerformanceInstanceView <- R6::R6Class(
           title = list(text = "<b>Instance</b>")
         )
 
-        filtered_config_data() %...>% {
-          data <- .
-
-          data %>%
-            plot_ly() %>%
+        config_data() %...>% {
+          plot_ly(.) %>%
             add_boxplot(
               x = ~instance,
               y = ~value,
@@ -252,12 +229,20 @@ PerformanceInstanceView <- R6::R6Class(
             )
         }
       })
+
+      observeEvent(session$userData$sidebar(), {
+        sidebar <- session$userData$sidebar()
+        if (sidebar == "visualization_by_instance") {
+          js$resizePlotly(session$ns("configurationPlot"))
+          js$resizePlotly(session$ns("distanceBestPlot"))
+        }
+      })
     },
 
     bestConfigurationByInstances = function(iraceResults, configurations = iraceResults$allConfigurations$.ID.) {
       data <- data.frame()
 
-      experiments <- iraceResults$experiments
+      experiments <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
 
       min <- apply(experiments, 1, function(row) {
         if (all(is.na(row)))
@@ -265,8 +250,6 @@ PerformanceInstanceView <- R6::R6Class(
         else
           min(row, na.rm = T)
       })
-
-      experiments <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
 
       for (idx in seq_along(min)) {
         if (is.na(min[idx])) {

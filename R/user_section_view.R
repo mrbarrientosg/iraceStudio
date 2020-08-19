@@ -6,7 +6,7 @@ UserSectionView <- R6::R6Class(
     observe_delete_card = NULL,
     count = 0,
     userSectionCard = NULL,
-    
+
     initialize = function(id) {
       super$initialize(id)
       self$cards <- list()
@@ -14,10 +14,10 @@ UserSectionView <- R6::R6Class(
       self$count <- 0
       self$userSectionCard <- UserSectionCard$new()
     },
-    
+
     ui = function() {
       ns <- NS(self$id)
-      
+
       tagList(
         fluidRow(
           class = "justify-content-between sub-header",
@@ -41,10 +41,10 @@ UserSectionView <- R6::R6Class(
         )
       )
     },
-    
+
     server = function(input, output, session, store) {
       ns <- session$ns
-      
+
       observeEvent(input$add, {
         if (is.null(store$currentExecution)) {
           alert.error("Select a execution or execute irace first.")
@@ -62,7 +62,7 @@ UserSectionView <- R6::R6Class(
           )
         }
       })
-      
+
       observeEvent(store$currentExecution,
         {
         for (id in names(self$cards)) {
@@ -75,17 +75,17 @@ UserSectionView <- R6::R6Class(
           )
           self$remove_shiny_inputs(id, input, ns)
         }
-        
+
         req(!is.null(store$currentExecution))
-        
+
         report <- store$currentExecution$get_report()
-        
+
         data <- report$get_data()
-        
+
         self$cards <- list()
         self$observe_delete_card <- list()
         self$count <- report$get_count()
-        
+
         for (id in names(data)) {
           insertUI(
             selector = "#userSectionContent",
@@ -96,19 +96,19 @@ UserSectionView <- R6::R6Class(
               value = data[[id]]$content
             )
           )
-          
+
           self$cards[[id]] <- self$userSectionCard$call(
             id = id,
             report_id = id,
             report = report,
             store = store
           )
-          
+
           local({
             myId <- id
             self$observe_delete_card[[id]] <- observe({
               req(self$cards[[myId]]$card$visible != TRUE)
-              
+
               self$cards[[myId]] <- NULL
               self$observe_delete_card[[myId]]$destroy()
               self$observe_delete_card[[myId]] <- NULL
@@ -124,17 +124,17 @@ UserSectionView <- R6::R6Class(
       },
         ignoreNULL = FALSE
       )
-      
+
       observeEvent(input$addSection, {
         removeModal()
-        
+
         report <- store$currentExecution$get_report()
         report$add_title(input$title)
-        
+
         self$count <- self$count + 1
-        
+
         id <- as.character(self$count)
-        
+
         insertUI(
           selector = "#userSectionContent",
           where = "beforeEnd",
@@ -143,19 +143,19 @@ UserSectionView <- R6::R6Class(
             title = input$title
           )
         )
-        
+
         self$cards[[id]] <- self$userSectionCard$call(
           id = id,
           report_id = id,
           report = report,
           store = store
         )
-        
+
         local({
           myId <- id
           self$observe_delete_card[[id]] <- observe({
             req(self$cards[[myId]]$card$visible != TRUE)
-            
+
             self$cards[[myId]] <- NULL
             self$observe_delete_card[[myId]]$destroy()
             self$observe_delete_card[[myId]] <- NULL
@@ -169,7 +169,7 @@ UserSectionView <- R6::R6Class(
         })
       }, ignoreInit = TRUE)
     },
-    
+
     remove_shiny_inputs = function(id, .input, ns) {
       invisible(
         lapply(grep(id, names(.input), value = TRUE), function(i) {

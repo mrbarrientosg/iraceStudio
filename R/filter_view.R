@@ -10,7 +10,7 @@ FilterView <- R6::R6Class(
       super$initialize(id)
       self$executionSelect <- ExecutionSelect$new()
       self$sandboxSelect <- SandboxSelect$new()
-      self$configurationFilter <- ConfigurationFilter$new()
+      self$configurationFilter <- ParameterCondition$new()
     },
 
     ui = function() {
@@ -69,7 +69,10 @@ FilterView <- R6::R6Class(
                 pickerInput(
                   inputId = ns("descentId"),
                   label = "Descent Configurations",
-                  choices = c()
+                  choices = c(),
+                  options = list(
+                    size = 8
+                  )
                 )
               ),
               column(
@@ -81,7 +84,10 @@ FilterView <- R6::R6Class(
             pickerInput(
               inputId = ns("trajectoryId"),
               label = "Trajectory Configuration",
-              choices = c()
+              choices = c(),
+              options = list(
+                size = 8
+              )
             ),
             footer = actionButton(inputId = ns("filter"), label = "Filter", class = "btn-primary")
           ),
@@ -107,7 +113,7 @@ FilterView <- R6::R6Class(
                 label = "Deselect All"
               )
             ),
-            DTOutput(outputId = ns("configurationsTable"), width = "100%"),
+            DT::dataTableOutput(outputId = ns("configurationsTable"), width = "100%"),
             br()
           ),
           bs4Card(
@@ -132,7 +138,7 @@ FilterView <- R6::R6Class(
                 label = "Delete"
               ),
             ),
-            DTOutput(outputId = ns("sandboxTable"), width = "100%"),
+            DT::dataTableOutput(outputId = ns("sandboxTable"), width = "100%"),
             br()
           )
         )
@@ -152,9 +158,13 @@ FilterView <- R6::R6Class(
         store = store
       )
 
-      self$configurationFilter$call(id = "filter", store = store)
+      values <- reactiveValues(configurations = NULL,
+                               sandbox = NULL,
+                               expressions = data.frame(),
+                               types = NULL,
+                               domain = NULL)
 
-      values <- reactiveValues(configurations = NULL, sandbox = NULL)
+      self$configurationFilter$call(id = "filter", store = store, parent = values)
 
       updateValue <- observe({
         req(store$sandbox)
@@ -174,12 +184,15 @@ FilterView <- R6::R6Class(
         values$configurations <- data.frame()
 
         if (!is.null(store$sandbox)) {
-          self$setupInputs(session, store)
-          self$configurationFilter$setupInputs(store)
-
           if (!is.null(store$iraceResults)) {
+            self$setupInputs(session, store)
+            self$configurationFilter$setupInputs(store$iraceResults$parameters$names)
             values$configurations <- store$iraceResults$allConfigurations[0, ]
+            values$types <- store$iraceResults$parameters$types
+            values$domain <- store$iraceResults$parameters$domain
           }
+
+          values$expressions <- store$sandbox$getFilters()
 
           if (nrow(store$sandbox$getConfigurations()) == 0)
             values$sandbox <- values$configurations
@@ -192,6 +205,11 @@ FilterView <- R6::R6Class(
         }
 
         updateValue$resume()
+      }, ignoreNULL = FALSE)
+
+      observeEvent(values$expressions, {
+        req(store$sandbox)
+        store$sandbox$setFilters(isolate(values$expressions))
       })
 
       output$descentTreePlot <- renderPlotly({
@@ -206,7 +224,7 @@ FilterView <- R6::R6Class(
         treePlot(data, paste("Descent Configuration Tree"))
       })
 
-      output$configurationsTable <- renderDT({
+      output$configurationsTable <- DT::renderDataTable({
         datatable(
           values$configurations,
           escape = FALSE,
@@ -308,7 +326,7 @@ FilterView <- R6::R6Class(
       })
 
       ## SANDBOX
-      output$sandboxTable <- renderDT({
+      output$sandboxTable <- DT::renderDataTable({
         datatable(
           data = values$sandbox,
           escape = FALSE,

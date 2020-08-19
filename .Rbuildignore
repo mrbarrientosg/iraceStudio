@@ -9,3 +9,5 @@ $run_dev.*
 ^doc$
 ^Meta$
 ^\.github$
+^img$
+^LICENSE\.md$
