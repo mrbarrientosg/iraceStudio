@@ -65,7 +65,7 @@ FilterView <- R6::R6Class(
             hr(),
             fluidRow(
               column(
-                width = 4,
+                width = 12,
                 pickerInput(
                   inputId = ns("descentId"),
                   label = "Descent Configurations",
@@ -74,10 +74,6 @@ FilterView <- R6::R6Class(
                     size = 8
                   )
                 )
-              ),
-              column(
-                width = 8,
-                plotlyOutput(outputId = ns("descentTreePlot"))
               )
             ),
             hr(),
@@ -210,18 +206,6 @@ FilterView <- R6::R6Class(
       observeEvent(values$expressions, {
         req(store$sandbox)
         store$sandbox$setFilters(isolate(values$expressions))
-      })
-
-      output$descentTreePlot <- renderPlotly({
-        shiny::validate(
-          need(input$descentId != "none", message = "Select a configuration id.")
-        )
-        data <- descentConfigurationTree(store$iraceResults, as.integer(input$descentId))
-        shiny::validate(
-          need(nrow(data) != 0, message = "")
-        )
-
-        treePlot(data, paste("Descent Configuration Tree"))
       })
 
       output$configurationsTable <- DT::renderDataTable({
