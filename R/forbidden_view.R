@@ -46,13 +46,13 @@ ForbiddenView <- R6::R6Class(
       # Don't remove this line it's used by aceEditor
       ns <- session$ns
 
-      volum <- c(root = path_home())
+      volumes <- getVolumes()()
 
-      shinyFileSave(input = input, id = "export", roots = volum)
+      shinyFileSave(input = input, id = "export", roots = volumes)
 
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
-          file <- parseSavePath(roots = volum, selection = input$export)
+          file <- parseSavePath(roots = volumes, selection = input$export)
           log_debug("Exporting forbidden file to {file$datapath}")
           create_forbidden_file(path = file$datapath, pg = store$pg, name = NULL)
           log_debug("Forbidden file exported successfully")
@@ -64,11 +64,11 @@ ForbiddenView <- R6::R6Class(
         }
       })
 
-      shinyFileChoose(input, "load", roots = volum)
+      shinyFileChoose(input, "load", roots = volumes)
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volum, input$load)
+          file <- parseFilePaths(roots = volumes, input$load)
 
           tryCatch({
             irace:::readForbiddenFile(file$datapath)

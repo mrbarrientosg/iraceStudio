@@ -35,13 +35,13 @@ ReportView <- R6::R6Class(
             width = 7,
             class = "d-flex align-items-center justify-content-end",
             self$executionSelect$ui(inputId = ns("executions")),
-            disabled(
-              importButton(
-                inputId = ns("load"),
-                style = "margin-left: 5px; margin-top: 15px;",
-                size = "default"
-              )
-            ),
+            #disabled(
+            #  importButton(
+            #    inputId = ns("load"),
+            #    style = "margin-left: 5px; margin-top: 15px;",
+            #    size = "default"
+            #  )
+            #),
             shinyDirButton(
               id = ns("pdf"),
               title = "Select a directory to save PDF Report",
@@ -70,14 +70,14 @@ ReportView <- R6::R6Class(
 
       executions <- self$executionSelect$call(id = "executions", store = store)
 
-      volum <- c(root = path_home())
+      volumes <- getVolumes()()
 
-      shinyFileChoose(input, "load", roots = volum, filetypes = "Rdata")
-      shinyDirChoose(input, "pdf", roots = volum, filetypes = "pdf")
+      shinyFileChoose(input, "load", roots = volumes, filetypes = "Rdata")
+      shinyDirChoose(input, "pdf", roots = volumes, filetypes = "pdf")
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volum, input$load)
+          file <- parseFilePaths(roots = volumes, input$load)
           load(file = file$datapath)
           store$iraceResults <- iraceResults
           rm(iraceResults)
@@ -98,7 +98,7 @@ ReportView <- R6::R6Class(
         req(store$iraceResults)
 
         if (!is.integer(input$pdf)) {
-          make_pdf_report(store, input, volum)
+          make_pdf_report(store, input, volumes)
         }
       })
 
@@ -112,4 +112,3 @@ ReportView <- R6::R6Class(
     }
   )
 )
-

@@ -37,7 +37,7 @@ import_initial_configurations <- function(input, store) {
     }
   )
 
-  file <- parseFilePaths(roots = volum, input$load)
+  file <- parseFilePaths(roots = getVolumes()(), input$load)
 
   if (!is.null(data)) {
     config <- tryCatch(irace::readConfigurationsFile(

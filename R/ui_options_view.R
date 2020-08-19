@@ -34,10 +34,10 @@ UIOptionsView <- R6::R6Class(
     },
 
     server = function(input, output, session, store) {
-      volum <- list(root = path_home())
+      volumes <- getVolumes()()
 
-      shinyDirChoose(input = input, id = "workspaceButton", roots = volum)
-      shinyDirChoose(input = input, id = "iraceButton", roots = volum)
+      shinyDirChoose(input = input, id = "workspaceButton", roots = volumes)
+      shinyDirChoose(input = input, id = "iraceButton", roots = volumes)
 
       observeEvent(c(store$gui, store$pg), {
         shinyjs::disable(id = "workspacePath")
@@ -60,7 +60,7 @@ UIOptionsView <- R6::R6Class(
 
       observeEvent(input$workspaceButton, {
         if (!is.integer(input$workspaceButton)) {
-          dir <- parseDirPath(roots = volum, input$workspaceButton)
+          dir <- parseDirPath(roots = volumes, input$workspaceButton)
 
           path <- private$getWorkspacePath(dir)
 
@@ -81,7 +81,7 @@ UIOptionsView <- R6::R6Class(
 
       observeEvent(input$iraceButton, {
         if (!is.integer(input$iraceButton)) {
-          dir <- parseDirPath(roots = volum, input$iraceButton)
+          dir <- parseDirPath(roots = volumes, input$iraceButton)
 
           path <- .libPaths()[1]
 

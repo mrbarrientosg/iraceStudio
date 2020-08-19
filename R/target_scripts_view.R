@@ -102,13 +102,13 @@ TargetTab <- R6::R6Class(
         message = "This action will remove the target code. Are you sure?."
       )
 
-      volum <- c(root = path_home())
+      volumes <- getVolumes()()
 
-      shinyFileSave(input = input, id = "export", roots = volum)
+      shinyFileSave(input = input, id = "export", roots = volumes)
 
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
-          file <- parseSavePath(roots = volum, selection = input$export)
+          file <- parseSavePath(roots = volumes, selection = input$export)
 
           if (isRunner) {
             log_debug("Exporting target runner file to {file$datapath}")
@@ -128,11 +128,11 @@ TargetTab <- R6::R6Class(
         }
       })
 
-      shinyFileChoose(input, "load", roots = volum)
+      shinyFileChoose(input, "load", roots = volumes)
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volum, input$load)
+          file <- parseFilePaths(roots = volumes, input$load)
           log_debug("Reading target file from {file$datapath}")
           source <- readLines(file$datapath)
 

@@ -137,13 +137,14 @@ PlaygroundView <- R6::R6Class(
         data$scenarios <- self$scenarios_as_data_frame(store)
       })
 
-      volum <- c(root = path_home())
 
-      shinyFileChoose(input, "load", roots = volum)
+      volumes <- getVolumes()()
+
+      shinyFileChoose(input, "load", roots = volumes)
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volum, input$load)
+          file <- parseFilePaths(roots = volumes, input$load)
 
           shinyalert(
             title = "Scenario name",

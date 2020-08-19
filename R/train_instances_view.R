@@ -60,16 +60,16 @@ TrainInstancesView <- R6::R6Class(
         message = "This action will remove all instances. Are you sure?."
       )
 
-      volum <- c(root = path_home())
+      volumes <- getVolumes()()
 
-      shinyDirChoose(input, "dir", roots = volum)
-      shinyDirChoose(input, "absolute", roots = volum)
-      shinyFileSave(input = input, id = "export", roots = volum)
-      shinyFileChoose(input, "load", roots = volum)
+      shinyDirChoose(input, "dir", roots = volumes)
+      shinyDirChoose(input, "absolute", roots = volumes)
+      shinyFileSave(input = input, id = "export", roots = volumes)
+      shinyFileChoose(input, "load", roots = volumes)
 
       observeEvent(input$dir, {
         if (!is.integer(input$dir)) {
-          dir <- parseDirPath(roots = volum, input$dir)
+          dir <- parseDirPath(roots = volumes, input$dir)
           log_debug("Adding trainInstancesDir {dir}")
           files <- list.files(path = dir, full.names = TRUE)
           updateTextAreaInput(
@@ -82,7 +82,7 @@ TrainInstancesView <- R6::R6Class(
 
       observeEvent(input$absolute, {
         if (!is.integer(input$absolute)) {
-          dir <- parseDirPath(roots = volum, input$absolute)
+          dir <- parseDirPath(roots = volumes, input$absolute)
           lines <- strsplit(input$source_instances_file, "\n")
           output <- c()
 
@@ -104,7 +104,7 @@ TrainInstancesView <- R6::R6Class(
 
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
-          file <- parseSavePath(roots = volum, selection = input$export)
+          file <- parseSavePath(roots = volumes, selection = input$export)
           log_debug("Exporting instances file to {file$datapath}")
           create_instances_file(path = file$datapath, pg = store$pg, name = NULL)
           log_debug("Instances file exported successfully")
@@ -118,7 +118,7 @@ TrainInstancesView <- R6::R6Class(
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volum, input$load)
+          file <- parseFilePaths(roots = volumes, input$load)
           log_info("Importing testing instances file from {file$datapath}")
           source <- readLines(file$datapath)
           source <- paste(source, collapse = "\n")

@@ -116,13 +116,13 @@ ParametersView <- R6::R6Class(
           )
       })
 
-      volum <- c(root = path_home())
+      volumes <- getVolumes()()
 
-      shinyFileChoose(input, "load", roots = volum)
+      shinyFileChoose(input, "load", roots = volumes)
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volum, input$load)
+          file <- parseFilePaths(roots = volumes, input$load)
           log_info("Importing paremeter file from {file$datapath}")
 
           tryCatch({
@@ -139,11 +139,11 @@ ParametersView <- R6::R6Class(
         }
       })
 
-      shinyFileSave(input = input, id = "export", roots = volum)
+      shinyFileSave(input = input, id = "export", roots = volumes)
 
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
-          file <- parseSavePath(roots = volum, selection = input$export)
+          file <- parseSavePath(roots = volumes, selection = input$export)
           log_debug("Exporting parameter file to {file$datapath}")
           create_parameter_file(path = file$datapath, pg = store$pg, name = NULL)
           log_debug("Parameter file exported successfully")

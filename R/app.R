@@ -13,8 +13,7 @@ App <- R6::R6Class(
     initialModal = function(input) {
       if (is.null(isolate(private$store$pg))) {
         workspaceVolume <- list(workspace = isolate(private$store$gui$workspacePath))
-        importVolume <- list(root = getVolumes()())
-
+        importVolume <- getVolumes()()
         showModal(
           modalDialog(
             title = "Welcome to Irace Studio",
@@ -92,7 +91,7 @@ App <- R6::R6Class(
       session$userData$sidebar <- reactive(input$sidebar)
 
       workspaceVolume <- list(workspace = isolate(private$store$gui$workspacePath))
-      importVolume <- list(root = getVolumes()())
+      importVolume <- getVolumes()()
 
       delay(1500, {
         private$initialModal(input)
@@ -141,7 +140,7 @@ App <- R6::R6Class(
 
       observeEvent(input$import, {
         if (!is.integer(input$import)) {
-          file <- parseFilePaths(roots = workspaceVolume, input$import)
+          file <- parseFilePaths(roots = importVolume, input$import)
           pg <- readRDS(file = file$datapath)
 
           if (is.null(pg$.iraceStudio) || !pg$.iraceStudio) {

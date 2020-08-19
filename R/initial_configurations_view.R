@@ -62,18 +62,18 @@ InitialConfigurationsView <- R6::R6Class(
 
       values <- reactiveValues(configurations = NULL)
 
-      volum <- c(root = path_home())
+      volumes <- getVolumes()()
 
-      shinyFileSave(input = input, id = "export", roots = volum)
+      shinyFileSave(input = input, id = "export", roots = volumes)
 
       observeEvent(input$export, {
         if (!is.integer(input$export)) {
-          file <- parseSavePath(roots = volum, selection = input$export)
+          file <- parseSavePath(roots = volumes, selection = input$export)
           export_initial_configurations(file, store)
         }
       })
 
-      shinyFileChoose(input, "load", roots = volum)
+      shinyFileChoose(input, "load", roots = volumes)
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
