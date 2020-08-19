@@ -39,7 +39,7 @@ On macOS you need install [brew](https://brew.sh):
 $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
 # Install dependencies
-$ brew install poppler libmagic openssl pandoc pandoc-citeproc
+$ brew install poppler libmagic openssl pandoc pandoc-citeproc imagemagick@6
 ```
 ### Install Irace Studio
 

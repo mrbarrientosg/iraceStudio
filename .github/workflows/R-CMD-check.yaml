@@ -23,7 +23,7 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt-get install libcurl4-openssl-dev libpoppler-cpp-dev libmagick++-dev pandoc pandoc-citeproc
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            brew install poppler libmagic openssl pandoc pandoc-citeproc
+            brew install poppler libmagic openssl pandoc pandoc-citeproc imagemagick@6
           else
             echo "$RUNNER_OS not supported"
             exit 1
@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          install.packages(c("remotes", "rcmdcheck"))
+          install.packages(c("remotes", "rcmdcheck", "stringi"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
 
