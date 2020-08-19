@@ -158,6 +158,7 @@ PlaygroundView <- R6::R6Class(
               }
 
               if (is.null(name) || name == "") {
+                alert.error("Scenario name is empty.")
                 return(invisible())
               }
 
@@ -166,6 +167,9 @@ PlaygroundView <- R6::R6Class(
               result <- private$importScenario(file$name, file$datapath)
 
               if (result) {
+                shinyalert(title = "Warning",
+                          text = "Cannot be import all options from the scenario.",
+                          type = "warning")
                 store$pg$add_scenario(private$scenario)
                 data$scenarios <- self$scenarios_as_data_frame(store)
                 private$scenario <- NULL
