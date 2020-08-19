@@ -6,9 +6,19 @@
 
 <!-- badges: start -->
 <p align="center">
-  <img src="https://img.shields.io/github/workflow/status/mrbarrientosg/iraceStudio/R-CMD-check.svg?logo=github">
-  <img src="https://img.shields.io/github/v/release/mrbarrientosg/iraceStudio">
-  <img src="https://img.shields.io/github/license/mrbarrientosg/iraceStudio.svg">
+  <a href="https://github.com/mrbarrientosg/iraceStudio/actions">
+    <img src="https://img.shields.io/github/workflow/status/mrbarrientosg/iraceStudio/R-CMD-check.svg?logo=github">
+  </a>
+  <a href="https://github.com/mrbarrientosg/iraceStudio/releases">
+     <img src="https://img.shields.io/github/v/release/mrbarrientosg/iraceStudio">
+  </a>
+  <a href="https://github.com/mrbarrientosg/iraceStudio/tags">
+    <img src="https://img.shields.io/github/v/tag/mrbarrientosg/iraceStudio">
+  </a>
+  <a href="LICENSE.md"
+    target="_blank">
+    <img src="https://img.shields.io/badge/License-GPLv3-blue.svg">
+  </a>
 </p>
 <!-- badges: end -->
 
