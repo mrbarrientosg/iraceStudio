@@ -16,7 +16,10 @@ ParameterCondition <- R6::R6Class(
               inputId = ns("paramNames"),
               label = "Parameter Name",
               choices = c(),
-              width = "100%"
+              width = "100%",
+              options = list(
+                  size = 8
+              )
             )
           ),
           column(
@@ -26,7 +29,10 @@ ParameterCondition <- R6::R6Class(
               inputId = ns("conditions"),
               label = "Condition",
               choices = c(),
-              width = "100%"
+              width = "100%",
+              options = list(
+                  size = 8
+              )
             )
           ),
           column(
@@ -68,11 +74,15 @@ ParameterCondition <- R6::R6Class(
       ns <- session$ns
 
       observeEvent(c(parent$types, input$paramNames), {
-        req(input$paramNames != "")
+        req(input$paramNames)
 
-        type <- parent$types[[input$paramNames]]
-        domain <- parent$domain[[input$paramNames]]
-        conditions <- self$conditionsList(type)
+        conditions <- if (!input$paramNames %in% names(parent$types)) {
+           c()
+        } else {
+          type <- parent$types[[input$paramNames]]
+          domain <- parent$domain[[input$paramNames]]
+          self$conditionsList(type)
+        }
 
         updatePickerInput(
           session = session,
@@ -87,6 +97,11 @@ ParameterCondition <- R6::R6Class(
           shiny::validate(
             need(store$pg, "")
           )
+
+          if (!input$paramNames %in% names(parent$types)) {
+            return()
+          }
+
           type <- isolate(parent$types[[input$paramNames]])
           domain <- isolate(parent$domain[[input$paramNames]])
 
@@ -104,7 +119,10 @@ ParameterCondition <- R6::R6Class(
               inputId = ns("paramValue"),
               label = "Parameter value",
               choices = domain,
-              width = "100%"
+              width = "100%",
+              options = list(
+                size = 8
+              )
             )
           } else {
             sliderInput(
@@ -139,7 +157,11 @@ ParameterCondition <- R6::R6Class(
       })
 
       observeEvent(input$conditions, {
-        req(input$conditions != "")
+        req(input$conditions)
+
+        if (!input$paramNames %in% names(parent$types)) {
+          return()
+        }
 
         type <- isolate(parent$types[[input$paramNames]])
         domain <- isolate(parent$domain[[input$paramNames]])
@@ -154,7 +176,8 @@ ParameterCondition <- R6::R6Class(
                 width = "100%",
                 multiple = TRUE,
                 options = list(
-                  `actions-box` = TRUE
+                  `actions-box` = TRUE,
+                  size = 8
                 )
               )
             )
@@ -164,7 +187,10 @@ ParameterCondition <- R6::R6Class(
                 inputId = ns("paramValue"),
                 label = "Parameter value",
                 choices = domain,
-                width = "100%"
+                width = "100%",
+                options = list(
+                  size = 8
+                )
               )
             )
           }

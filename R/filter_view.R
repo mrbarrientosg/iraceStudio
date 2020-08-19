@@ -69,7 +69,10 @@ FilterView <- R6::R6Class(
                 pickerInput(
                   inputId = ns("descentId"),
                   label = "Descent Configurations",
-                  choices = c()
+                  choices = c(),
+                  options = list(
+                    size = 8
+                  )
                 )
               ),
               column(
@@ -81,7 +84,10 @@ FilterView <- R6::R6Class(
             pickerInput(
               inputId = ns("trajectoryId"),
               label = "Trajectory Configuration",
-              choices = c()
+              choices = c(),
+              options = list(
+                size = 8
+              )
             ),
             footer = actionButton(inputId = ns("filter"), label = "Filter", class = "btn-primary")
           ),

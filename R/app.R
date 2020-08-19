@@ -91,7 +91,10 @@ App <- R6::R6Class(
 
       session$userData$sidebar <- reactive(input$sidebar)
 
-      delay(200, {
+      workspaceVolume <- list(workspace = isolate(private$store$gui$workspacePath))
+      importVolume <- list(root = getVolumes()())
+
+      delay(1500, {
         private$initialModal(input)
       })
 
@@ -127,6 +130,7 @@ App <- R6::R6Class(
 
           if (is.null(pg$.iraceStudio) || !pg$.iraceStudio) {
             alert.error("Bad Irace Studio playground.")
+            return()
           }
 
           private$store$pg <- playground$new(playground = pg)
@@ -142,6 +146,7 @@ App <- R6::R6Class(
 
           if (is.null(pg$.iraceStudio) || !pg$.iraceStudio) {
             alert.error("Bad Irace Studio playground.")
+            return()
           }
 
           private$store$pg <- playground$new(playground = pg)

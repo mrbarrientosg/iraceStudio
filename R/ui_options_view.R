@@ -64,16 +64,18 @@ UIOptionsView <- R6::R6Class(
 
           path <- private$getWorkspacePath(dir)
 
-          updateTextInput(
-            session = session,
-            inputId = "workspacePath",
-            value = path
-          )
-
           # TODO: Move all files inside of workspace to the new path and
           # validating if another workspace do not exist
-          store$gui$workspacePath <- path
-          store$gui$createWorkspaceDirectory()
+          if (store$gui$createWorkspaceDirectory(path)) {
+            store$gui$workspacePath <- path
+            updateTextInput(
+              session = session,
+              inputId = "workspacePath",
+              value = path
+            )
+          } else {
+            alert.error("Cannot create workspace directory. Make sure there is no another folder called workspace name folder.")
+          }
         }
       })
 
@@ -102,15 +104,15 @@ UIOptionsView <- R6::R6Class(
   private = list(
     checkPath = function(path) {
       if (is.null(path) || path == "") {
-        return(false)
+        return(FALSE)
       }
 
-      return(true)
+      return(TRUE)
     },
 
     getWorkspacePath = function(path) {
       if (!private$checkPath(path)) {
-        return(file.path(getwd(), "workspace"))
+        return(file.path(fs::path_home(), "workspace"))
       }
 
       return(file.path(path, "workspace"));

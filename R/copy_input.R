@@ -12,7 +12,10 @@ CopyInput <- R6::R6Class(
             inputId = ns("select_input"),
             label = label,
             choices = choices,
-            width = "100%"
+            width = "100%",
+            options = list(
+                size = 8
+            )
           )
         ),
         column(

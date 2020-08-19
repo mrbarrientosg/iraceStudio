@@ -426,7 +426,8 @@ CandidatesCard <- R6::R6Class(
 
         disable(id = "update")
 
-        createHiddenDirectory(file.path(gui$optionsPath, ".Fimages"))
+        path <- file.path(store$gui$optionsPath, ".Fimages")
+        createHiddenDirectory(path)
 
         nb_plots_freq(0)
 
@@ -467,14 +468,15 @@ CandidatesCard <- R6::R6Class(
             fixFormat <- isolate(store$iraceResults$parameters)
             fixFormat$names <- params
 
-            png(filename = sprintf(".Fimages/Rplot%03d.png", i), width = 550, height = 550, res = 80)
+            image <- paste0(path, "/Rplot%03d.png")
+            png(filename = sprintf(image, i), width = 550, height = 550, res = 80)
             parameterFrequency(configurations = configurations, parameters = fixFormat)
             dev.off()
 
             limit <- (max * i) + 1
           }
 
-          files <- list.files(path = ".Fimages", pattern = ".*[.]png", full.names = TRUE)
+          files <- list.files(path = path, pattern = ".*[.]png", full.names = TRUE)
 
           lapply(files, function(image) {
             image_uri(image)
@@ -483,7 +485,7 @@ CandidatesCard <- R6::R6Class(
           progress$set(1.0, detail = "Finishing...")
           files <- .
           pkg$reportStore$parameterFreq <- files
-          unlink(".Fimages", recursive = TRUE, force = TRUE)
+          unlink(path, recursive = TRUE, force = TRUE)
           progress$close()
         }
       })
@@ -565,7 +567,8 @@ CandidatesCard <- R6::R6Class(
 
         disable(id = "update")
 
-        createHiddenDirectory(file.path(gui$optionsPath, ".Pimages"))
+        path <- file.path(store$gui$optionsPath, ".Pimages")
+        createHiddenDirectory(path)
 
         nb_plots_parall(0)
         parameters <- input$parameters
@@ -587,8 +590,10 @@ CandidatesCard <- R6::R6Class(
             }
 
             progress$inc(0.05, detail = "Making Plots...")
+
+            image <- paste0(path, "/Rplot%03d.png")
             png(
-              filename = sprintf(".Pimages/Rplot%03d.png", i),
+              filename = sprintf(image, i),
               width = 550,
               height = 550,
               res = 80
@@ -605,7 +610,7 @@ CandidatesCard <- R6::R6Class(
             limit <- (max * i) + 1
           }
 
-          files <- list.files(path = ".Pimages", pattern = ".*[.]png", full.names = TRUE)
+          files <- list.files(path = path, pattern = ".*[.]png", full.names = TRUE)
 
           images <- lapply(sort(files), function(image) {
             image_uri(image)
@@ -614,7 +619,7 @@ CandidatesCard <- R6::R6Class(
           progress$inc(1.0, detail = "Finishing...")
           files <- .
           pkg$reportStore$parallelCoordinates <- files
-          unlink(".Pimages", recursive = TRUE, force = TRUE)
+          unlink(path, recursive = TRUE, force = TRUE)
           progress$close()
         }
       })
@@ -708,7 +713,10 @@ PerformanceCard <- R6::R6Class(
               inputId = ns("iterations"),
               label = "Iterations",
               choices = c(),
-              width = "100%"
+              width = "100%",
+              options = list(
+                size = 8
+              )
             ),
             plotOutput(outputId = ns("performance_box_plot"), height = 550)
           )

@@ -9,6 +9,9 @@ SandboxSelect <- R6::R6Class(
         inputId = ns("options"),
         label = "Sandbox",
         choices = "",
+        options = list(
+          size = 8
+        ),
         ...
       )
     },

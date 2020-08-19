@@ -1,7 +1,7 @@
 name: R-CMD-check
 
 on:
-  push:
+  pull_request:
     branches:
       - master
 
@@ -21,9 +21,9 @@ jobs:
       - name: System dependencies
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-            sudo apt-get install libcurl4-openssl-dev libpoppler-cpp-dev libmagick++-dev
+            sudo apt-get install libcurl4-openssl-dev libpoppler-cpp-dev libmagick++-dev pandoc pandoc-citeproc
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            brew install poppler libmagic openssl
+            brew install poppler libmagic openssl pandoc pandoc-citeproc
           else
             echo "$RUNNER_OS not supported"
             exit 1

@@ -30,8 +30,9 @@ GUIOptions <- R6::R6Class(
       yaml::write_yaml(data, file = file)
     },
 
-    createWorkspaceDirectory = function() {
-      path <- self$workspacePath
+    createWorkspaceDirectory = function(path) {
+      if (missing(path))
+        path <- self$workspacePath
 
       if (is.null(path) || path == "") {
         path <- file.path(fs::path_home(), "workspace")
@@ -39,9 +40,16 @@ GUIOptions <- R6::R6Class(
 
       if (!dir.exists(path)) {
         dir.create(path)
+        file.create(file.path(path, ".irace_studio.irs"))
+        return(TRUE)
       }
 
-      return(path)
+      files <- list.files(path = path, pattern = ".irace_studio.irs", all.files = TRUE)
+
+      if (length(files) == 0)
+        return(FALSE)
+
+      return(TRUE)
     }
   )
 )

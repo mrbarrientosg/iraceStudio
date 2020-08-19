@@ -1,7 +1,9 @@
 run_irace <- function(store, executionName = "") {
 
   createFolders <- function(store) {
-    workspacePath <- store$gui$createWorkspaceDirectory()
+    store$gui$createWorkspaceDirectory()
+
+    workspacePath <- store$gui$workspacePath
     playgroundPath <- file.path(workspacePath, store$pg$get_name())
 
     if (!dir.exists(playgroundPath)) {

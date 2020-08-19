@@ -79,7 +79,7 @@ IraceOptionTab <- R6::R6Class(
       } else if (data$type == "atext") {
         textAreaInput(inputId = ns(data$id), label = data$name, value = default)
       } else {
-        pickerInput(inputId = ns(data$id), label = data$name, choices = data$values[[1]], selected = default)
+        pickerInput(inputId = ns(data$id), label = data$name, choices = data$values[[1]], selected = default, options = list(size = 8))
       }
 
       private$addInputInfo(data, input, ns(data$id))

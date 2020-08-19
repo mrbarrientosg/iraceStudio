@@ -85,7 +85,10 @@ create_initial_modal_input <- function(param, ns, configuration) {
       inputId = ns(param$names),
       label = param$names,
       choices = values[[1]],
-      selected = default
+      selected = default,
+      options = list(
+        size = 8
+      )
     )
   } else if (param$type == "i") {
     input <- sliderInput(

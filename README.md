@@ -28,7 +28,7 @@ Previous to install R package you need to install some dependency before.
 ### GNU/Linux
 
 ```bash
-$ sudo apt-get install libcurl4-openssl-dev libpoppler-cpp-dev libmagick++-dev
+$  sudo apt-get install libcurl4-openssl-dev libpoppler-cpp-dev libmagick++-dev pandoc pandoc-citeproc
 ```
 ### MacOS
 
@@ -39,7 +39,7 @@ On macOS you need install [brew](https://brew.sh):
 $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
 # Install dependencies
-$ brew install poppler libmagic openssl
+$ brew install poppler libmagic openssl pandoc pandoc-citeproc
 ```
 ### Install Irace Studio
 

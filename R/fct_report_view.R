@@ -12,7 +12,6 @@ make_pdf_report <- function(store, input, volum) {
   for (id in names(userData)) {
     tempFiles <- tempfile(fileext = c(".html", ".pdf"))
     files <- c(files, tempFiles[2])
-    cat(sprintf("<head><title>%s</title></head>", userData[[id]]$title), file = tempFiles[1], fill = TRUE)
     cat(userData[[id]]$content, file = tempFiles[1], fill = TRUE, append = TRUE)
     rmarkdown::pandoc_convert(
       tempFiles[1],

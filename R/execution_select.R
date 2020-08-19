@@ -9,6 +9,9 @@ ExecutionSelect <- R6::R6Class(
         inputId = ns("options"),
         label = "Execution",
         choices = "",
+        options = list(
+            size = 8
+        ),
         ...
       )
     },
