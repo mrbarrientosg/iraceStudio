@@ -51,9 +51,8 @@ import_initial_configurations <- function(input, store) {
       }
     )
 
-    store$pg$add_configuration(config)
-
-    values$configurations <- store$pg$get_configurations()
+    if (!is.null(config))
+      store$pg$add_configuration(config)
   }
 }
 

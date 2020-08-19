@@ -78,6 +78,7 @@ InitialConfigurationsView <- R6::R6Class(
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
           import_initial_configurations(input, store)
+           values$configurations <- store$pg$get_configurations()
         }
       })
 
