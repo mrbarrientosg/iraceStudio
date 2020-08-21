@@ -95,7 +95,7 @@ UIOptionsView <- R6::R6Class(
             value = path
           )
 
-          store$pg$set_irace_path(input$iracePath)
+          store$pg$set_irace_path(path)
         }
       })
 

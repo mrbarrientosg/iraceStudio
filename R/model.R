@@ -651,18 +651,18 @@ scenario <- R6::R6Class(
     get_execution = function(name) private$executions$get_execution(name),
 
     clear_scenario_temp = function() {
-      self$add_irace_option("parameterFile", "")
-      self$add_irace_option("trainInstancesFile", "")
-      self$add_irace_option("trainInstancesDir", "")
-      self$add_irace_option("scenarioFile", "")
-      self$add_irace_option("execDir", "")
-      self$add_irace_option("logFile", "")
-      self$add_irace_option("configurationsFile", "")
-      self$add_irace_option("forbiddenFile", "")
-      self$add_irace_option("testInstancesFile", "")
-      self$add_irace_option("testInstancesDir", "")
-      self$add_irace_option("targetEvaluator", "")
-      self$add_irace_option("targetRunner", "")
+      self$add_irace_option("parameterFile", NULL)
+      self$add_irace_option("trainInstancesFile", NULL)
+      self$add_irace_option("trainInstancesDir", NULL)
+      self$add_irace_option("scenarioFile", NULL)
+      self$add_irace_option("execDir", NULL)
+      self$add_irace_option("logFile", NULL)
+      self$add_irace_option("configurationsFile", NULL)
+      self$add_irace_option("forbiddenFile", NULL)
+      self$add_irace_option("testInstancesFile", NULL)
+      self$add_irace_option("testInstancesDir", NULL)
+      self$add_irace_option("targetEvaluator", NULL)
+      self$add_irace_option("targetRunner", NULL)
       self$add_irace_option("testInstances", NULL)
       self$add_irace_option("instances", NULL)
     },
@@ -708,7 +708,9 @@ playground <- R6::R6Class(
       if (!is.null(playground)) {
         private$name <- playground$name
         private$description <- playground$description
-        private$iracePath <- playground$iracePath
+        if (dir.exists(playground$iracePath)) {
+          private$iracePath <- playground$iracePath
+        }
         for (name in names(playground$scenarios)) {
           private$scenarios[[name]] <- scenario$new(scenario = playground$scenarios[[name]])
         }

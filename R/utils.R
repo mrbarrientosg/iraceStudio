@@ -8,7 +8,12 @@ createHiddenDirectory <- function(path) {
 }
 
 alert.error <- function(message = NULL) {
-  shinyalert(title = "Error", text = message, type = "error")
+  shinyalert(
+    title = "Error",
+    text = message,
+    type = "error",
+    closeOnClickOutside = TRUE
+  )
 }
 
 write.list <- function(x, file, export) {

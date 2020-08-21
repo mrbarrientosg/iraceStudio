@@ -257,7 +257,7 @@ App <- R6::R6Class(
 
       unlink(file.path(gui$optionsPath, ".Fimages"), recursive = TRUE, force = TRUE)
       unlink(file.path(gui$optionsPath, ".Pimages"), recursive = TRUE, force = TRUE)
-      # unlink(pkg_env$tempFolder, recursive = TRUE, force = TRUE)
+      unlink(pkg$tempFolder, recursive = TRUE, force = TRUE)
     }
   )
 )
