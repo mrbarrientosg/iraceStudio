@@ -25,8 +25,8 @@
 <p align="center">
   <a href="#installation">Installation</a> •
   <a href="#how-to-use">How To Use</a> •
-  <a href="#license">License</a> •
-  <a href="#browsers-support">Browsers support</a>
+  <a href="#browsers-support">Browsers support</a> •
+  <a href="#license">License</a>
 </p>
 
 ![screenshot](img/iraceStudio.png)
