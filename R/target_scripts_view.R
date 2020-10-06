@@ -84,7 +84,7 @@ TargetTab <- R6::R6Class(
             selectInput(
               inputId = ns("ace_mode"),
               label = "Language",
-              choices = getAceModes(),
+              choices = c("batchfile", "sh"),
               selected = "sh"
             )
           )
