@@ -34,6 +34,6 @@ addExternalResources <- function() {
     ),
     shinyalert::useShinyalert(),
     shinyjs::useShinyjs(),
-    extendShinyjs(text = plotlyResize)
+    shinyjs::extendShinyjs(text = plotlyResize, functions = c("resizePlotly"))
   )
 }
