@@ -65,7 +65,7 @@ IraceOutputView <- R6::R6Class(
       observeEvent(start$action, {
         if (store$startIrace) {
           store$startIrace <- FALSE
-          store$iraceProcess$kill()
+          store$iraceProcess$kill_tree()
           store$iraceProcess$finalize()
         } else {
           shinyalert(
