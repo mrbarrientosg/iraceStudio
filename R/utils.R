@@ -122,17 +122,33 @@ create_instances_file <- function(path, pg, name = "instances.txt") {
 create_target_runner_file <- function(path, pg, name = "target-runner") {
   if (!is.null(name) && name != "") {
     path <- file.path(path, name)
+
+    if (.Platform$OS.type == "windows") {
+      path <- paste0(path,  ".bat")
+    }
   }
+
   write(paste(pg$get_target_runner(), collapse = "\n"), file = path)
-  Sys.chmod(path, mode = "0771")
+
+  if (.Platform$OS.type == "unix") {
+    Sys.chmod(path, mode = "0771")
+  }
 }
 
 create_target_evaluator_file <- function(path, pg, name = "target-evaluator") {
   if (!is.null(name) && name != "") {
     path <- file.path(path, name)
+
+    if (.Platform$OS.type == "windows") {
+      path <- paste0(path,  ".bat")
+    }
   }
+
   write(paste(pg$get_target_evaluator(), collapse = "\n"), file = path)
-  Sys.chmod(path, mode = "0771")
+
+  if (.Platform$OS.type == "unix") {
+    Sys.chmod(path, mode = "0771")
+  }
 }
 
 create_initial_config_file <- function(path, pg, name = "configurations.txt") {

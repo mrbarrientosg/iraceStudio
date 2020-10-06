@@ -51,6 +51,11 @@ App <- R6::R6Class(
           filetypes = "rds"
         )
       }
+    },
+
+    validateName = function(name, path) {
+      files <- list.files(path)
+      return(any(grepl(name, files) == TRUE))
     }
   ),
 
@@ -90,7 +95,8 @@ App <- R6::R6Class(
 
       session$userData$sidebar <- reactive(input$sidebar)
 
-      workspaceVolume <- list(workspace = isolate(private$store$gui$workspacePath))
+      workPath <- isolate(private$store$gui$workspacePath)
+      workspaceVolume <- list(workspace = workPath)
       importVolume <- getVolumes()()
 
       delay(1500, {
@@ -117,7 +123,19 @@ App <- R6::R6Class(
               return(invisible())
             }
 
-            # TODO: Validate if playground name exist in workspace directory
+            if (private$validateName(name, workPath)) {
+              shinyalert(
+                title = "Error",
+                text = "Playground name is repeated.",
+                closeOnEsc = FALSE,
+                type = "error",
+                callbackR = function() {
+                  private$initialModal(input)
+                }
+              )
+              return(invisible())
+            }
+
             private$store$pg <- playground$new(name = name)
           }
         )
@@ -156,7 +174,7 @@ App <- R6::R6Class(
       })
 
       # Javascript code: Before the user closes the browser tab, a warning
-      # alert will prompt indicating if he wants close all irace studio and
+      # alert will prompt indicating if he wants close irace studio and
       # irace, if this is still running.
       runjs(code = '
           window.addEventListener("beforeunload", (event) => {
@@ -263,7 +281,9 @@ App <- R6::R6Class(
 
       unlink(file.path(gui$optionsPath, ".Fimages"), recursive = TRUE, force = TRUE)
       unlink(file.path(gui$optionsPath, ".Pimages"), recursive = TRUE, force = TRUE)
-      unlink(pkg$tempFolder, recursive = TRUE, force = TRUE)
+      if (!get_option("debug", FALSE)) {
+        unlink(pkg$tempFolder, recursive = TRUE, force = TRUE)
+      }
     }
   )
 )
