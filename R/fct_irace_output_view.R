@@ -90,7 +90,6 @@ run_irace <- function(store, executionName = "") {
   }
 
   log_trace("6. Create all data files")
-  create_scenario_file(pkg$tempFolder, store$pg)
   create_parameter_file(pkg$tempFolder, store$pg)
   create_instances_file(pkg$tempFolder, store$pg)
   create_target_runner_file(pkg$tempFolder, store$pg)
@@ -134,24 +133,44 @@ run_irace <- function(store, executionName = "") {
     length(store$pg$get_target_evaluator()) != 0) {
     log_trace("10. Set target evaluator ./target-evaluator")
 
+    targetEvaluator <- "target-evaluator"
+
+    if (.Platform$OS.type == "windows") {
+      targetEvaluator <- paste0(targetEvaluator,  ".bat")
+    } else {
+      targetEvaluator <- paste0("./", targetEvaluator)
+    }
+
     store$pg$add_irace_option(
       option = "targetEvaluator",
-      value = "./target-evaluator"
+      value = dQuote(targetEvaluator, FALSE)
     )
 
     create_target_evaluator_file(pkg$tempFolder, store$pg)
   }
 
-  log_trace("11. Set target runner ./target-runner")
+  log_trace("11. Set target runner")
+
+  targetRunner <- "target-runner"
+
+  if (.Platform$OS.type == "windows") {
+    targetRunner <- paste0(targetRunner,  ".bat")
+  } else {
+    targetRunner <- paste0("./", targetRunner)
+  }
+
   store$pg$add_irace_option(
     option = "targetRunner",
-    value = "./target-runner"
+    value = dQuote(targetRunner, FALSE)
   )
 
   store$pg$add_irace_option(option = "trainInstancesDir", value = '""')
   store$pg$add_irace_option(option = "testInstancesDir", value = '""')
 
-  log_trace("12. Run irace script")
+  log_trace("12. Create scenario file")
+  create_scenario_file(pkg$tempFolder, store$pg)
+
+  log_trace("13. Run irace script")
   log_debug("Script run with: {store$pg$get_irace_path()}\n{pkg$tempFolder}\n{pkg$outputLog}")
   store$iraceProcess <- process$new(
     command = "Rscript",
