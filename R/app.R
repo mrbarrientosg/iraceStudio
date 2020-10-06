@@ -117,6 +117,7 @@ App <- R6::R6Class(
               return(invisible())
             }
 
+            # TODO: Validate if playground name exist in workspace directory
             private$store$pg <- playground$new(name = name)
           }
         )
@@ -194,7 +195,12 @@ App <- R6::R6Class(
     },
 
     setup = function() {
-      log_threshold(FATAL)
+      log_layout(layout_glue_colors)
+      if (get_option("debug", FALSE)) {
+        log_threshold(TRACE)
+      } else {
+        log_threshold(FATAL)
+      }
 
       gui <- isolate(private$store$gui)
       pg <- isolate(private$store$pg)
@@ -204,7 +210,7 @@ App <- R6::R6Class(
       # TODO: Implements logger in a correct way.
       #private$logger_path <- self$setupLogger()
 
-      log_info("Shiny app start")
+      log_info("Irace Studio Start")
 
       # output <- file.path(logs, "output.log")
       # output <- file(output, open = "w")
@@ -257,7 +263,7 @@ App <- R6::R6Class(
 
       unlink(file.path(gui$optionsPath, ".Fimages"), recursive = TRUE, force = TRUE)
       unlink(file.path(gui$optionsPath, ".Pimages"), recursive = TRUE, force = TRUE)
-      # unlink(pkg_env$tempFolder, recursive = TRUE, force = TRUE)
+      unlink(pkg$tempFolder, recursive = TRUE, force = TRUE)
     }
   )
 )

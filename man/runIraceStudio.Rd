@@ -4,7 +4,7 @@
 \alias{runIraceStudio}
 \title{Run Irace Studio}
 \usage{
-runIraceStudio(port = 4350)
+runIraceStudio(port = 4350, ...)
 }
 \arguments{
 \item{port}{A port number that Irace Studio will listen on.}

@@ -7,8 +7,35 @@ createHiddenDirectory <- function(path) {
   }
 }
 
+get_option <- function(name, default = NULL) {
+  if (is.null(get_golem_options(name)))
+    return(default)
+
+  return(get_golem_options(name))
+}
+
+parameters_as_irace <- function(parameters) {
+  params <- capture.output(
+            write.table(
+              parameters,
+              row.names = FALSE,
+              col.names = FALSE,
+              sep = "\t",
+              quote = F
+            )
+          )
+  params <- paste0(params, collapse = "\n")
+
+  irace::readParameters(text = params)
+}
+
 alert.error <- function(message = NULL) {
-  shinyalert(title = "Error", text = message, type = "error")
+  shinyalert(
+    title = "Error",
+    text = message,
+    type = "error",
+    closeOnClickOutside = TRUE
+  )
 }
 
 write.list <- function(x, file, export) {
@@ -163,6 +190,10 @@ convert_vector_to_string <- function(vector) {
     newVector[i] <- paste0(vector[i])
   }
   return(newVector)
+}
+
+checkPath <- function(path) {
+  return(!is.null(path) && fs::is_absolute_path(path) && file.exists(path))
 }
 
 descentConfigurationTree <- function(iraceResults, configuration_id) {

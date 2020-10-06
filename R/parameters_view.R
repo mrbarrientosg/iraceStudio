@@ -274,14 +274,6 @@ ParametersView <- R6::R6Class(
 
         log_debug("All parameters removed")
       })
-    },
-
-    remove_shiny_inputs = function(id, .input, ns) {
-      invisible(
-        lapply(grep(id, names(.input), value = TRUE), function(i) {
-          .subset2(.input, "impl")$.values$remove(ns(i))
-        })
-      )
     }
   )
 )

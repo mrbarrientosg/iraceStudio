@@ -158,18 +158,7 @@ InitialConfigurationsView <- R6::R6Class(
           data <- list()
           changed <- c()
 
-          parameters <- store$pg$get_parameters()
-          parameters <- capture.output(
-            write.table(
-              parameters,
-              row.names = FALSE,
-              col.names = FALSE,
-              sep = "\t",
-              quote = F
-            )
-          )
-          parameters <- paste0(parameters, collapse = "\n")
-          parameters <- irace::readParameters(text = parameters)
+          parameters <- parameters_as_irace(store$pg$get_parameters())
 
           for (name in parameters$names) {
               data[[name]] <- input[[name]]

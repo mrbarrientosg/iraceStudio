@@ -98,7 +98,7 @@
         "name": "nbIterations",
         "description": "Number of iterations.",
         "type": "numeric",
-        "default": 0,
+        "default": null,
         "min": 0,
         "step": 1,
         "max": null
@@ -108,7 +108,7 @@
         "name": "nbExperimentsPerIteration",
         "description": "Number of runs of the target algorithm per iteration.",
         "type": "numeric",
-        "default": 0,
+        "default": null,
         "min": 0,
         "step": 1,
         "max": null
@@ -125,7 +125,7 @@
         "name": "minNbSurvival",
         "description": "Minimum number of configurations needed to continue the execution of each race (iteration).",
         "type": "numeric",
-        "default": 0,
+        "default": null,
         "min": 0,
         "step": 1,
         "max": null
@@ -135,7 +135,7 @@
         "name": "nbConfigurations",
         "description": "Number of configurations to be sampled and evaluated at each iteration.",
         "type": "numeric",
-        "default": 0,
+        "default": null,
         "min": 0,
         "step": 1,
         "max": null
@@ -257,7 +257,7 @@
         "type": "list",
         "default": "F-test",
         "values": [
-          "F-test", 
+          "F-test",
           "t-test",
           "t-test-bonferroni",
           "t-test-holm"
@@ -312,7 +312,7 @@
         "type": "list",
         "default": "median",
         "values": [
-          "median", 
+          "median",
           "mean",
           "best",
           "worst"
@@ -325,7 +325,7 @@
         "type": "list",
         "default": "candidate",
         "values": [
-          "candidate", 
+          "candidate",
           "instance"
         ]
       },
@@ -388,6 +388,6 @@
         "type": "bool",
         "default": false
       }
-    ] 
+    ]
   }
 }

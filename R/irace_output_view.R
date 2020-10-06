@@ -103,12 +103,19 @@ IraceOutputView <- R6::R6Class(
         store$iraceAlive()
 
         if (!store$iraceProcess$is_alive()) {
+          log_info("Irace end.")
           enable(id = "scenarioPicker")
 
-          unlink(store$tempFolder, recursive = TRUE, force = TRUE)
+          if (!get_option("debug", FALSE)) {
+            unlink(pkg$tempFolder, recursive = TRUE, force = TRUE)
+          }
 
-          store$iraceProcess$poll_io(1000)
-          error <- store$iraceProcess$read_all_error_lines()
+          store$iraceProcess$poll_io(1500)
+          error <- store$iraceProcess$read_error_lines()
+
+          if (get_option("debug", FALSE)) {
+            log_error("Optional: {error}")
+          }
 
           log <- gsub('"', "", store$pg$get_irace_option("logFile"))
 
@@ -137,6 +144,12 @@ IraceOutputView <- R6::R6Class(
             }
 
             rm(iraceResults)
+          } else {
+            if (!is.null(error) && error != "" && length(error) > 0) {
+              log_error("Stop irace with error: {error}")
+              alert.error(paste(error, collapse = "\n"))
+              self$execution <- NULL
+            }
           }
 
           store$pg$clear_scenario_temp()
