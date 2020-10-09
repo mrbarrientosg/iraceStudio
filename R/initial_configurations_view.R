@@ -177,9 +177,11 @@ InitialConfigurationsView <- R6::R6Class(
 
           values$configurations <- store$pg$get_configurations()
 
-          shinyalert(title = "Warning",
-                    text = sprintf("These (%s) configuration has been set NA by parameter condition.", paste0(changed, collapse = ", ")),
-                    type = "warning")
+          if (length(changed) != 0) {
+            shinyalert(title = "Warning",
+                      text = sprintf("These (%s) configuration has been set NA by parameter condition.", paste0(changed, collapse = ", ")),
+                      type = "warning")
+          }
 
           log_debug("Configuration added")
         },

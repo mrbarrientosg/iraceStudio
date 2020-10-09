@@ -25,6 +25,10 @@ run_irace <- function(store, executionName = "") {
       dir.create(pkg$executionFolder)
     }
 
+    if (dir.exists(pkg$tempFolder)) {
+        unlink(pkg$tempFolder, recursive = TRUE, force = TRUE)
+    }
+
     createHiddenDirectory(pkg$tempFolder)
   }
 
@@ -188,7 +192,6 @@ run_irace <- function(store, executionName = "") {
     log_info("stdout: {store$iraceProcess$read_output_lines()}")
     log_info("stderr: {store$iraceProcess$read_error_lines()}")
   }
-
 
   store$startIrace <- TRUE
   shinyalert(title = "IRACE is now running", type = "success", timer = 1500)
