@@ -7,7 +7,6 @@ on:
       - master
 
 name: R-CMD-check
-author: Matias Barrientos G
 
 jobs:
   R-CMD-check:
