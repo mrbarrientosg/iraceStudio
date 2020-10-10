@@ -1,3 +1,6 @@
+#' @noRd
+.version <- "1.0.4.9000"
+
 #' Access files in the current app
 #'
 #' @param ... Character vector specifying directory and or file to
