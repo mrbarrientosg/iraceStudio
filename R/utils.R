@@ -164,7 +164,7 @@ create_initial_config_file <- function(path, pg, name = "configurations.txt") {
   }
 }
 
-create_forbidden_file <- function(path, pg, name = "fobidden.txt") {
+create_forbidden_file <- function(path, pg, name = "forbidden.txt") {
   if (!is.null(name) && name != "") {
     path <- file.path(path, name)
   }
