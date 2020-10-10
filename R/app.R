@@ -213,7 +213,8 @@ App <- R6::R6Class(
     },
 
     setup = function() {
-      log_layout(layout_glue_colors)
+      logger <- layout_glue_generator(format = "{level} {.version} [{format(time, \"%Y-%m-%d %H:%M:%S\")}] {msg}")
+      log_layout(logger)
       if (get_option("debug", FALSE)) {
         log_threshold(TRACE)
       } else {
