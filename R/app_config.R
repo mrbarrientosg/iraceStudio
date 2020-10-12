@@ -33,7 +33,7 @@ addExternalResources <- function() {
       path = appSys("app/www"),
       app_title = "Irace Studio",
       name = "irace_studio",
-      version = "1.0.0"
+      version = .version
     ),
     shinyalert::useShinyalert(),
     shinyjs::useShinyjs(),

@@ -97,7 +97,7 @@ ReportView <- R6::R6Class(
       observeEvent(input$pdf, {
         req(store$iraceResults)
         tryCatch({
-          system2("pdflatex", wait = FALSE, timeout = 1)
+          system2("pdflatex", wait = FALSE)
         }, warning = function(w) {
           log_error("{w}")
           alert.error("You need to install 'pdflatex' to export.")
@@ -107,7 +107,7 @@ ReportView <- R6::R6Class(
 
         if (!is.integer(input$pdf)) {
           tryCatch({
-            system2("pdflatex", wait = FALSE, timeout = 1)
+            system2("pdflatex", wait = FALSE)
             make_pdf_report(store, input, volumes)
           }, warning = function(w) {
             log_error("{w}")
