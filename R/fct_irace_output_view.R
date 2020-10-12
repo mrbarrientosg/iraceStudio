@@ -187,11 +187,11 @@ run_irace <- function(store, executionName = "") {
     stdout = "|", stderr = "|"
   )
 
-  if (get_option("debug", FALSE)) {
-    store$iraceProcess$poll_io(3000)
-    log_info("stdout: {store$iraceProcess$read_output_lines()}")
-    log_info("stderr: {store$iraceProcess$read_error_lines()}")
-  }
+  #if (get_option("debug", FALSE)) {
+  #  store$iraceProcess$poll_io(3000)
+  #  log_info("stdout: {store$iraceProcess$read_output_lines()}")
+  #  log_info("stderr: {store$iraceProcess$read_error_lines()}")
+  #}
 
   store$startIrace <- TRUE
   shinyalert(title = "IRACE is now running", type = "success", timer = 1500)
