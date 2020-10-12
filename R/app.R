@@ -278,7 +278,7 @@ App <- R6::R6Class(
       iraceProcess <- isolate(private$store$iraceProcess)
 
       if (!is.null(iraceProcess)) {
-        iraceProcess$kill()
+        iraceProcess$kill_tree()
         iraceProcess$finalize()
       }
 
