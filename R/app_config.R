@@ -1,6 +1,3 @@
-#' @noRd
-.version <- "1.0.4.9000"
-
 #' Access files in the current app
 #'
 #' @param ... Character vector specifying directory and or file to
@@ -33,7 +30,7 @@ addExternalResources <- function() {
       path = appSys("app/www"),
       app_title = "Irace Studio",
       name = "irace_studio",
-      version = .version
+      version = "1.0.6.9000"
     ),
     shinyalert::useShinyalert(),
     shinyjs::useShinyjs(),
