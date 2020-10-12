@@ -176,7 +176,7 @@ run_irace <- function(store, executionName = "") {
 
   log_trace("13. Create run script")
   scriptPath <- file.path(pkg$tempFolder, "run_irace.R")
-  file.copy(system.file("app/script/run_irace.R", package = packageName()), scriptPath)
+  file.copy(system.file("inst/app/script/run_irace.R", package = packageName()), scriptPath)
 
   log_trace("14. Run irace script")
   log_debug("Script run with: {store$pg$get_irace_path()}\n{pkg$tempFolder}\n{pkg$outputLog}")
