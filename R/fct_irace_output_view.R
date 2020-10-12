@@ -174,12 +174,16 @@ run_irace <- function(store, executionName = "") {
   log_trace("12. Create scenario file")
   create_scenario_file(pkg$tempFolder, store$pg)
 
-  log_trace("13. Run irace script")
+  log_trace("13. Create run script")
+  scriptPath <- file.path(pkg$tempFolder, "run_irace.R")
+  file.copy(system.file("app/script/run_irace.R", package = packageName()), scriptPath)
+
+  log_trace("14. Run irace script")
   log_debug("Script run with: {store$pg$get_irace_path()}\n{pkg$tempFolder}\n{pkg$outputLog}")
   store$iraceProcess <- process$new(
     command = "Rscript",
     args = c(
-      system.file("inst/app/script/run_irace.R", package = packageName()),
+      scriptPath,
       store$pg$get_irace_path(),
       pkg$tempFolder,
       pkg$outputLog
