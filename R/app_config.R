@@ -1,5 +1,5 @@
 #' @noRd
-.version <- "1.0.4.9000"
+.version <- "1.0.5.9000"
 
 #' Access files in the current app
 #'
