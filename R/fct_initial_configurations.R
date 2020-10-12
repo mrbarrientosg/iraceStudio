@@ -9,7 +9,7 @@ export_initial_configurations <- function(file, store) {
   )
 }
 
-import_initial_configurations <- function(input, store) {
+import_initial_configurations <- function(input, store, volumes) {
   if (nrow(store$pg$get_parameters()) == 0) {
     alert.error(
       message = "There are no parameters. First add a parameter in the parameter section."
@@ -37,7 +37,17 @@ import_initial_configurations <- function(input, store) {
     }
   )
 
-  file <- parseFilePaths(roots = getVolumes()(), input$load)
+  file <- tryCatch({
+            parseFilePaths(roots = volumes, input$load)
+          }, error = function(err) {
+            log_error("{err}")
+            return(NULL)
+          })
+
+  if (is.null(file)) {
+    alert.error("Can't load configuration file, check if the file format is correct.")
+    return(invisible())
+  }
 
   if (!is.null(data)) {
     config <- tryCatch(irace::readConfigurationsFile(

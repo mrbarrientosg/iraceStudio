@@ -90,6 +90,10 @@ App <- R6::R6Class(
       private$store$copy <- list(id = NULL, plot = NULL, table = NULL)
       private$store$updateSandbox <- 0
 
+      # actions
+      private$store$iraceResults <- NULL
+      private$store$currentExecution <- NULL
+
       private$navbar$call(id = "navbar", store = private$store)
       private$body$setupModules(private$store)
 
@@ -98,10 +102,6 @@ App <- R6::R6Class(
       workPath <- isolate(private$store$gui$workspacePath)
       workspaceVolume <- list(workspace = workPath)
       importVolume <- getVolumes()()
-
-      delay(1500, {
-        private$initialModal(input)
-      })
 
       observeEvent(input$new, {
         removeModal()
@@ -190,6 +190,8 @@ App <- R6::R6Class(
         self$destroy()
         stopApp()
       })
+
+      private$initialModal(input)
     },
 
     setupLogger = function() {
@@ -276,7 +278,7 @@ App <- R6::R6Class(
       iraceProcess <- isolate(private$store$iraceProcess)
 
       if (!is.null(iraceProcess)) {
-        iraceProcess$kill()
+        iraceProcess$kill_tree()
         iraceProcess$finalize()
       }
 

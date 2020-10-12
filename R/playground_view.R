@@ -9,19 +9,21 @@ PlaygroundView <- R6::R6Class(
       scenario <- if (grepl(".Rdata", name, fixed = TRUE)) {
         load(path)
         private$scenario$add_parameter(extract.parameters(iraceResults$parameters))
-        exe <- execution$new(name = "execution-1")
-        exe$set_irace_results(iraceResults)
-        private$scenario$add_execution(exe)
+        if (nrow(iraceResults$allConfigurations) != 0) {
+          exe <- execution$new(name = "execution-1")
+          exe$set_irace_results(iraceResults)
+          private$scenario$add_execution(exe)
+        }
         aux <- iraceResults$scenario
         rm(iraceResults)
         aux
       } else {
-        tryCatch(irace::readScenario(filename = path),
-                             error = function(err) {
-                               log_error("{err}")
-                               return(NULL)
-                             }
-        )
+        tryCatch({
+          irace::readScenario(filename = path)
+        }, error = function(err) {
+          log_error("{err}")
+          return(NULL)
+        })
       }
 
       if (is.null(scenario)) {
@@ -91,6 +93,10 @@ PlaygroundView <- R6::R6Class(
         if (!private$availableOption(opt))
           next
 
+        if (is.function(scenario[[opt]]))
+          next
+
+        log_info("{opt}: {as.character(scenario[[opt]])}")
         private$scenario$add_irace_option(opt, as.character(scenario[[opt]]))
       }
 
@@ -188,7 +194,17 @@ PlaygroundView <- R6::R6Class(
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volumes, input$load)
+          file <- tryCatch({
+            parseFilePaths(roots = volumes, input$load)
+          }, error = function(err) {
+            log_error("{err}")
+            return(NULL)
+          })
+
+          if (is.null(file)) {
+            alert.error("Can't load scenario file, check if the file format is correct.")
+            return(invisible())
+          }
 
           shinyalert(
             title = "Scenario name",
@@ -219,7 +235,7 @@ PlaygroundView <- R6::R6Class(
                 data$scenarios <- self$scenarios_as_data_frame(store)
                 private$scenario <- NULL
               } else {
-                alert.error("Error importing scenario")
+                alert.error("Can't load scenario file, check if the file format is correct.")
               }
             }
           )

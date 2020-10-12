@@ -74,7 +74,7 @@ UIOptionsView <- R6::R6Class(
               value = path
             )
           } else {
-            alert.error("Cannot create workspace directory. Make sure there is no another folder called workspace name folder.")
+            alert.error("Can't create workspace directory, because there is an another folder called workspace.")
           }
         }
       })

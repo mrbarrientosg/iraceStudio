@@ -33,10 +33,10 @@ CopyInput <- R6::R6Class(
 
     server = function(input, output, session, store) {
       values <- reactiveValues()
-      observe(values$section <- input$select_input)
-      observe(values$action <- input$action)
+      observeEvent(input$select_input, values$section <- input$select_input)
+      observeEvent(input$action, values$action <- input$action)
 
-      observe({
+      observeEvent(c(store$currentExecution, playground_emitter$value(playground_events$update_report)), {
         if (is.null(store$currentExecution)) {
           updatePickerInput(
             session = session,
@@ -46,7 +46,6 @@ CopyInput <- R6::R6Class(
           )
         } else {
           report <- store$currentExecution$get_report()
-          playground_emitter$value(playground_events$update_report)
 
           data <- report$get_data()
 
@@ -63,7 +62,7 @@ CopyInput <- R6::R6Class(
             selected = NULL
           )
         }
-      })
+      }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
       return(values)
     }

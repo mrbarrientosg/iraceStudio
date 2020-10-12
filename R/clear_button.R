@@ -5,7 +5,7 @@ clear_button <- function(inputId, label = "Clear", ...) {
 }
 
 clear_button_sv <- function (input, output, session, message) {
-  values <- reactiveValues()
+  values <- reactiveValues(action = NULL)
 
   observeEvent(input$action, {
     shinyalert::shinyalert(

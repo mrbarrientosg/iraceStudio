@@ -23,7 +23,14 @@ ExecutionSelect <- R6::R6Class(
         playground_emitter$value(playground_events$update_executions)), {
 
         if (length(store$pg$get_executions()) == 0) {
-          return()
+          store$iraceResults <- NULL
+          store$currentExecution <- NULL
+          updatePickerInput(
+            session = session,
+            inputId = "options",
+            choices = c("")
+          )
+          return(invisible(NULL))
         }
 
         executions <- lapply(store$pg$get_executions(), function(execution) execution$get_name())
@@ -45,7 +52,7 @@ ExecutionSelect <- R6::R6Class(
           inputId = "options",
           choices = executions_id
         )
-      })
+      }, ignoreInit = TRUE)
 
       observeEvent(input$options, values$option <- input$options)
 
@@ -63,7 +70,7 @@ ExecutionSelect <- R6::R6Class(
           inputId = "options",
           selected = store$currentExecution$get_id()
         )
-      })
+      }, ignoreInit = TRUE)
 
       return(values)
     }

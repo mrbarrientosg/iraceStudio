@@ -19,7 +19,7 @@ SummaryCard <- R6::R6Class(
         shiny::validate(
           need(
             !is.null(store$iraceResults),
-            "Provide a Rdata file (logFile) to display information."
+            "Execute irace first to display information."
           )
         )
 
@@ -177,14 +177,14 @@ BestConfigurationCard <- R6::R6Class(
         shiny::validate(
           need(
             !is.null(store$iraceResults),
-            "Provide a Rdata file (logFile) to display information."
+            "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
             nrow(store$iraceResults$allConfigurations) != 0,
-            "ERROR: The number of candidate configurations is 0."
+            "The number of candidate configurations is 0."
           )
         )
 
@@ -225,14 +225,14 @@ BestConfigurationCard <- R6::R6Class(
         shiny::validate(
           need(
             !is.null(store$iraceResults),
-            "Provide a Rdata file (logFile) to display information."
+            "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
             nrow(store$iraceResults$allConfigurations) != 0,
-            "ERROR: Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
+            "Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
           )
         )
 
@@ -420,7 +420,7 @@ CandidatesCard <- R6::R6Class(
         shiny::validate(
           need(
             length(input$parameters) >= 2,
-            "ERROR: At least two parameters are necessary to generate the plots."
+            "At least two parameters are necessary to generate the plots."
           )
         )
 
@@ -494,14 +494,14 @@ CandidatesCard <- R6::R6Class(
         shiny::validate(
           need(
             !is.null(store$iraceResults),
-            "Provide a Rdata file (logFile) to display information."
+            "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
             nrow(store$iraceResults$allConfigurations) != 0,
-            "ERROR: The number of candidate configurations is 0."
+            "The number of candidate configurations is 0."
           )
         )
 
@@ -547,15 +547,15 @@ CandidatesCard <- R6::R6Class(
         shiny::validate(
           need(
             length(input$parameters) >= 2,
-            "ERROR: At least two parameters are necessary to generate the plots."
+            "At least two parameters are necessary to generate the plots."
           ),
           need(
             nrow(conf) != 0,
-            "ERROR: Cannot plot because IRACE did not finish. The amount of rows is 0."
+            "Cannot plot because IRACE did not finish. The amount of rows is 0."
           ),
           need(
             nrow(store$iraceResults$allConfigurations) != 0,
-            "ERROR: Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
+            "Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
           )
         )
 
@@ -628,14 +628,14 @@ CandidatesCard <- R6::R6Class(
         shiny::validate(
           need(
             !is.null(store$iraceResults),
-            "Provide a Rdata file (logFile) to display information."
+            "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
             nrow(store$iraceResults$allConfigurations) != 0,
-            "ERROR: The number of candidate configurations is 0."
+            "The number of candidate configurations is 0."
           )
         )
 
@@ -746,7 +746,7 @@ PerformanceCard <- R6::R6Class(
         store$copy$plot <- "performanceBoxPlot"
       })
 
-      observe({
+      observeEvent(store$iraceResults, {
         if (is.null(store$iraceResults)) {
           updatePickerInput(
             session = session,
@@ -760,20 +760,20 @@ PerformanceCard <- R6::R6Class(
             choices = 1:store$iraceResults$state$nbIterations
           )
         }
-      })
+      }, ignoreNULL = FALSE)
 
       output$performance_box_plot <- renderPlot({
         shiny::validate(
           need(
             !is.null(store$iraceResults),
-            "Provide a Rdata file (logFile) to display information."
+            "Execute irace first to display information."
           ),
           need(input$iterations, "")
         )
         shiny::validate(
           need(
             nrow(store$iraceResults$allConfigurations) != 0,
-            "ERROR: Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
+            "Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
           )
         )
 
@@ -794,13 +794,13 @@ PerformanceCard <- R6::R6Class(
         shiny::validate(
           need(
             !is.null(store$iraceResults),
-            "Provide a Rdata file (logFile) to display information."
+            "Execute irace first to display information."
           )
         )
         shiny::validate(
           need(
             nrow(store$iraceResults$allConfigurations) != 0,
-            "ERROR: Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
+            "Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
           )
         )
 
@@ -811,7 +811,7 @@ PerformanceCard <- R6::R6Class(
         shiny::validate(
           need(
             dim(store$iraceResults$experiments[, elites]) != 0,
-            "ERROR: Cannot plot because IRACE did not finish. Must be an array of two dimensions."
+            "Cannot plot because IRACE did not finish. Must be an array of two dimensions."
           )
         )
 
@@ -976,14 +976,14 @@ DetailByIterationCard <- R6::R6Class(
         shiny::validate(
           need(
             !is.null(store$iraceResults),
-            "Provide a Rdata file (logFile) to display information."
+            "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
             nrow(store$iraceResults$allConfigurations) != 0,
-            "ERROR: The number of candidate configurations is 0."
+            "The number of candidate configurations is 0."
           )
         )
 
@@ -1020,14 +1020,14 @@ DetailByIterationCard <- R6::R6Class(
         shiny::validate(
           need(
             !is.null(store$iraceResults),
-            "Provide a Rdata file (logFile) to display information."
+            "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
             nrow(store$iraceResults$allConfigurations) != 0,
-            "ERROR: The number of candidate configurations is 0."
+            "The number of candidate configurations is 0."
           )
         )
 
