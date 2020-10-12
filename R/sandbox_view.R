@@ -95,8 +95,10 @@ SandboxView <- R6::R6Class(
       ), {
         if (!is.null(store$currentExecution)) {
           data$sandbox <- self$sandbox_as_data_frame(store$currentExecution)
+        } else {
+          data$sandbox <- data.frame()
         }
-      })
+      }, ignoreInit = TRUE)
 
       observeEvent(input$add, {
         showModal(
@@ -201,7 +203,7 @@ SandboxView <- R6::R6Class(
           enable(id = "add")
           data$sandbox <- self$sandbox_as_data_frame(store$currentExecution)
         }
-      }, ignoreNULL = FALSE)
+      }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
       observeEvent(input$boxes_rows_selected,{
         if (is.null(input$boxes_rows_selected)) {

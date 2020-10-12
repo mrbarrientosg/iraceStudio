@@ -8,5 +8,6 @@ rm(list = ls(all.names = TRUE))
 # Document and reload your package
 golem::document_and_reload()
 
+reactlog::reactlog_enable()
 # Run the application
 runIraceStudio(debug = TRUE)

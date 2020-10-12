@@ -77,8 +77,8 @@ InitialConfigurationsView <- R6::R6Class(
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          import_initial_configurations(input, store)
-           values$configurations <- store$pg$get_configurations()
+          import_initial_configurations(input, store, volumes)
+          values$configurations <- store$pg$get_configurations()
         }
       })
 
@@ -96,9 +96,8 @@ InitialConfigurationsView <- R6::R6Class(
       })
 
       output$initial_config_table <- DT::renderDataTable({
-        playground_emitter$value(playground_events$update_parameters)
-
         shiny::validate(
+          need(playground_emitter$value(playground_events$update_parameters) > 0, ""),
           need(nrow(store$pg$get_parameters()) > 0, "Empty parameters"),
           need(store$pg, "")
         )

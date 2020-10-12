@@ -72,18 +72,18 @@ ReportView <- R6::R6Class(
 
       volumes <- getVolumes()()
 
-      shinyFileChoose(input, "load", roots = volumes, filetypes = "Rdata")
+      #shinyFileChoose(input, "load", roots = volumes, filetypes = "Rdata")
       shinyDirChoose(input, "pdf", roots = volumes, filetypes = "pdf")
 
-      observeEvent(input$load, {
-        if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volumes, input$load)
-          load(file = file$datapath)
-          store$iraceResults <- iraceResults
-          rm(iraceResults)
-          store$currentExecution <- NULL
-        }
-      })
+      #observeEvent(input$load, {
+      #  if (!is.integer(input$load)) {
+      #    file <- parseFilePaths(roots = volumes, input$load)
+      #    load(file = file$datapath)
+      #    store$iraceResults <- iraceResults
+      #    rm(iraceResults)
+      #    store$currentExecution <- NULL
+      #  }
+      #})
 
       output$importLabel <- renderText({
         shiny::validate(
@@ -96,9 +96,25 @@ ReportView <- R6::R6Class(
 
       observeEvent(input$pdf, {
         req(store$iraceResults)
+        tryCatch({
+          system2("pdflatex")
+        }, warning = function(w) {
+          log_error("{w}")
+          alert.error("You need to install 'pdflatex' to export.")
+        }, error = function(e) {
+          log_error("{e}")
+        })
 
         if (!is.integer(input$pdf)) {
-          make_pdf_report(store, input, volumes)
+          tryCatch({
+            system2("pdflatex")
+            make_pdf_report(store, input, volumes)
+          }, warning = function(w) {
+            log_error("{w}")
+            alert.error("You need to install 'pdflatex' to export.")
+          }, error = function(e) {
+            log_error("{e}")
+          })
         }
       })
 

@@ -63,8 +63,7 @@ UserSectionView <- R6::R6Class(
         }
       })
 
-      observeEvent(store$currentExecution,
-        {
+      observeEvent(store$currentExecution, {
         for (id in names(self$cards)) {
           self$cards[[id]] <- NULL
           self$observe_delete_card[[id]]$destroy()
@@ -121,9 +120,7 @@ UserSectionView <- R6::R6Class(
             })
           })
         }
-      },
-        ignoreNULL = FALSE
-      )
+      }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
       observeEvent(input$addSection, {
         removeModal()

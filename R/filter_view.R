@@ -280,12 +280,10 @@ FilterView <- R6::R6Class(
         values$configurations <- unique(configurationsIter)
       })
 
-      observe({
-        req(values$configurations)
-
+      observeEvent(values$configurations, {
         names(values$configurations)[names(values$configurations) == ".ID."] <- "ID"
         names(values$configurations)[names(values$configurations) == ".PARENT."] <- "PARENT"
-      })
+      }, ignoreInit = TRUE)
 
       observeEvent(input$addSandBox, {
         rows <- values$configurations[input$configurationsTable_rows_selected, ]
@@ -294,12 +292,12 @@ FilterView <- R6::R6Class(
         values$sandbox <- store$sandbox$getConfigurations()
       })
 
-      observe({
+      observeEvent(c(input$configurationsTable_rows_selected, values$configurations), {
         condition <- !is.null(input$configurationsTable_rows_selected) & nrow(values$configurations) > 0
         toggleState(id = "addSandBox", condition = condition)
         toggleState(id = "deselectAllConfigs", condition = condition)
         toggleState(id = "selectAllConfigs", condition = nrow(values$configurations) > 0)
-      })
+      }, ignoreNULL = FALSE)
 
       observeEvent(input$selectAllConfigs, {
         configProxy %>% selectRows(input$configurationsTable_rows_all)

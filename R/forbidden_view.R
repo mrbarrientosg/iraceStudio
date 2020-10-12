@@ -68,7 +68,17 @@ ForbiddenView <- R6::R6Class(
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volumes, input$load)
+          file <- tryCatch({
+            parseFilePaths(roots = volumes, input$load)
+          }, error = function(err) {
+            log_error("{err}")
+            return(NULL)
+          })
+
+          if (is.null(file)) {
+            alert.error("Can't load forbidden file, check if the file format is correct.")
+            return(invisible())
+          }
 
           tryCatch({
             irace:::readForbiddenFile(file$datapath)

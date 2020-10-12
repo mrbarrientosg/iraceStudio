@@ -105,7 +105,7 @@ ParametersView <- R6::R6Class(
         values$parameters <- store$pg$get_parameters()
       })
 
-      observe({
+      observeEvent(values$parameters, {
         playground_emitter$emit(playground_events$update_parameters)
 
         proxy %>%
@@ -122,7 +122,18 @@ ParametersView <- R6::R6Class(
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- parseFilePaths(roots = volumes, input$load)
+          file <- tryCatch({
+            parseFilePaths(roots = volumes, input$load)
+          }, error = function(err) {
+            log_error("{err}")
+            return(NULL)
+          })
+
+          if (is.null(file)) {
+            alert.error("Can't load parameters file, check if the file format is correct.")
+            return(invisible())
+          }
+
           log_info("Importing paremeter file from {file$datapath}")
 
           tryCatch({
