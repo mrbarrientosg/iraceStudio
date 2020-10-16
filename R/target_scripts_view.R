@@ -163,7 +163,7 @@ TargetTab <- R6::R6Class(
         )
       })
 
-      observeEvent(playground_emitter$value(playground_events$current_scenario), {
+      observeEvent(c(playground_emitter$value(playground_events$current_scenario), store$pg), {
         if (isRunner) {
           updateAceEditor(
             session = session,

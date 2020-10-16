@@ -82,7 +82,7 @@ InitialConfigurationsView <- R6::R6Class(
         }
       })
 
-      observeEvent(playground_emitter$value(playground_events$current_scenario), {
+      observeEvent(c(playground_emitter$value(playground_events$current_scenario), store$pg), {
         values$configurations <- store$pg$get_configurations()
       })
 
