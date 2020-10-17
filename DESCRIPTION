@@ -17,7 +17,7 @@ Imports:
     glue (>= 1.4.1),
     htmltools (>= 0.3.6),
     bs4Dash (>= 0.6.0.9000),
-    shinyalert (>= 1.1),
+    shinyalert (>= 2.0.0),
     shinyjs (>= 1.1),
     shinyAce (>= 0.4.1),
     processx (>= 3.4.2),
@@ -42,11 +42,11 @@ Imports:
     magick (>= 2.3),
     shinycssloaders (>= 0.3),
     sortable (>= 0.4.2),
-    htmlwidgets (>= 1.5.1)
+    htmlwidgets (>= 1.5.1),
+    shinyhelper (>= 0.3.2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Remotes:
-    RinteRface/bs4Dash@eb867d1,
-    daattali/shinyalert
+    RinteRface/bs4Dash@eb867d1
 VignetteBuilder: knitr

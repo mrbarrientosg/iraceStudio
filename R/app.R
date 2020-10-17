@@ -84,6 +84,8 @@ App <- R6::R6Class(
     },
 
     server = function(input, output, session) {
+      shinyhelper::observe_helpers(withMathJax = TRUE)
+
       private$store$playgroundName <- ""
       private$store$startIrace <- FALSE
       private$store$iraceAlive <- reactiveTimer(intervalMs = 1050)

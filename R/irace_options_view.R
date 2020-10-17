@@ -27,6 +27,8 @@ IraceOptionsView <- R6::R6Class(
     server = function(input, output, session, store) {
       ns <- session$ns
 
+      update <- reactiveValues(id = NULL, section = NULL)
+
       volumes <- getVolumes()()
 
       shinyFileSave(input = input, id = "export", roots = volumes)
@@ -51,8 +53,8 @@ IraceOptionsView <- R6::R6Class(
         )
 
         args <- c(
-          self$create_tabs(ns, store),
-          id = ns("tab"),
+          self$create_tabs(ns, store, update),
+          id = ns("tabs"),
           title = "",
           collapsible = FALSE,
           closable = FALSE,
@@ -64,24 +66,39 @@ IraceOptionsView <- R6::R6Class(
       })
     },
 
-    create_tabs = function(ns, store) {
-      tabs <- list()
-
+    create_tabs = function(ns, store, update) {
       option <- IraceOptionTab$new()
 
-      for (name in names(scenarioOptions)) {
-        if (name == "testing") {
-          next
-        }
+      data <- scenarioOptions %>%
+        distinct(section) %>%
+        filter(section != "Testing")
+
+      tabs <- list()
+
+      quick_section <- "Quick Options"
+      quick <- gsub(" ", "", quick_section)
+
+      tab <- bs4TabPanel(
+        tabName = quick_section,
+        option$ui(inputId = ns(quick), section = quick_section, store = store, isFast = TRUE)
+      )
+
+      option$call(id = quick, store = store, .section = quick_section, update = update, isFast = TRUE)
+
+      tabs <- c(tabs, list(tab))
+
+      for (row in seq_len(nrow(data))) {
+        section <- data[row, ]
+        name <- gsub(" ", "", section)
 
         tab <- bs4TabPanel(
-          tabName = scenarioOptions[[name]]$name,
-          option$ui(inputId = ns(name), section = name, store = store)
+          tabName = section,
+          option$ui(inputId = ns(name), section = section, store = store, isFast = FALSE)
         )
 
-        tabs[[name]] <- tab
+        option$call(id = name, store = store, .section = section, update = update, isFast = FALSE)
 
-        option$call(id = name, store = store, section = name)
+        tabs <- c(tabs, list(tab))
       }
 
       return(tabs)

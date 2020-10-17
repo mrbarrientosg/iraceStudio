@@ -2,47 +2,77 @@ IraceOptionTab <- R6::R6Class(
   classname = "IraceOptionTab",
   inherit = Component,
   public = list(
-    ui = function(inputId, section, store) {
-      private$create_tab_content(inputId, section, store)
+    fast_ids = c("debugLevel", "seed", "elitist", "deterministic",
+                 "parallel", "maxExperiments", "maxTime", "testType", "capping"),
+
+    ui = function(inputId, section, store, isFast) {
+      private$create_tab_content(inputId, section, store, isFast)
     },
 
-    server = function(input, output, session, store, section) {
-      for (row in seq_len(nrow(scenarioOptions[[section]]$options))) {
-        local({
-          option <- scenarioOptions[[section]]$options[row, ]
-          my_id <- option$id
-
-          observeEvent(input[[my_id]], {
-            if (my_id != "testType" && my_id != "boundType") {
-              log_debug("Observing input: {my_id}, value: {input[[my_id]]}")
-              store$pg$add_irace_option(option = my_id, value = input[[my_id]])
-            } else {
-              log_debug("Observing input: {my_id}, value: {input[[my_id]]}")
-              store$pg$add_irace_option(
-                option = my_id,
-                value = paste0('"', input[[my_id]], '"')
-              )
-            }
-          })
-        })
+    server = function(input, output, session, store, .section, update, isFast) {
+      data <- if (isFast) {
+        scenarioOptions %>%
+          filter(id %in% self$fast_ids)
+      } else {
+        scenarioOptions %>%
+          filter(section == .section)
       }
 
+      data %>%
+        apply(1, function(row) {
+          local({
+            my_id <- row$id
+
+            observeEvent(input[[my_id]], {
+              if (my_id != "testType" && my_id != "boundType") {
+                log_debug("Observing input: {my_id}, value: {input[[my_id]]}")
+                store$pg$add_irace_option(option = my_id, value = input[[my_id]])
+              } else {
+                log_debug("Observing input: {my_id}, value: {input[[my_id]]}")
+                store$pg$add_irace_option(
+                  option = my_id,
+                  value = paste0('"', input[[my_id]], '"')
+                )
+              }
+
+              if (!is.null(update)) {
+                update$id <- isolate(NULL)
+                update$section <- isolate(NULL)
+
+                update$id <- my_id
+                update$section <- .section
+              }
+            }, ignoreInit = TRUE)
+          })
+        })
+
       observeEvent(playground_emitter$value(playground_events$current_scenario), {
-        for (i in seq_len(nrow(scenarioOptions[[section]]$options))) {
-          option <- scenarioOptions[[section]]$options[i, ]
-          private$updateInput(option, session, store)
+        if (!isFast) {
+          scenarioOptions %>%
+            filter(section == .section) %>%
+            apply(1, function(row) {
+              private$updateInput(row, session, store)
+            })
         }
       }, ignoreInit = TRUE)
+
+      observeEvent(c(update$id, update$section), {
+        req(update$id)
+        req(update$section)
+        if (update$section != .section) {
+          scenarioOptions %>%
+            filter(id == update$id) %>%
+            apply(1, function(row) {
+              private$updateInput(row, session, store)
+            })
+        }
+      })
 
       observeEvent(input$elitist, {
         if (!input$elitist) {
           log_info("Disable elitistLimit and elitistNewInstances")
           disable(id = "elitistLimit")
           disable(id = "elitistNewInstances")
-
-          # TODO: No dejar en null, revisar cuando se cree el archivo scenario.txt
-          # store$scenario$elitistLimit <- NULL
-          # store$scenario$elitistNewInstances <- NULL
         } else {
           log_info("Enable elitistLimit and elitistNewInstances")
           enable(id = "elitistLimit")
@@ -52,14 +82,19 @@ IraceOptionTab <- R6::R6Class(
     }
   ),
   private = list(
-    create_tab_content = function(inputId, section, store) {
-      content <- list()
-      data <- scenarioOptions[[section]]$options
-
-      for (row in seq_len(nrow(data))) {
-        input <- data[row, ]
-        content[[row]] <- private$create_input(inputId, input, store)
+    create_tab_content = function(inputId, .section, store, isFast) {
+      content <- if (isFast) {
+        scenarioOptions %>%
+          dplyr::filter(id %in% self$fast_ids)
+      } else {
+        scenarioOptions %>%
+          dplyr::filter(section == .section)
       }
+
+      content <- content %>%
+        apply(1, function(row) {
+          private$create_input(inputId, row, store)
+        })
 
       return(tagList(content))
     },
@@ -79,10 +114,10 @@ IraceOptionTab <- R6::R6Class(
       } else if (data$type == "atext") {
         textAreaInput(inputId = ns(data$id), label = data$name, value = default)
       } else {
-        pickerInput(inputId = ns(data$id), label = data$name, choices = data$values[[1]], selected = default, options = list(size = 8))
+        pickerInput(inputId = ns(data$id), label = data$name, choices = data$values, selected = default, options = list(size = 8))
       }
 
-      private$addInputInfo(data, input, ns(data$id))
+      input %>% shinyhelper::helper(type = "inline", title = data$name, content = data$description, icon = "info-circle")
     },
 
     addInputInfo = function(option, input, inputId) {
