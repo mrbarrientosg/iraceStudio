@@ -64,7 +64,7 @@ PerformanceConfigView <- R6::R6Class(
         config <- store$sandbox$getConfigurations()$ID
 
         if (length(config) == 0)
-          config <- store$iraceResults$allConfigurations$.ID.
+          config <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
 
         config_data() %...>% subset(id %in% config)
       })
@@ -105,9 +105,9 @@ PerformanceConfigView <- R6::R6Class(
               showlegend = FALSE
             ) %>%
             layout(
-              title = "Configuration vs Solution Cost",
+              title = "Configuration vs Performance Raw",
               xaxis = list(title = "Configuration ID", tickvals = ~id, ticktext = ~id, fixedrange = T),
-              yaxis = list(title = "Solution Cost", type = "linear", fixedrange = T),
+              yaxis = list(title = "Performance Raw", type = "linear", fixedrange = T),
               legend = legend,
               hovermode = "closest",
               showlegend = TRUE

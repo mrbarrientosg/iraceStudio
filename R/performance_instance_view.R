@@ -67,7 +67,7 @@ PerformanceInstanceView <- R6::R6Class(
           config <- isolate(store$sandbox$getConfigurations()$ID)
 
           if (length(config) == 0)
-            config <- isolate(store$iraceResults$allConfigurations$.ID.)
+            config <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
 
           self$bestConfigurationByInstances(isolate(store$iraceResults), config)
         })
@@ -106,9 +106,9 @@ PerformanceInstanceView <- R6::R6Class(
               showlegend = FALSE
             ) %>%
             layout(
-              title = "Distance to best vs Instance",
+              title = "Distance to best performance vs Instance",
               xaxis = list(title = "Instance", tickvals = ~instance, ticktext = ~instance, fixedrange = T),
-              yaxis = list(title = "Distance to best", type = "linear", fixedrange = T),
+              yaxis = list(title = "Distance to best performance", type = "linear", fixedrange = T),
               legend = legend,
               hovermode = "closest",
               showlegend = TRUE
@@ -183,7 +183,7 @@ PerformanceInstanceView <- R6::R6Class(
           config <- isolate(store$sandbox$getConfigurations()$ID)
 
           if (length(config) == 0)
-            config <- isolate(store$iraceResults$allConfigurations$.ID.)
+            config <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
 
           self$configurationByIntances(isolate(store$iraceResults), config)
         })
@@ -222,9 +222,9 @@ PerformanceInstanceView <- R6::R6Class(
               showlegend = FALSE
             ) %>%
             layout(
-              title = "Configuration vs Instance",
+              title = "Performance Raw vs Instance",
               xaxis = list(title = "Instance", tickvals = ~instance, ticktext = ~instance, fixedrange = T),
-              yaxis = list(title = "Configuration", type = "linear", fixedrange = T),
+              yaxis = list(title = "Performance Raw", type = "linear", fixedrange = T),
               legend = legend,
               hovermode = "closest",
               showlegend = TRUE
