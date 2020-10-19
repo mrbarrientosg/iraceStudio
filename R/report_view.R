@@ -27,28 +27,13 @@ ReportView <- R6::R6Class(
           class = "justify-content-between",
           style = "height: 90px;",
           column(
-            width = 2,
-            h2("Report"),
-            textOutput(outputId = ns("importLabel"))
+            width = 5,
+            h2("Report")
           ),
           column(
             width = 7,
             class = "d-flex align-items-center justify-content-end",
-            self$executionSelect$ui(inputId = ns("executions")),
-            #disabled(
-            #  importButton(
-            #    inputId = ns("load"),
-            #    style = "margin-left: 5px; margin-top: 15px;",
-            #    size = "default"
-            #  )
-            #),
-            shinyDirButton(
-              id = ns("pdf"),
-              title = "Select a directory to save PDF Report",
-              label = "Save as PDF",
-              style = "margin-left: 5px; margin-top: 15px;",
-              buttonType = "primary"
-            )
+            self$executionSelect$ui(inputId = ns("executions"))
           )
         ),
         fluidRow(
@@ -67,64 +52,7 @@ ReportView <- R6::R6Class(
       self$candidatesCard$call(id = "candidates", store = store)
       self$performanceCard$call(id = "performance", store = store)
       self$detailByIterationCard$call(id = "detail_by_iteration", store = store)
-
-      executions <- self$executionSelect$call(id = "executions", store = store)
-
-      volumes <- getVolumes()()
-
-      #shinyFileChoose(input, "load", roots = volumes, filetypes = "Rdata")
-      shinyDirChoose(input, "pdf", roots = volumes, filetypes = "pdf")
-
-      #observeEvent(input$load, {
-      #  if (!is.integer(input$load)) {
-      #    file <- parseFilePaths(roots = volumes, input$load)
-      #    load(file = file$datapath)
-      #    store$iraceResults <- iraceResults
-      #    rm(iraceResults)
-      #    store$currentExecution <- NULL
-      #  }
-      #})
-
-      output$importLabel <- renderText({
-        shiny::validate(
-          need(store$iraceResults, message = ""),
-          need(is.null(store$currentExecution), message = "")
-        )
-
-        return("An external log file will not be saved in the playground.")
-      })
-
-      observeEvent(input$pdf, {
-        req(store$iraceResults)
-        tryCatch({
-          system2("pdflatex", wait = FALSE)
-        }, warning = function(w) {
-          log_error("{w}")
-          alert.error("You need to install 'pdflatex' to export.")
-        }, error = function(e) {
-          log_error("{e}")
-        })
-
-        if (!is.integer(input$pdf)) {
-          tryCatch({
-            system2("pdflatex", wait = FALSE)
-            make_pdf_report(store, input, volumes)
-          }, warning = function(w) {
-            log_error("{w}")
-            alert.error("You need to install 'pdflatex' to export.")
-          }, error = function(e) {
-            log_error("{e}")
-          })
-        }
-      })
-
-      observeEvent(store$iraceResults, {
-        if (is.null(store$iraceResults)) {
-          disable(id = "pdf")
-        } else {
-          enable(id = "pdf")
-        }
-      }, ignoreNULL = FALSE)
+      self$executionSelect$call(id = "executions", store = store)
     }
   )
 )
