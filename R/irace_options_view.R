@@ -15,7 +15,9 @@ IraceOptionsView <- R6::R6Class(
           column(
             width = 2,
             class = "d-flex align-items-center justify-content-end",
-            exportButton(inputId = ns("export"), filename = "scenario.txt")
+            importButton(inputId = ns("load")),
+            exportButton(inputId = ns("export"), filename = "scenario.txt",
+              style = "margin-left: 5px;")
           )
         ),
         fluidRow(
@@ -31,7 +33,35 @@ IraceOptionsView <- R6::R6Class(
 
       volumes <- getVolumes()()
 
+      shinyFileChoose(input, "load", roots = volumes)
       shinyFileSave(input = input, id = "export", roots = volumes)
+
+      observeEvent(input$load, {
+        if (!is.integer(input$load)) {
+          file <- tryCatch({
+            parseFilePaths(roots = volumes, input$load)
+          }, error = function(err) {
+            log_error("{err}")
+            return(NULL)
+          })
+
+          if (is.null(file)) {
+            alert.error("Can't load scenario file, check if the file format is correct.")
+            return(invisible())
+          }
+
+          result <- importScenario(file$name, file$datapath, store$pg$get_current_scenario(), TRUE)
+
+          if (result) {
+            shinyalert(title = "Warning",
+                      text = "Cannot be import all options from the scenario.",
+                      type = "warning")
+            playground_emitter$emit(playground_events$current_scenario)
+          } else {
+            alert.error("Can't load scenario file, check if the file format is correct.")
+          }
+        }
+      })
 
       observeEvent(input$export, {
         if (!is.integer(input$export)) {

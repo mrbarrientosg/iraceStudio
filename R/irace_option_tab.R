@@ -107,6 +107,9 @@ IraceOptionTab <- R6::R6Class(
       else
         store$pg$get_irace_option(data$id)
 
+      if (is.character(default) && default == "NA")
+        default <- NULL
+
       input <- if (data$type == "numeric") {
         numericInput(inputId = ns(data$id), label = data$name, value = default, min = data$min, step = data$step, max = data$max)
       } else if (data$type == "bool") {

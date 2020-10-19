@@ -2,117 +2,7 @@ PlaygroundView <- R6::R6Class(
   classname = "PlaygroundView",
   inherit = View,
   private = list(
-    scenario = NULL,
-
-    importScenario = function(name, path) {
-      log_info("Load scenario {path}")
-      scenario <- if (grepl(".Rdata", name, fixed = TRUE)) {
-        load(path)
-        private$scenario$add_parameter(extract.parameters(iraceResults$parameters))
-        if (nrow(iraceResults$allConfigurations) != 0) {
-          exe <- execution$new(name = "execution-1")
-          exe$set_irace_results(iraceResults)
-          private$scenario$add_execution(exe)
-        }
-        aux <- iraceResults$scenario
-        rm(iraceResults)
-        aux
-      } else {
-        tryCatch({
-          irace::readScenario(filename = path)
-        }, error = function(err) {
-          log_error("{err}")
-          return(NULL)
-        })
-      }
-
-      if (is.null(scenario)) {
-        log_error("Can't load scenario file")
-        return(FALSE)
-      }
-
-      path <- scenario$targetRunner
-      if (checkPath(path)) {
-        log_info("Add target runner from {path}")
-        private$scenario$set_target_runner(
-          paste(readLines(path), collapse = "\n")
-        )
-      }
-
-      path <- scenario$targetEvaluator
-      if (checkPath(path)) {
-        log_info("Add target evaluator from {path}")
-        private$scenario$set_target_evaluator(
-          paste(readLines(path), collapse = "\n")
-        )
-      }
-
-      path <- scenario$parameterFile
-      parameters <- NULL
-      if (checkPath(path) && nrow(private$scenario$get_parameters()) == 0) {
-        log_info("Add parameters from {path}")
-        parameters <- tryCatch({
-            data <- irace::readParameters(file = path)
-            private$scenario$add_parameter(extract.parameters(data))
-            data
-          },
-          error = function(err) {
-            log_error("{err}")
-          })
-      }
-
-      path <- scenario$forbiddenFile
-      if (checkPath(path)) {
-        log_info("Add forbidden file from {path}")
-        tryCatch({
-          irace:::readForbiddenFile(path)
-          source <- readLines(path)
-          private$scenario$add_forbidden(source)
-        }, error = function(err) {
-          log_error("{err}")
-        })
-      }
-
-      path <- scenario$configurationsFile
-      if (checkPath(path)) {
-        log_info("Add initial configurations {path}")
-
-        tryCatch({
-          if (is.null(parameters)) {
-            parameters <- parameters_as_irace(private$scenario$get_parameters())
-          }
-          config <- irace::readConfigurationsFile(filename = path, parameters = parameters)
-          private$scenario$add_configuration(config)
-        },
-        error = function(err) {
-          log_error("{err}")
-        })
-      }
-
-      for (opt in names(scenario)) {
-        if (!private$availableOption(opt))
-          next
-
-        if (is.function(scenario[[opt]]))
-          next
-
-        log_info("{opt}: {as.character(scenario[[opt]])}")
-        private$scenario$add_irace_option(opt, as.character(scenario[[opt]]))
-      }
-
-      private$scenario$clear_scenario_temp()
-
-      return(TRUE)
-    },
-
-    availableOption = function(option) {
-      for (section in scenarioOptions) {
-        if (option %in% section$options$id) {
-          return(TRUE)
-        }
-      }
-      return(FALSE)
-    }
+    scenario = NULL
   ),
   public = list(
     ui = function() {
@@ -228,7 +118,7 @@ PlaygroundView <- R6::R6Class(
 
               private$scenario <- scenario$new(name = name)
 
-              result <- private$importScenario(file$name, file$datapath)
+              result <- importScenario(file$name, file$datapath, private$scenario)
 
               if (result) {
                 shinyalert(title = "Warning",
