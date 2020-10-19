@@ -97,9 +97,6 @@ App <- R6::R6Class(
       private$store$currentExecution <- NULL
 
       private$navbar$call(id = "navbar", store = private$store)
-      private$body$setupModules(private$store)
-
-      session$userData$sidebar <- reactive(input$sidebar)
 
       workPath <- isolate(private$store$gui$workspacePath)
       workspaceVolume <- list(workspace = workPath)
@@ -193,7 +190,9 @@ App <- R6::R6Class(
         stopApp()
       })
 
+      private$body$setupModules(private$store)
       private$initialModal(input)
+      session$userData$sidebar <- reactive(input$sidebar)
     },
 
     setupLogger = function() {

@@ -6,7 +6,10 @@ UIOptionsView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header", h2("UI Options")),
+        div(class = "sub-header",
+          h2("UI Options"),
+          p("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae orci ex. Cras porttitor, dolor in consequat pellentesque, tellus risus suscipit turpis, et aliquam nisl nunc at ante. Proin ut purus enim. Cras pretium sed massa a dictum. Sed id auctor mi, at bibendum eros. Vestibulum lectus purus, aliquet eget sodales at, consectetur vitae ante. Ut mollis bibendum tortor vel dapibus. Pellentesque eget elit dapibus ipsum tincidunt iaculis. Donec vitae suscipit dolor, congue rutrum turpis. Morbi lobortis ipsum id diam laoreet, vitae mollis nisl maximus. Curabitur tristique vel justo sit amet sagittis. Integer tristique dui nec nunc pellentesque, id placerat sapien suscipit. Integer imperdiet nibh id tristique vehicula. Aenean sodales interdum mi quis iaculis. Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+        ),
         fluidRow(
           bs4Card(
             title = strong("Options"),

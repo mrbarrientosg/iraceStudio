@@ -10,6 +10,10 @@ Sidebar <- R6::R6Class(
         bs4Dash::bs4SidebarMenu(
           id = "sidebar",
           bs4Dash::bs4SidebarMenuItem(
+            text = "Home",
+            tabName = "home"
+          ),
+          bs4Dash::bs4SidebarMenuItem(
             text = "UI Options",
             tabName = "ui_options"
           ),
@@ -74,12 +78,12 @@ Sidebar <- R6::R6Class(
             bs4Dash::bs4SidebarMenuItem(
               text = strong("Performance"),
               bs4SidebarMenuSubItem(
-                text = "Instance",
-                tabName = "visualization_by_instance"
-              ),
-              bs4SidebarMenuSubItem(
                 text = "Configuration",
                 tabName = "visualization_by_config"
+              ),
+              bs4SidebarMenuSubItem(
+                text = "Instance",
+                tabName = "visualization_by_instance"
               )
             )
           ),
