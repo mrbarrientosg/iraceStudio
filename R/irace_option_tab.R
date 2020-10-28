@@ -107,7 +107,7 @@ IraceOptionTab <- R6::R6Class(
       else
         store$pg$get_irace_option(data$id)
 
-      if (is.character(default) && default == "NA")
+      if (is.na(default))
         default <- NULL
 
       input <- if (data$type == "numeric") {
