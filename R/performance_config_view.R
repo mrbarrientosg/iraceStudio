@@ -61,12 +61,13 @@ PerformanceConfigView <- R6::R6Class(
         req(store$updateSandbox)
         req(store$sandbox)
 
-        config <- store$sandbox$getConfigurations()$ID
+        id <- store$sandbox$getConfigurations()$ID
 
-        if (length(config) == 0)
-          config <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
+        if (length(id) == 0)
+          id <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
 
-        config_data() %...>% subset(id %in% config)
+        config_data() %...>%
+          subset(configuration %in% id)
       })
 
       output$solutionCostConfig <- renderPlotly({
@@ -82,34 +83,23 @@ PerformanceConfigView <- R6::R6Class(
         filtered_config_data() %...>% {
           data <- .
 
-          data %>%
-            plot_ly() %>%
+          plot_ly(data) %>%
             add_boxplot(
-              x = ~id,
-              y = ~value,
-              color = ~id,
-              boxpoints = FALSE,
-              hoverinfo = "none",
-              hoveron = "boxes",
-              legendgroup = ~id,
-              showlegend = TRUE
-            ) %>%
-            add_markers(
-              x = ~jitter,
-              y = ~value,
-              marker = list(size = 5),
-              color = ~id,
-              customdata = ~id,
-              hovertemplate = "<b>y:</b> %{y:.3f} <br><b>ID: %{customdata}</b><extra></extra>",
-              legendgroup = ~id,
-              showlegend = FALSE
+              x = ~as.factor(configuration),
+              y = ~performance,
+              color = ~as.factor(configuration),
+              showlegend = TRUE,
+              hoverinfo = "y",
+              boxpoints = "all",
+              jitter = 1.0,
+              pointpos = 0.0
             ) %>%
             layout(
               title = "Configuration vs Performance Raw",
-              xaxis = list(title = "Configuration ID", tickvals = ~id, ticktext = ~id, fixedrange = T),
-              yaxis = list(title = "Performance Raw", type = "linear", fixedrange = T),
-              legend = legend,
+              xaxis = list(title = "Configuration ID", type = "category", fixedrange = T),
+              yaxis = list(title = "Performance Raw", type = "linear", fixedrange = T, tickformat = "e"),
               hovermode = "closest",
+              legend = legend,
               showlegend = TRUE
             )
         }
@@ -124,24 +114,14 @@ PerformanceConfigView <- R6::R6Class(
     },
 
     configurationByPerformance = function(iraceResults) {
-      experiments <- iraceResults$experiments
-      data.labels <- colnames(experiments)
-      if (is.null(data.labels)) data.labels <- seq_len(ncol(experiments))
+      exp <- iraceResults$experiments
+      performance <- c(exp)
+      configuration <- as.numeric(colnames(exp)[col(exp)])
 
-      data <- data.frame()
+      df <- data.frame(performance = performance, configuration = configuration)
+      df <- df[complete.cases(df),]
 
-      for (i in seq_len(ncol(experiments))) {
-        values <- as.vector(experiments[,i])
-        values <- values[!is.na(values)]
-        config <- rep(data.labels[i], length(values))
-        data <- rbind(data, data.frame(id = config, value = values))
-      }
-
-      data$jitter <- jitter(as.numeric(data$id))
-      data$id <- factor(data$id)
-      data <- data[order(data$id), ]
-
-      return(data)
+      return(df)
     }
   )
 )
