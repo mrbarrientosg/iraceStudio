@@ -56,6 +56,12 @@ App <- R6::R6Class(
     validateName = function(name, path) {
       files <- list.files(path)
       return(any(grepl(name, files) == TRUE))
+    },
+
+    setupModules = function() {
+      shinybusy::show_modal_spinner(text = "Loading workspace...")
+      private$body$setupModules(private$store)
+      shinybusy::remove_modal_spinner()
     }
   ),
 
@@ -78,7 +84,6 @@ App <- R6::R6Class(
         navbar = private$navbar$ui("navbar"),
         sidebar = private$sidebar$ui(),
         body = private$body$ui(),
-        enable_preloader = TRUE,
         loading_background = "#242939"
       )
     },
@@ -135,6 +140,7 @@ App <- R6::R6Class(
               return(invisible())
             }
 
+            private$setupModules()
             private$store$pg <- playground$new(name = name)
           }
         )
@@ -150,9 +156,10 @@ App <- R6::R6Class(
             return()
           }
 
-          private$store$pg <- playground$new(playground = pg)
-
           removeModal()
+
+          private$setupModules()
+          private$store$pg <- playground$new(playground = pg)
         }
       })
 
@@ -166,9 +173,10 @@ App <- R6::R6Class(
             return()
           }
 
-          private$store$pg <- playground$new(playground = pg)
-
           removeModal()
+
+          private$setupModules()
+          private$store$pg <- playground$new(playground = pg)
         }
       })
 
@@ -190,8 +198,12 @@ App <- R6::R6Class(
         stopApp()
       })
 
-      private$body$setupModules(private$store)
-      private$initialModal(input)
+      if (app_prod()) {
+        private$initialModal(input)
+      } else {
+        private$setupModules()
+        private$store$pg <- playground$new("dev-test")
+      }
       session$userData$sidebar <- reactive(input$sidebar)
     },
 
