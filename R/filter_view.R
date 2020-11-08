@@ -259,7 +259,7 @@ FilterView <- R6::R6Class(
           configurationsIter <- rbind(configurationsIter, ids)
         }
 
-        if (input$descentId != "none") {
+        if (!is.null(input$descentId) && input$descentId != "none") {
           data <- descentConfigurationTree(store$iraceResults, as.integer(input$descentId))
           if (nrow(data) > 0) {
             ids <- c(as.integer(input$descentId), data$to)
@@ -268,7 +268,7 @@ FilterView <- R6::R6Class(
           }
         }
 
-        if (input$trajectoryId != "none") {
+        if (!is.null(input$trajectoryId) && input$trajectoryId != "none") {
           data <- configurationTrajectory(store$iraceResults, as.integer(input$trajectoryId))
           if (nrow(data) > 0) {
             ids <- c(as.integer(input$trajectoryId), data$to)
