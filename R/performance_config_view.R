@@ -53,11 +53,17 @@ PerformanceConfigView <- R6::R6Class(
         store = store
       )
 
-      config_data <- eventReactive(store$iraceResults, {
-        future(self$configurationByPerformance(isolate(store$iraceResults)))
+      values <- reactiveValues(data = NULL)
+
+      observeEvent(store$iraceResults, {
+        future({
+          self$configurationByPerformance(isolate(store$iraceResults))
+        }) %...>% {
+          values$data <- .
+        }
       })
 
-      filtered_config_data <- reactive({
+      filtered_config_data <- eventReactive(c(values$data, store$updateSandbox, store$sandbox), {
         req(store$updateSandbox)
         req(store$sandbox)
 
@@ -66,8 +72,8 @@ PerformanceConfigView <- R6::R6Class(
         if (length(id) == 0)
           id <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
 
-        config_data() %...>%
-          subset(configuration %in% id)
+        values$data %>%
+          filter(configuration %in% id)
       })
 
       output$solutionCostConfig <- renderPlotly({
@@ -80,29 +86,27 @@ PerformanceConfigView <- R6::R6Class(
           title = list(text = "<b>Configuration</b>")
         )
 
-        filtered_config_data() %...>% {
-          data <- .
+        data <- filtered_config_data()
 
-          plot_ly(data) %>%
-            add_boxplot(
-              x = ~as.factor(configuration),
-              y = ~performance,
-              color = ~as.factor(configuration),
-              showlegend = TRUE,
-              hoverinfo = "y",
-              boxpoints = "all",
-              jitter = 1.0,
-              pointpos = 0.0
-            ) %>%
-            layout(
-              title = "Configuration vs Performance Raw",
-              xaxis = list(title = "Configuration ID", type = "category", fixedrange = T),
-              yaxis = list(title = "Performance Raw", type = "linear", fixedrange = T, tickformat = "e"),
-              hovermode = "closest",
-              legend = legend,
-              showlegend = TRUE
-            )
-        }
+        plot_ly(data) %>%
+          add_boxplot(
+            x = ~as.factor(configuration),
+            y = ~performance,
+            color = ~as.factor(configuration),
+            showlegend = TRUE,
+            hoverinfo = "y",
+            boxpoints = "all",
+            jitter = 1.0,
+            pointpos = 0.0
+          ) %>%
+          layout(
+            title = "Configuration vs Performance Raw",
+            xaxis = list(title = "Configuration ID", type = "category", fixedrange = T),
+            yaxis = list(title = "Performance Raw", type = "linear", fixedrange = T, tickformat = ".03e"),
+            hovermode = "closest",
+            legend = legend,
+            showlegend = TRUE
+          )
       })
 
       observeEvent(session$userData$sidebar(), {

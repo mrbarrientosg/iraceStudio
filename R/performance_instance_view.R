@@ -87,16 +87,16 @@ PerformanceInstanceView <- R6::R6Class(
         best_data() %...>% {
           plot_ly(., source = "distanceBestPlot") %>%
             add_boxplot(
-              x = ~instance,
-              y = ~value,
-              color = ~instance,
+              x = ~as.factor(instance),
+              y = ~distance,
+              color = ~as.factor(instance),
               showlegend = TRUE,
-              text = ~sprintf("<b>ID:</b> %s\n<b>Distance:</b> %g", conf, value),
+              text = ~sprintf("<b>ID:</b> %s\n<b>Distance:</b> %g", configuration, distance),
               hoverinfo = "text",
               boxpoints = "all",
               jitter = 1.0,
               pointpos = 0.0,
-              customdata = ~conf
+              customdata = ~configuration
             ) %>%
             layout(
               title = "Distance to best performance vs Instance",
@@ -123,7 +123,7 @@ PerformanceInstanceView <- R6::R6Class(
             return(data.frame())
           }
 
-          return(subset(., conf %in% event$customdata))
+          return(subset(., configuration %in% event$customdata))
         } %...>% {
           if (is.null(event)) {
             return(data.frame())
@@ -138,11 +138,11 @@ PerformanceInstanceView <- R6::R6Class(
           repeated <- data %>%
             dplyr::group_by(instance) %>%
             summarise(
-              id = unique(conf),
-              `mean distance` = mean(value),
-              min = min(value),
-              max = max(value),
-              nbExecutions = length(value)
+              id = unique(configuration),
+              `mean distance` = mean(distance),
+              min = min(distance),
+              max = max(distance),
+              nbExecutions = length(distance)
             )
 
           return(repeated)
@@ -225,36 +225,30 @@ PerformanceInstanceView <- R6::R6Class(
     },
 
     bestConfigurationByInstances = function(iraceResults, configurations = iraceResults$allConfigurations$.ID.) {
-      data <- data.frame()
+      exp <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
 
-      experiments <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
-
-      min <- apply(experiments, 1, function(row) {
+      min <- apply(exp, 1, function(row) {
         if (all(is.na(row)))
           return(NA)
         else
           min(row, na.rm = T)
       })
 
-      for (idx in seq_along(min)) {
-        if (is.na(min[idx])) {
-          next
-        }
+      exp <- 100 * (min[row(exp)] - exp) / min[row(exp)]
+      exp[is.nan(exp)] <- 0.0 # Replace nan values with 0
 
-        row <- experiments[idx, , drop = FALSE]
-        row <- row[, which(!is.na(row)), drop = F]
-        values <- 100 * ((row - min[idx]) / min[idx])
-        conf <- colnames(values)
-        values <- as.vector(values)
-        instance <- iraceResults$state$.irace$instancesList[idx, "instance"]
-        instances <- rep(instance, length(values))
-        data <- rbind(data, data.frame(instance = instances, conf = conf, value = values))
-      }
+      instances <- iraceResults$state$.irace$instancesList[rownames(exp), "instance"]
+      rownames(exp) <- sort(instances)
 
-      data$instance <- factor(data$instance)
-      data <- data[order(data$instance), ]
+      distance <- c(exp)
+      configuration <- as.numeric(colnames(exp)[col(exp)])
+      instance <- as.numeric(rownames(exp)[row(exp)])
 
-      return(data)
+      df <- data.frame(distance = distance, configuration = configuration, instance = instance)
+      df <- df[complete.cases(df),]
+
+      print(df)
+      return(df)
     },
 
     configurationByIntances = function(iraceResults) {
