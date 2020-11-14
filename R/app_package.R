@@ -15,12 +15,9 @@
 #' @import irace
 #' @import promises
 #' @import future
-#' @import knitr
-#' @import rmarkdown
 #' @import shinyWidgets
 #' @import shinyFiles
 #' @import magick
-#' @import pdftools
 #' @import ipc
 #' @import fs
 #' @import logger
@@ -32,4 +29,5 @@
 #' @import shinycssloaders
 #' @import sortable
 #' @import htmlwidgets
+#' @import shinyhelper
 NULL
