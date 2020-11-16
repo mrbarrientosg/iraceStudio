@@ -63,11 +63,3 @@ hr {
 body {
     background-color: #f2f3f8;
 }
-
-:root {
-    --primary: #007aff;
-}
-
-.shinyhelper-container {
-    color: var(--primary);
-}
