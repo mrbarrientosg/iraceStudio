@@ -59,13 +59,15 @@ IraceOptionTab <- R6::R6Class(
       observeEvent(c(update$id, update$section), {
         req(update$id)
         req(update$section)
-        if (update$section != .section) {
+        isolate({
+          if (update$section != .section) {
           scenarioOptions %>%
             filter(id == update$id) %>%
             apply(1, function(row) {
               private$updateInput(row, session, store)
             })
-        }
+          }
+        })
       })
 
       observeEvent(input$elitist, {
