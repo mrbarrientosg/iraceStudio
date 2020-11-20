@@ -247,7 +247,6 @@ PerformanceInstanceView <- R6::R6Class(
       df <- data.frame(distance = distance, configuration = configuration, instance = instance)
       df <- df[complete.cases(df),]
 
-      print(df)
       return(df)
     },
 

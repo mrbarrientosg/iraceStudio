@@ -122,7 +122,7 @@ IraceOptionTab <- R6::R6Class(
         pickerInput(inputId = ns(data$id), label = data$name, choices = data$values, selected = default, options = list(size = 8))
       }
 
-      input %>% shinyhelper::helper(type = "inline", title = data$name, content = data$description, icon = "info-circle")
+      input %>% shinyhelper::helper(type = "inline", colour = "var(--blue)", title = data$name, content = data$description, icon = "info-circle")
     },
 
     addInputInfo = function(option, input, inputId) {

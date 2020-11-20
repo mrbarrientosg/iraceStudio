@@ -33,5 +33,4 @@ runIraceStudio <- function(port = 4350, ...) {
     ),
     golem_opts = list(...)
   )
-
 }
