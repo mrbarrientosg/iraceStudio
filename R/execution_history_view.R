@@ -16,7 +16,9 @@ ExecutionsHistoryView <- R6::R6Class(
         fluidRow(
           column(
             width = 8,
-            h2("History")
+            h2("History"),
+            p("View the output of previous irace executions. 
+              Use the execution selector (right) to select the execution to display.")
           ),
           column(
             width = 4,

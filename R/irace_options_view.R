@@ -10,7 +10,15 @@ IraceOptionsView <- R6::R6Class(
           class = "sub-header",
           column(
             width = 10,
-            h2("Irace Options")
+            h2("Irace Options"),
+            HTML("Set options for your scenario:<br>
+                  <ul>
+                  <li>you do not need to set all options, default options values are assigned</li>
+                  <li>most commonly used options are listed in <b>Quick Options</b> tab </li>
+                  <li>for a quick setup, just define either <b>maxExperiments</b> or <b>maxTime</b> options </li>
+                  </ul>
+                  Check each option information for details, or go to the irace package 
+                 <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
           ),
           column(
             width = 2,

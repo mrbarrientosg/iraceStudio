@@ -28,7 +28,8 @@ ReportView <- R6::R6Class(
           style = "height: 90px;",
           column(
             width = 5,
-            h2("Report")
+            h2("Report"),
+            p("(Development) View here the irace execution report")
           ),
           column(
             width = 7,

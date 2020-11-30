@@ -32,12 +32,12 @@ Sidebar <- R6::R6Class(
               tabName = "scenario_parameters"
             ),
             bs4Dash::bs4SidebarMenuSubItem(
-              text = "Train Instances",
-              tabName = "scenario_train_instances"
-            ),
-            bs4Dash::bs4SidebarMenuSubItem(
               text = "Target Scripts",
               tabName = "scenario_target_scripts"
+            ),
+            bs4Dash::bs4SidebarMenuSubItem(
+              text = "Train Instances",
+              tabName = "scenario_train_instances"
             ),
             bs4Dash::bs4SidebarMenuSubItem(
               text = "Initial Configurations",
@@ -67,14 +67,6 @@ Sidebar <- R6::R6Class(
 
           bs4Dash::bs4SidebarMenuItem(
             text = strong("Visualization"),
-            bs4Dash::bs4SidebarMenuSubItem(
-              text = "Sandbox",
-              tabName = "visualization_sandbox"
-            ),
-            bs4Dash::bs4SidebarMenuSubItem(
-              text = "Filter",
-              tabName = "visualization_filter"
-            ),
             bs4Dash::bs4SidebarMenuItem(
               text = strong("Performance"),
               bs4SidebarMenuSubItem(
@@ -85,6 +77,14 @@ Sidebar <- R6::R6Class(
                 text = "Instance",
                 tabName = "visualization_by_instance"
               )
+            ),
+            bs4Dash::bs4SidebarMenuSubItem(
+              text = "Sandbox",
+              tabName = "visualization_sandbox"
+            ),
+            bs4Dash::bs4SidebarMenuSubItem(
+              text = "Filter",
+              tabName = "visualization_filter"
             )
           ),
 

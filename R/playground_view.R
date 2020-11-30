@@ -11,7 +11,14 @@ PlaygroundView <- R6::R6Class(
       tagList(
         div(class = "sub-header",
           h2("Playground"),
-          p("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae orci ex. Cras porttitor, dolor in consequat pellentesque, tellus risus suscipit turpis, et aliquam nisl nunc at ante. Proin ut purus enim. Cras pretium sed massa a dictum. Sed id auctor mi, at bibendum eros. Vestibulum lectus purus, aliquet eget sodales at, consectetur vitae ante. Ut mollis bibendum tortor vel dapibus. Pellentesque eget elit dapibus ipsum tincidunt iaculis. Donec vitae suscipit dolor, congue rutrum turpis. Morbi lobortis ipsum id diam laoreet, vitae mollis nisl maximus. Curabitur tristique vel justo sit amet sagittis. Integer tristique dui nec nunc pellentesque, id placerat sapien suscipit. Integer imperdiet nibh id tristique vehicula. Aenean sodales interdum mi quis iaculis. Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+          p("The playground contains a set of scenarios that will be availabe within an Irace Studio session. 
+            Check the name of your playground in the center of the upper bar."),
+          p("Add the scenarios you would like to have access in your playground:"),
+          HTML("<ul> 
+               <li> to create a new scenario, click in the add button</li>
+               <li> to import an scenario from an irace Rdata file, click the import button</li>
+               </ul>"),
+          p("Use the selector in the upper right corner to select the active scenario.")
         ),
         fluidRow(
           bs4TabCard(

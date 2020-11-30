@@ -16,7 +16,14 @@ SandboxView <- R6::R6Class(
         fluidRow(
           column(
             width = 8,
-            h2("Sandbox")
+            h2("Sandbox"),
+            p("A sandbox is a set of configurations selected for visualization. "),
+            HTML("<ul>
+                  <li>use the execution selector (right) to select the active irace execution</li>
+                  <li>to create a new sandbox, click on add</li>
+                  <li>by default, a new sandbox contains the final elite configurations</li>
+                  <li>to add more configurations, go to the Filter menu</li>
+                 </ul>")
           ),
           column(
             width = 4,

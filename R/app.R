@@ -17,9 +17,14 @@ App <- R6::R6Class(
         showModal(
           modalDialog(
             title = "Welcome to Irace Studio",
-            "Create, select or import a playground in your workspace.",
+            p("To start, you must select/create playground, click on:"),
+            HTML("<ul>
+                 <li>Select, to open a previuously saved playground in your workspace (Rds file)</li>
+                 <li>Import, to create new playground from an irace Rdata file</li>
+                 <li>New, to create a new playground and start an scenario from scratch</li>
+                 </ul>"),
+            p("If its your first time using Irace Studio, click on New and follow the instructions in Home!"),
             footer = tagList(
-              actionButton(inputId = "new", label = "New", class = "btn-primary"),
               shinyFilesButton(
                 id = "select",
                 label = "Select",
@@ -33,7 +38,8 @@ App <- R6::R6Class(
                 title = "Import a Playground",
                 multiple = FALSE,
                 buttonType = "outline-primary"
-              )
+              ),
+              actionButton(inputId = "new", label = "New", class = "btn-primary")
             )
           )
         )

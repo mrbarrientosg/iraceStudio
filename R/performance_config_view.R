@@ -18,7 +18,13 @@ PerformanceConfigView <- R6::R6Class(
         fluidRow(
           column(
             width = 4,
-            h2("Performance by Configuration")
+            h2("Configuration performance"),
+            p("Visualize training performace by configuration. Select the active execution and sandbox in the selectors."),
+            HTML("<ul>
+                 <li>default sandbox includes final elite configurations</li>
+                 <li>to add configurations in the current sandbox, go to the Filter menu</li>
+                 <li>to create a new sandbox, go to the Sandbox menu</li>
+                 </ul>")
           ),
           column(
             width = 8,

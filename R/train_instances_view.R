@@ -6,7 +6,10 @@ TrainInstancesView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header", h2("Train Instances")),
+        div(class = "sub-header", 
+            h2("Train Instances"),
+            p("Add training instances to perform the configuration. You can import instances from a folder, file, or add them directly in the text box.")
+            ),
         fluidRow(
           class = "sub-header",
           column(

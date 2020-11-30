@@ -12,7 +12,18 @@ ParametersView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header", h2("Parameters")),
+        div(class = "sub-header", 
+            h2("Parameters"),
+            p("Add, remove or modify parameter definitions"),
+            HTML("<ul>
+                 <li>Name: name to identify a parameter in irace (e.g. tabuSize)</li>
+                 <li>Switch: (optional) command line flag to pass the parameter value to the target runner (e.g. --tsize )</li>
+                 <li>Type: parameter type (real, integer, categorical or ordered)</li>
+                 <li>Domain: parameter domain (a range for numerical parameters, or a set for categorical and ordered parameters)</li>
+                 <li>Condition: activation condition (in R) based on the values of other parameters (e.g. searchType == \"tabu\")  </li>
+                 </ul>
+                 For more information, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
+            ),
         fluidRow(
           column(
             width = 8,

@@ -13,7 +13,15 @@ TargetScriptsView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header", h2("Target Scripts")),
+        div(class = "sub-header", 
+            h2("Target Scripts"),
+            p("Add or import target runner and target evaluator scripts."),
+            HTML("<b>Target runner</b><br> The target runner script must receive the following arguments:<br>
+                 <center> &lt;id.configuration&gt; &lt;id.instance&gt; &lt;seed&gt; &lt;instance&gt; [bound] &lt;configuration&gt; </center><br>
+                 the script must execute your algorithm and <b>only</b> print the result found and, optionally, the execution time:
+                 <center>24629&nbsp;&nbsp;&nbsp;20.4</center><br>"), 
+            HTML("For more information and examples, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
+            ),
         fluidRow(
           bs4TabCard(
             id = ns("scripts"),
