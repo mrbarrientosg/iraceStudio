@@ -13,7 +13,11 @@ TestingView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header", h2("Testing")),
+        div(class = "sub-header", 
+            h2("Testing"),
+            HTML("Activate the execution of a test phase in irace for evaluating the best configurations on a different set of problem instances.<br>
+                 For more information, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
+            ),
         fluidRow(
           bs4Card(
             inputId = ns("testingInstances"),
@@ -168,10 +172,10 @@ TestingView <- R6::R6Class(
         playground_emitter$value(playground_events$current_scenario)
 
         obs_value(TRUE)
-        self$testingOptions$ui(inputId = ns("testing"), "testing", store)
+        self$testingOptions$ui(inputId = ns("testing"), "Testing", store, FALSE)
       })
 
-      observeEvent(playground_emitter$value(playground_events$current_scenario), {
+      observeEvent(c(playground_emitter$value(playground_events$current_scenario), store$pg), {
         updateTextAreaInput(
           session = session,
           inputId = "source_instances_file",
@@ -188,7 +192,9 @@ TestingView <- R6::R6Class(
           self$testingOptions$call(
             id = "testing",
             store = store,
-            section = "testing"
+            .section = "Testing",
+            update = NULL,
+            isFast = FALSE
           )
           obs_value(FALSE)
         }

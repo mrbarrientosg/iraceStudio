@@ -75,8 +75,6 @@ UserSectionView <- R6::R6Class(
           self$remove_shiny_inputs(id, input, ns)
         }
 
-        req(!is.null(store$currentExecution))
-
         report <- store$currentExecution$get_report()
 
         data <- report$get_data()
@@ -120,7 +118,7 @@ UserSectionView <- R6::R6Class(
             })
           })
         }
-      }, ignoreNULL = FALSE, ignoreInit = TRUE)
+      })
 
       observeEvent(input$addSection, {
         removeModal()

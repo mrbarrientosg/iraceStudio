@@ -6,7 +6,14 @@ UIOptionsView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header", h2("UI Options")),
+        div(class = "sub-header",
+          h2("UI Options"),
+          p("Set here Irace Studio options:"),
+          HTML("<ul>
+                <li>define the path where irace is installed in your computer</li>
+                <li>define the folder where Irace Studio data will be saved</li>
+               </ul>")
+        ),
         fluidRow(
           bs4Card(
             title = strong("Options"),

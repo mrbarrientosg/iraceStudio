@@ -17,9 +17,14 @@ App <- R6::R6Class(
         showModal(
           modalDialog(
             title = "Welcome to Irace Studio",
-            "Create, select or import a playground in your workspace.",
+            p("To start, you must select/create playground, click on:"),
+            HTML("<ul>
+                 <li>Select, to open a previuously saved playground in your workspace (Rds file)</li>
+                 <li>Import, to create new playground from an irace Rdata file</li>
+                 <li>New, to create a new playground and start an scenario from scratch</li>
+                 </ul>"),
+            p("If its your first time using Irace Studio, click on New and follow the instructions in Home!"),
             footer = tagList(
-              actionButton(inputId = "new", label = "New", class = "btn-primary"),
               shinyFilesButton(
                 id = "select",
                 label = "Select",
@@ -33,7 +38,8 @@ App <- R6::R6Class(
                 title = "Import a Playground",
                 multiple = FALSE,
                 buttonType = "outline-primary"
-              )
+              ),
+              actionButton(inputId = "new", label = "New", class = "btn-primary")
             )
           )
         )
@@ -56,6 +62,12 @@ App <- R6::R6Class(
     validateName = function(name, path) {
       files <- list.files(path)
       return(any(grepl(name, files) == TRUE))
+    },
+
+    setupModules = function() {
+      shinybusy::show_modal_spinner(text = "Loading workspace...")
+      private$body$setupModules(private$store)
+      shinybusy::remove_modal_spinner()
     }
   ),
 
@@ -78,12 +90,13 @@ App <- R6::R6Class(
         navbar = private$navbar$ui("navbar"),
         sidebar = private$sidebar$ui(),
         body = private$body$ui(),
-        enable_preloader = TRUE,
         loading_background = "#242939"
       )
     },
 
     server = function(input, output, session) {
+      shinyhelper::observe_helpers(withMathJax = TRUE)
+
       private$store$playgroundName <- ""
       private$store$startIrace <- FALSE
       private$store$iraceAlive <- reactiveTimer(intervalMs = 1050)
@@ -95,9 +108,6 @@ App <- R6::R6Class(
       private$store$currentExecution <- NULL
 
       private$navbar$call(id = "navbar", store = private$store)
-      private$body$setupModules(private$store)
-
-      session$userData$sidebar <- reactive(input$sidebar)
 
       workPath <- isolate(private$store$gui$workspacePath)
       workspaceVolume <- list(workspace = workPath)
@@ -136,6 +146,7 @@ App <- R6::R6Class(
               return(invisible())
             }
 
+            private$setupModules()
             private$store$pg <- playground$new(name = name)
           }
         )
@@ -151,9 +162,10 @@ App <- R6::R6Class(
             return()
           }
 
-          private$store$pg <- playground$new(playground = pg)
-
           removeModal()
+
+          private$setupModules()
+          private$store$pg <- playground$new(playground = pg)
         }
       })
 
@@ -167,9 +179,10 @@ App <- R6::R6Class(
             return()
           }
 
-          private$store$pg <- playground$new(playground = pg)
-
           removeModal()
+
+          private$setupModules()
+          private$store$pg <- playground$new(playground = pg)
         }
       })
 
@@ -191,7 +204,13 @@ App <- R6::R6Class(
         stopApp()
       })
 
-      private$initialModal(input)
+      if (app_prod()) {
+        private$initialModal(input)
+      } else {
+        private$setupModules()
+        private$store$pg <- playground$new("dev-test")
+      }
+      session$userData$sidebar <- reactive(input$sidebar)
     },
 
     setupLogger = function() {

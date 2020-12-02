@@ -10,7 +10,9 @@ ForbiddenView <- R6::R6Class(
           class = "sub-header",
           column(
             width = 10,
-            h2("Forbidden Configurations")
+            h2("Forbidden Configurations"), 
+            HTML("Forbid parameter settings combinations for the configuration process.<br>
+                 For more information and examples, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
           ),
           column(
             width = 2,
@@ -100,7 +102,7 @@ ForbiddenView <- R6::R6Class(
         store$pg$add_forbidden(input$conditions)
       }, ignoreInit = TRUE)
 
-      observeEvent(playground_emitter$value(playground_events$current_scenario), {
+      observeEvent(c(playground_emitter$value(playground_events$current_scenario), store$pg), {
         updateAceEditor(
           session = session,
           editorId = "conditions",

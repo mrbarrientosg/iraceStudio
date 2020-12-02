@@ -1,6 +1,7 @@
 Body <- R6::R6Class(
   classname = "Body",
   public = list(
+    homeView = NULL,
     uiOptionsView = NULL,
     playgroundView = NULL,
     iraceOptionsView = NULL,
@@ -23,6 +24,7 @@ Body <- R6::R6Class(
     userSectionView = NULL,
 
     initialize = function() {
+      self$homeView <- HomeView$new("welcome")
       self$uiOptionsView <- UIOptionsView$new("ui_options")
       self$playgroundView <- PlaygroundView$new("playground")
       self$iraceOptionsView <- IraceOptionsView$new("scenario_irace_options")
@@ -48,6 +50,10 @@ Body <- R6::R6Class(
       bs4Dash::bs4DashBody(
         addExternalResources(),
         bs4TabItems(
+          bs4TabItem(
+            tabName = "home",
+            self$homeView$ui()
+          ),
           bs4TabItem(
             tabName = "ui_options",
             self$uiOptionsView$ui()
@@ -101,12 +107,12 @@ Body <- R6::R6Class(
             self$filterView$ui()
           ),
           bs4TabItem(
-            tabName = "visualization_by_instance",
-            self$performanceInstance$ui()
-          ),
-          bs4TabItem(
             tabName = "visualization_by_config",
             self$performanceConfig$ui()
+          ),
+          bs4TabItem(
+            tabName = "visualization_by_instance",
+            self$performanceInstance$ui()
           ),
           bs4TabItem(
             tabName = "report",
@@ -121,6 +127,7 @@ Body <- R6::R6Class(
     },
 
     setupModules = function(store) {
+      self$homeView$call(store = store)
       self$uiOptionsView$call(store = store)
       self$playgroundView$call(store = store)
       self$iraceOptionsView$call(store = store)

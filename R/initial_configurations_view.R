@@ -6,7 +6,11 @@ InitialConfigurationsView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header", h2("Initial Configurations")),
+        div(class = "sub-header", 
+            h2("Initial Configurations"),
+            HTML("Provide initial parameter settings for starting the configuration process.<br>
+                 For more information and examples, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
+            ),
         fluidRow(
           column(
             width = 8,
@@ -82,7 +86,7 @@ InitialConfigurationsView <- R6::R6Class(
         }
       })
 
-      observeEvent(playground_emitter$value(playground_events$current_scenario), {
+      observeEvent(c(playground_emitter$value(playground_events$current_scenario), store$pg), {
         values$configurations <- store$pg$get_configurations()
       })
 

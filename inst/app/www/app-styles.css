@@ -51,6 +51,11 @@
     border-radius: .25rem !important;
 }
 
+.shinyhelper-wrapper {
+    width: 300px;
+    max-width: 100%;
+}
+
 hr {
     border-top: 1px solid #f0f0f0;
 }
@@ -58,4 +63,3 @@ hr {
 body {
     background-color: #f2f3f8;
 }
-

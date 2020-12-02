@@ -850,6 +850,8 @@ playground <- R6::R6Class(
     get_irace_path = function() private$iracePath,
     set_irace_path = function(path) private$iracePath <- path,
 
+    get_current_scenario = function() private$current_scenario,
+
     change_current_scenario = function(id) {
       scenario <- private$scenarios[[id]]
       private$current_scenario <- scenario

@@ -1,7 +1,8 @@
 createHiddenDirectory <- function(path) {
   if (!dir.exists(path)) {
     dir.create(path)
-    if (.Platform$OS.type == "windows") { # Invisible directory in windows
+    if (.Platform$OS.type == "windows") {
+      # Invisible directory in windows
       system2(command = "attrib", args = paste("+h", path))
     }
   }
@@ -124,7 +125,7 @@ create_target_runner_file <- function(path, pg, name = "target-runner") {
     path <- file.path(path, name)
 
     if (.Platform$OS.type == "windows") {
-      path <- paste0(path,  ".bat")
+      path <- paste0(path, ".bat")
     }
   }
 
@@ -140,7 +141,7 @@ create_target_evaluator_file <- function(path, pg, name = "target-evaluator") {
     path <- file.path(path, name)
 
     if (.Platform$OS.type == "windows") {
-      path <- paste0(path,  ".bat")
+      path <- paste0(path, ".bat")
     }
   }
 
@@ -212,6 +213,110 @@ checkPath <- function(path) {
   return(!is.null(path) && fs::is_absolute_path(path) && file.exists(path))
 }
 
+importScenario <- function(name, path, scenario, onlyOptions = FALSE) {
+  log_info("Load scenario {path}")
+  .scenario <- if (grepl(".Rdata", name, fixed = TRUE)) {
+    load(path)
+    scenario$add_parameter(extract.parameters(iraceResults$parameters))
+    if (nrow(iraceResults$allConfigurations) != 0) {
+      exe <- execution$new(name = "execution-1")
+      exe$set_irace_results(iraceResults)
+      scenario$add_execution(exe)
+    }
+    aux <- iraceResults$scenario
+    rm(iraceResults)
+    aux
+  } else {
+    tryCatch({
+      irace::readScenario(filename = path)
+    }, error = function(err) {
+      log_error("{err}")
+      return(NULL)
+    })
+  }
+
+  if (!onlyOptions) {
+    if (is.null(.scenario)) {
+      log_error("Can't load scenario file")
+      return(FALSE)
+    }
+
+    path <- scenario$targetRunner
+    if (checkPath(path)) {
+      log_info("Add target runner from {path}")
+      scenario$set_target_runner(paste(readLines(path), collapse = "\n"))
+    }
+
+    path <- scenario$targetEvaluator
+    if (checkPath(path)) {
+      log_info("Add target evaluator from {path}")
+      scenario$set_target_evaluator(paste(readLines(path), collapse = "\n"))
+    }
+
+    path <- scenario$parameterFile
+    parameters <- NULL
+    if (checkPath(path) && nrow(scenario$get_parameters()) == 0) {
+      log_info("Add parameters from {path}")
+      parameters <- tryCatch({
+        data <- irace::readParameters(file = path)
+        scenario$add_parameter(extract.parameters(data))
+        data
+      }, error = function(err) {
+        log_error("{err}")
+      })
+    }
+
+    path <- scenario$forbiddenFile
+    if (checkPath(path)) {
+      log_info("Add forbidden file from {path}")
+      tryCatch({
+        irace:::readForbiddenFile(path)
+        source <- readLines(path)
+        scenario$add_forbidden(source)
+      }, error = function(err) {
+        log_error("{err}")
+      })
+    }
+
+    path <- scenario$configurationsFile
+    if (checkPath(path)) {
+      log_info("Add initial configurations {path}")
+
+      tryCatch({
+        if (is.null(parameters)) {
+          parameters <- parameters_as_irace(scenario$get_parameters())
+        }
+        config <- irace::readConfigurationsFile(filename = path, parameters = parameters)
+        scenario$add_configuration(config)
+      }, error = function(err) {
+        log_error("{err}")
+      })
+    }
+  }
+
+  for (opt in names(.scenario)) {
+    if (!availableOption(opt))
+      next
+
+    if (is.function(.scenario[[opt]]))
+      next
+
+    log_info("{opt}: {as.character(.scenario[[opt]])}")
+    scenario$add_irace_option(opt, .scenario[[opt]])
+  }
+
+  scenario$clear_scenario_temp()
+
+  return(TRUE)
+}
+
+availableOption <- function(option) {
+  if (option %in% scenarioOptions$id) {
+    return(TRUE)
+  }
+  return(FALSE)
+}
+
 descentConfigurationTree <- function(iraceResults, configuration_id) {
 
   recursiveChilds <- function(id) {
@@ -224,7 +329,7 @@ descentConfigurationTree <- function(iraceResults, configuration_id) {
     ids <- data.frame(from = id, to = childs$.ID.)
 
     for (row in seq_len(nrow(childs))) {
-      childId <- childs[row, ]
+      childId <- childs[row,]
       ids <- rbind(ids, recursiveChilds(childId))
     }
 
@@ -281,13 +386,13 @@ treePlot <- function(data, title) {
   edge_shapes <- list()
 
   for (i in seq_len(ne)) {
-    v0 <- es[i, ]$V1
-    v1 <- es[i, ]$V2
+    v0 <- es[i,]$V1
+    v1 <- es[i,]$V2
 
     if (v0 == v1)
       next
 
-    edge_shape <- list(
+      edge_shape <- list(
       type = "line",
       layer = "below",
       line = list(color = "#030303", width = 0.3),

@@ -18,7 +18,13 @@ PerformanceInstanceView <- R6::R6Class(
         fluidRow(
           column(
             width = 4,
-            h2("Performance by Instance")
+            h2("Performance by Instance"),
+            p("Visualize training performace by instance. Select the active execution and sandbox in the selectors."), 
+            HTML("<ul>
+                 <li>default sandbox includes data of final elite configurations</li>
+                 <li>to add configurations in the current sandbox, go to the Filter menu</li>
+                 <li>to create a new sandbox, go to the Sandbox menu</li>
+                 </ul>")
           ),
           column(
             width = 8,
@@ -30,22 +36,23 @@ PerformanceInstanceView <- R6::R6Class(
         ),
         fluidRow(
           bs4Card(
-            title = strong("Distance to best"),
-            collapsible = FALSE,
-            closable = FALSE,
-            width = 12,
-            plotlyOutput(outputId = ns("distanceBestPlot")) %>%
-              shinycssloaders::withSpinner(type = 6),
-            br(),
-            DT::dataTableOutput(outputId = ns("selectedPointTable"))
-          ),
-          bs4Card(
-            title = strong("Configuration"),
+            title = strong("Raw performance"),
             collapsible = FALSE,
             closable = FALSE,
             width = 12,
             plotlyOutput(outputId = ns("configurationPlot")) %>%
               shinycssloaders::withSpinner(type = 6)
+          ),
+          bs4Card(
+            title = strong("Distance to best"),
+            collapsible = FALSE,
+            closable = FALSE,
+            width = 12,
+            strong("Click a point to see more info."),
+            plotlyOutput(outputId = ns("distanceBestPlot")) %>%
+              shinycssloaders::withSpinner(type = 6),
+            br(),
+            DT::dataTableOutput(outputId = ns("selectedPointTable"))
           )
         )
       )
@@ -67,7 +74,7 @@ PerformanceInstanceView <- R6::R6Class(
           config <- isolate(store$sandbox$getConfigurations()$ID)
 
           if (length(config) == 0)
-            config <- isolate(store$iraceResults$allConfigurations$.ID.)
+            config <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
 
           self$bestConfigurationByInstances(isolate(store$iraceResults), config)
         })
@@ -86,29 +93,21 @@ PerformanceInstanceView <- R6::R6Class(
         best_data() %...>% {
           plot_ly(., source = "distanceBestPlot") %>%
             add_boxplot(
-              x = ~instance,
-              y = ~value,
-              color = ~instance,
-              boxpoints = FALSE,
-              hoverinfo = "none",
-              hoveron = "boxes",
-              legendgroup = ~instance,
-              showlegend = TRUE
-            ) %>%
-            add_markers(
-              x = ~jitter,
-              y = ~value,
-              marker = list(size = 5),
-              color = ~instance,
-              customdata = ~conf,
-              hovertemplate = "<b>y:</b> %{y:.3f} <br><b>ID: %{customdata}</b><extra></extra>",
-              legendgroup = ~instance,
-              showlegend = FALSE
+              x = ~as.factor(instance),
+              y = ~distance,
+              color = ~as.factor(instance),
+              showlegend = TRUE,
+              text = ~sprintf("<b>ID:</b> %s\n<b>Distance:</b> %g", configuration, distance),
+              hoverinfo = "text",
+              boxpoints = "all",
+              jitter = 1.0,
+              pointpos = 0.0,
+              customdata = ~configuration
             ) %>%
             layout(
-              title = "Distance to best vs Instance",
-              xaxis = list(title = "Instance", tickvals = ~instance, ticktext = ~instance, fixedrange = T),
-              yaxis = list(title = "Distance to best", type = "linear", fixedrange = T),
+              title = "Distance to best performance vs Instance",
+              xaxis = list(title = "Instance", type = "category", fixedrange = T),
+              yaxis = list(title = "Distance to best performance", type = "linear", fixedrange = T, tickformat = ".03g"),
               legend = legend,
               hovermode = "closest",
               showlegend = TRUE
@@ -130,7 +129,7 @@ PerformanceInstanceView <- R6::R6Class(
             return(data.frame())
           }
 
-          return(subset(., conf %in% event$customdata))
+          return(subset(., configuration %in% event$customdata))
         } %...>% {
           if (is.null(event)) {
             return(data.frame())
@@ -142,16 +141,14 @@ PerformanceInstanceView <- R6::R6Class(
             return(data.frame())
           }
 
-          data <- data[, !(colnames(data) %in% "jitter"), drop = F]
-
           repeated <- data %>%
             dplyr::group_by(instance) %>%
             summarise(
-              id = unique(conf),
-              mean = mean(value),
-              min = min(value),
-              max = max(value),
-              nbExecutions = length(value)
+              id = unique(configuration),
+              `mean distance` = mean(distance),
+              min = min(distance),
+              max = max(distance),
+              nbExecutions = length(distance)
             )
 
           return(repeated)
@@ -180,12 +177,13 @@ PerformanceInstanceView <- R6::R6Class(
 
       config_data <- eventReactive(c(store$iraceResults, store$updateSandbox), {
         future({
-          config <- isolate(store$sandbox$getConfigurations()$ID)
+          id <- isolate(store$sandbox$getConfigurations()$ID)
 
-          if (length(config) == 0)
-            config <- isolate(store$iraceResults$allConfigurations$.ID.)
+          if (length(id) == 0)
+            id <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
 
-          self$configurationByIntances(isolate(store$iraceResults), config)
+          self$configurationByIntances(isolate(store$iraceResults)) %>%
+            subset(configuration %in% id)
         })
       })
 
@@ -202,31 +200,22 @@ PerformanceInstanceView <- R6::R6Class(
         config_data() %...>% {
           plot_ly(.) %>%
             add_boxplot(
-              x = ~instance,
-              y = ~value,
-              color = ~instance,
-              boxpoints = FALSE,
-              hoverinfo = "none",
-              hoveron = "boxes",
-              legendgroup = ~instance,
-              showlegend = TRUE
-            ) %>%
-            add_markers(
-              x = ~jitter,
-              y = ~value,
-              marker = list(size = 5),
-              color = ~instance,
-              customdata = ~id,
-              hovertemplate = "<b>y:</b> %{y:.3f} <br><b>ID: %{customdata}</b><extra></extra>",
-              legendgroup = ~instance,
-              showlegend = FALSE
+              x = ~as.factor(instance),
+              y = ~performance,
+              color = ~as.factor(instance),
+              showlegend = TRUE,
+              text = ~sprintf("<b>ID:</b> %s\n<b>Performance:</b> %g", configuration, performance),
+              hoverinfo = "text",
+              boxpoints = "all",
+              jitter = 1.0,
+              pointpos = 0.0
             ) %>%
             layout(
-              title = "Configuration vs Instance",
-              xaxis = list(title = "Instance", tickvals = ~instance, ticktext = ~instance, fixedrange = T),
-              yaxis = list(title = "Configuration", type = "linear", fixedrange = T),
-              legend = legend,
+              title = "Performance Raw vs Instance",
+              xaxis = list(title = "Instance", type = "category", fixedrange = T),
+              yaxis = list(title = "Performance Raw", type = "linear", fixedrange = T, tickformat = ".03e"),
               hovermode = "closest",
+              legend = legend,
               showlegend = TRUE
             )
         }
@@ -242,55 +231,44 @@ PerformanceInstanceView <- R6::R6Class(
     },
 
     bestConfigurationByInstances = function(iraceResults, configurations = iraceResults$allConfigurations$.ID.) {
-      data <- data.frame()
+      exp <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
 
-      experiments <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
-
-      min <- apply(experiments, 1, function(row) {
+      min <- apply(exp, 1, function(row) {
         if (all(is.na(row)))
           return(NA)
         else
           min(row, na.rm = T)
       })
 
-      for (idx in seq_along(min)) {
-        if (is.na(min[idx])) {
-          next
-        }
+      exp <- 100 * (min[row(exp)] - exp) / min[row(exp)]
+      exp[is.nan(exp)] <- 0.0 # Replace nan values with 0
 
-        row <- experiments[idx, , drop = FALSE]
-        row <- row[, which(!is.na(row)), drop = F]
-        values <- 100 * ((row - min[idx]) / min[idx])
-        conf <- colnames(values)
-        values <- as.vector(values)
-        instance <- iraceResults$state$.irace$instancesList[idx, "instance"]
-        instances <- rep(instance, length(values))
-        data <- rbind(data, data.frame(instance = instances, conf = conf, value = values))
-      }
+      instances <- iraceResults$state$.irace$instancesList[rownames(exp), "instance"]
+      rownames(exp) <- sort(instances)
 
-      data$jitter <- jitter(as.numeric(data$instance))
-      data$instance <- factor(data$instance)
-      data <- data[order(data$instance), ]
+      distance <- c(exp)
+      configuration <- as.numeric(colnames(exp)[col(exp)])
+      instance <- as.numeric(rownames(exp)[row(exp)])
 
-      return(data)
+      df <- data.frame(distance = distance, configuration = configuration, instance = instance)
+      df <- df[complete.cases(df),]
+
+      return(df)
     },
 
-    configurationByIntances = function(iraceResults, configurations = iraceResults$allConfigurations$.ID.) {
-      experiments <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
+    configurationByIntances = function(iraceResults) {
+      exp <- iraceResults$experiments
+      instances <- iraceResults$state$.irace$instancesList[rownames(exp), "instance"]
+      rownames(exp) <- sort(instances)
 
-      id <- rownames(experiments)
-      instances <- iraceResults$state$.irace$instancesList[id, "instance"]
-      rownames(experiments) <- sort(instances)
+      performance <- c(exp)
+      configuration <- as.numeric(colnames(exp)[col(exp)])
+      instance <- as.numeric(rownames(exp)[row(exp)])
 
-      data <- as.data.frame(as.table(experiments))
-      data <- na.omit(data)
+      df <- data.frame(performance = performance, configuration = configuration, instance = instance)
+      df <- df[complete.cases(df),]
 
-      colnames(data) <- c("instance", "id", "value")
-
-      data$jitter <- jitter(as.numeric(data$instance))
-      data <- data[order(data$instance), ]
-
-      return(data)
+      return(df)
     }
   )
 )

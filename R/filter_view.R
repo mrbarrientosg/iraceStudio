@@ -15,12 +15,17 @@ FilterView <- R6::R6Class(
 
     ui = function() {
       ns <- NS(self$id)
-
       tagList(
         fluidRow(
           column(
             width = 4,
-            h2("Filter")
+            h2("Filter"), 
+            p("(Development) Search and add new configurations to the current sandbox."),
+            HTML("<ul>
+                  <li>search for configurations in the filter section. Once you have set all conditions, click in the filter button below</li>
+                  <li>select configurations in the configuration section</li>
+                  <li>see the list of selected configurations in the sanbox section</li>
+                 </ul>")
           ),
           column(
             width = 8,
@@ -37,6 +42,14 @@ FilterView <- R6::R6Class(
             collapsible = FALSE,
             closable = FALSE,
             width = 12,
+            p("Add conditions to search for configurations, you may search them by:"),
+            HTML("<ul>
+                  <li>status (elite/non-elites)</li>
+                  <li>iteration</li>
+                  <li>parameter values</li>
+                  <li>configuration ID</li>
+                  <li>...</li> 
+                  </ul>"),
             checkboxInput(
               inputId = ns("elites"),
               label = "Elites",
@@ -259,7 +272,7 @@ FilterView <- R6::R6Class(
           configurationsIter <- rbind(configurationsIter, ids)
         }
 
-        if (input$descentId != "none") {
+        if (!is.null(input$descentId) && input$descentId != "none") {
           data <- descentConfigurationTree(store$iraceResults, as.integer(input$descentId))
           if (nrow(data) > 0) {
             ids <- c(as.integer(input$descentId), data$to)
@@ -268,7 +281,7 @@ FilterView <- R6::R6Class(
           }
         }
 
-        if (input$trajectoryId != "none") {
+        if (!is.null(input$trajectoryId) && input$trajectoryId != "none") {
           data <- configurationTrajectory(store$iraceResults, as.integer(input$trajectoryId))
           if (nrow(data) > 0) {
             ids <- c(as.integer(input$trajectoryId), data$to)

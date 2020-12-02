@@ -18,7 +18,13 @@ PerformanceConfigView <- R6::R6Class(
         fluidRow(
           column(
             width = 4,
-            h2("Performance by Configuration")
+            h2("Configuration performance"),
+            p("Visualize training performace by configuration. Select the active execution and sandbox in the selectors."),
+            HTML("<ul>
+                 <li>default sandbox includes final elite configurations</li>
+                 <li>to add configurations in the current sandbox, go to the Filter menu</li>
+                 <li>to create a new sandbox, go to the Sandbox menu</li>
+                 </ul>")
           ),
           column(
             width = 8,
@@ -53,20 +59,27 @@ PerformanceConfigView <- R6::R6Class(
         store = store
       )
 
-      config_data <- eventReactive(store$iraceResults, {
-        future(self$configurationByPerformance(isolate(store$iraceResults)))
+      values <- reactiveValues(data = NULL)
+
+      observeEvent(store$iraceResults, {
+        future({
+          self$configurationByPerformance(isolate(store$iraceResults))
+        }) %...>% {
+          values$data <- .
+        }
       })
 
-      filtered_config_data <- reactive({
+      filtered_config_data <- eventReactive(c(values$data, store$updateSandbox, store$sandbox), {
         req(store$updateSandbox)
         req(store$sandbox)
 
-        config <- store$sandbox$getConfigurations()$ID
+        id <- store$sandbox$getConfigurations()$ID
 
-        if (length(config) == 0)
-          config <- store$iraceResults$allConfigurations$.ID.
+        if (length(id) == 0)
+          id <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
 
-        config_data() %...>% subset(id %in% config)
+        values$data %>%
+          filter(configuration %in% id)
       })
 
       output$solutionCostConfig <- renderPlotly({
@@ -79,40 +92,27 @@ PerformanceConfigView <- R6::R6Class(
           title = list(text = "<b>Configuration</b>")
         )
 
-        filtered_config_data() %...>% {
-          data <- .
+        data <- filtered_config_data()
 
-          data %>%
-            plot_ly() %>%
-            add_boxplot(
-              x = ~id,
-              y = ~value,
-              color = ~id,
-              boxpoints = FALSE,
-              hoverinfo = "none",
-              hoveron = "boxes",
-              legendgroup = ~id,
-              showlegend = TRUE
-            ) %>%
-            add_markers(
-              x = ~jitter,
-              y = ~value,
-              marker = list(size = 5),
-              color = ~id,
-              customdata = ~id,
-              hovertemplate = "<b>y:</b> %{y:.3f} <br><b>ID: %{customdata}</b><extra></extra>",
-              legendgroup = ~id,
-              showlegend = FALSE
-            ) %>%
-            layout(
-              title = "Configuration vs Solution Cost",
-              xaxis = list(title = "Configuration ID", tickvals = ~id, ticktext = ~id, fixedrange = T),
-              yaxis = list(title = "Solution Cost", type = "linear", fixedrange = T),
-              legend = legend,
-              hovermode = "closest",
-              showlegend = TRUE
-            )
-        }
+        plot_ly(data) %>%
+          add_boxplot(
+            x = ~as.factor(configuration),
+            y = ~performance,
+            color = ~as.factor(configuration),
+            showlegend = TRUE,
+            hoverinfo = "y",
+            boxpoints = "all",
+            jitter = 1.0,
+            pointpos = 0.0
+          ) %>%
+          layout(
+            title = "Configuration vs Performance Raw",
+            xaxis = list(title = "Configuration ID", type = "category", fixedrange = T),
+            yaxis = list(title = "Performance Raw", type = "linear", fixedrange = T, tickformat = ".03e"),
+            hovermode = "closest",
+            legend = legend,
+            showlegend = TRUE
+          )
       })
 
       observeEvent(session$userData$sidebar(), {
@@ -124,24 +124,14 @@ PerformanceConfigView <- R6::R6Class(
     },
 
     configurationByPerformance = function(iraceResults) {
-      experiments <- iraceResults$experiments
-      data.labels <- colnames(experiments)
-      if (is.null(data.labels)) data.labels <- seq_len(ncol(experiments))
+      exp <- iraceResults$experiments
+      performance <- c(exp)
+      configuration <- as.numeric(colnames(exp)[col(exp)])
 
-      data <- data.frame()
+      df <- data.frame(performance = performance, configuration = configuration)
+      df <- df[complete.cases(df),]
 
-      for (i in seq_len(ncol(experiments))) {
-        values <- as.vector(experiments[,i])
-        values <- values[!is.na(values)]
-        config <- rep(data.labels[i], length(values))
-        data <- rbind(data, data.frame(id = config, value = values))
-      }
-
-      data$jitter <- jitter(as.numeric(data$id))
-      data$id <- factor(data$id)
-      data <- data[order(data$id), ]
-
-      return(data)
+      return(df)
     }
   )
 )

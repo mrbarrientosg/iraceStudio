@@ -4,7 +4,7 @@ pkg <- new.env(parent = emptyenv())
 pkg$reportStore <- list()
 
 scenarioOptions <- jsonlite::fromJSON(
-  system.file("app/www/scenarioOptions.json", package = packageName()),
+  system.file("app/static/scenario_options.json", package = packageName()),
   simplifyDataFrame = TRUE,
   flatten = TRUE
 )
@@ -33,5 +33,4 @@ runIraceStudio <- function(port = 4350, ...) {
     ),
     golem_opts = list(...)
   )
-
 }
