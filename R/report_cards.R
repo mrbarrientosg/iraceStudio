@@ -479,7 +479,7 @@ CandidatesCard <- R6::R6Class(
           files <- list.files(path = path, pattern = ".*[.]png", full.names = TRUE)
 
           lapply(files, function(image) {
-            image_uri(image)
+            knitr::image_uri(image)
           })
         }) %...>% {
           progress$set(1.0, detail = "Finishing...")
@@ -613,7 +613,7 @@ CandidatesCard <- R6::R6Class(
           files <- list.files(path = path, pattern = ".*[.]png", full.names = TRUE)
 
           images <- lapply(sort(files), function(image) {
-            image_uri(image)
+            knitr::image_uri(image)
           })
         }) %...>% {
           progress$inc(1.0, detail = "Finishing...")

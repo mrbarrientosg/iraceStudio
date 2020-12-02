@@ -403,10 +403,9 @@ ModalParameter <- R6::R6Class(
           }
           parent$domainList <- domain
           tagList(
-            textInput(ns("domainName"), "Domain name"),
-            uiOutput(ns("domainList")),
-            br(),
-            actionButton(ns("addDomain"), "Add", class = "btn-link")
+            textInput(ns("domainName"), "Domain values (press add)"),
+            actionButton(ns("addDomain"), "Add", class = "btn-link"),
+            uiOutput(ns("domainList"))
           )
         } else {
           domain <- private$checkValue("domain", param)
