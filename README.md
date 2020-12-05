@@ -53,8 +53,12 @@ $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/
 $ brew install poppler libmagic openssl pandoc pandoc-citeproc imagemagick@6
 ```
 ### Install Irace Studio
+Fot installing irace Studio you need to install the devtools package:
+``` r
+install.packages("devtools")
+```
 
-This package can be installed from Gtihub for the moment:
+The Irace Studio package can be installed from Gtihub:
 ``` r
 devtools::install_github("mrbarrientosg/iraceStudio")
 ```
