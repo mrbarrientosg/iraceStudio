@@ -61,7 +61,7 @@ App <- R6::R6Class(
 
     validateName = function(name, path) {
       files <- list.files(path)
-      return(any(grepl(name, files) == TRUE))
+      return(tolower(name) %in% tolower(files))
     },
 
     setupModules = function() {
