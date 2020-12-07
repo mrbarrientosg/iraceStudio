@@ -204,6 +204,9 @@ App <- R6::R6Class(
         stopApp()
       })
 
+      # Force production mode
+      options(golem.app.prod = T)
+
       if (app_prod()) {
         private$initialModal(input)
       } else {
