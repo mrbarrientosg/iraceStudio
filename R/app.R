@@ -61,7 +61,7 @@ App <- R6::R6Class(
 
     validateName = function(name, path) {
       files <- list.files(path)
-      return(any(grepl(name, files) == TRUE))
+      return(tolower(name) %in% tolower(files))
     },
 
     setupModules = function() {
@@ -203,6 +203,9 @@ App <- R6::R6Class(
         self$destroy()
         stopApp()
       })
+
+      # Force production mode
+      options(golem.app.prod = T)
 
       if (app_prod()) {
         private$initialModal(input)
