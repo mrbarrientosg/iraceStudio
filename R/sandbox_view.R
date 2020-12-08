@@ -32,9 +32,9 @@ SandboxView <- R6::R6Class(
           )
         ),
         fluidRow(
-          bs4Card(
+          box(
             id = ns("sandbox_options"),
-            title = "Boxes",
+            title = strong("Boxes"),
             collapsible = FALSE,
             closable = FALSE,
             side = "left",

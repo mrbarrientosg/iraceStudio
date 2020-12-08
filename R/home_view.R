@@ -8,17 +8,16 @@ HomeView <- R6::R6Class(
       tagList(
         div(class = "sub-header", h2("Home")),
         fluidRow(
-          bs4Card(
-            title = NULL,
+          box(
+            title = strong("Welcome to Irace Studio!"),
             collapsible = FALSE,
             closable = FALSE,
             width = 12,
-            strong("Welcome to Irace Studio!"),
             p("This software is an interface to execute and visualize irace data."),
             p("The irace package is an algorithm configuration tool currently available as an R package:"),
             HTML("<center><a href= \"https://iridia.ulb.ac.be/irace/\" target=\"_blank\">https://iridia.ulb.ac.be/irace/</a></center>"),
             p(""),
-            HTML("<b>Important</b>: This is development version. If you have any problem, comment, or suggestion about his software, 
+            HTML("<b>Important</b>: This is development version. If you have any problem, comment, or suggestion about his software,
                  please contact us! we appreacite your input.<br>"),
             HTML("<center><a href= \"https://groups.google.com/d/forum/irace-package\" target=\"_blank\">The irace package Google group</a></center>"),
             HTML("<center><a href= \"https://github.com/mrbarrientosg/iraceStudio\" target=\"_blank\">Irace Studio Github repository</a></center>"),

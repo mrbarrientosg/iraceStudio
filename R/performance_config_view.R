@@ -35,7 +35,7 @@ PerformanceConfigView <- R6::R6Class(
           )
         ),
         fluidRow(
-          bs4Card(
+          box(
             title = strong("Configuration Performance"),
             collapsible = FALSE,
             closable = FALSE,

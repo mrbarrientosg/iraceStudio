@@ -15,7 +15,7 @@ UIOptionsView <- R6::R6Class(
                </ul>")
         ),
         fluidRow(
-          bs4Card(
+          box(
             title = strong("Options"),
             collapsible = FALSE,
             closable = FALSE,

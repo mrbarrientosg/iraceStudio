@@ -17,7 +17,7 @@ ExecutionsHistoryView <- R6::R6Class(
           column(
             width = 8,
             h2("History"),
-            p("View the output of previous irace executions. 
+            p("View the output of previous irace executions.
               Use the execution selector (right) to select the execution to display.")
           ),
           column(
@@ -27,7 +27,8 @@ ExecutionsHistoryView <- R6::R6Class(
           )
         ),
         fluidRow(
-          bs4Card(
+          box(
+            title = strong("Output"),
             collapsible = FALSE,
             closable = FALSE,
             width = 12,

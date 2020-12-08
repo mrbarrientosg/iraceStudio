@@ -17,7 +17,7 @@ IraceOptionsView <- R6::R6Class(
                   <li>most commonly used options are listed in <b>Quick Options</b> tab </li>
                   <li>for a quick setup, just define either <b>maxExperiments</b> or <b>maxTime</b> options </li>
                   </ul>
-                  Check each option information for details, or go to the irace package 
+                  Check each option information for details, or go to the irace package
                  <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
           ),
           column(
@@ -93,14 +93,14 @@ IraceOptionsView <- R6::R6Class(
         args <- c(
           self$create_tabs(ns, store, update),
           id = ns("tabs"),
-          title = "",
           collapsible = FALSE,
           closable = FALSE,
-          side = "left",
-          width = 12
+          width = 12,
+          type = "tabs",
+          status = "gray"
         )
 
-        do.call(bs4TabCard, args)
+        do.call(tabBox, args)
       })
     },
 
@@ -116,8 +116,8 @@ IraceOptionsView <- R6::R6Class(
       quick_section <- "Quick Options"
       quick <- gsub(" ", "", quick_section)
 
-      tab <- bs4TabPanel(
-        tabName = quick_section,
+      tab <- tabPanel(
+        quick_section,
         option$ui(inputId = ns(quick), section = quick_section, store = store, isFast = TRUE)
       )
 
@@ -129,8 +129,8 @@ IraceOptionsView <- R6::R6Class(
         section <- data[row, ]
         name <- gsub(" ", "", section)
 
-        tab <- bs4TabPanel(
-          tabName = section,
+        tab <- tabPanel(
+          section,
           option$ui(inputId = ns(name), section = section, store = store, isFast = FALSE)
         )
 

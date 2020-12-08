@@ -11,8 +11,8 @@ UserSectionCard <- R6::R6Class(
     ui = function(inputId, title, value = "") {
       ns <- NS(inputId)
 
-      bs4Card(
-        inputId = ns("card"),
+      box(
+        id = ns("card"),
         title = strong(title),
         collapsible = TRUE,
         closable = TRUE,

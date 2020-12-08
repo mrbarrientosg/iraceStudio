@@ -84,13 +84,13 @@ App <- R6::R6Class(
     },
 
     ui = function() {
-      bs4Dash::bs4DashPage(
+      dashboardPage(
         title = "Irace Studio",
-        sidebar_mini = FALSE,
-        navbar = private$navbar$ui("navbar"),
+        dark = FALSE,
+        header = private$navbar$ui("navbar"),
         sidebar = private$sidebar$ui(),
-        body = private$body$ui(),
-        loading_background = "#242939"
+        body = private$body$ui()
+        #preloader = list(waiter = list(html = spin_1(), color = "#242939"), duration = 5)
       )
     },
 

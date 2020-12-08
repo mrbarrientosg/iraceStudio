@@ -47,78 +47,78 @@ Body <- R6::R6Class(
     },
 
     ui = function() {
-      bs4Dash::bs4DashBody(
+      dashboardBody(
         addExternalResources(),
-        bs4TabItems(
-          bs4TabItem(
+        tabItems(
+          tabItem(
             tabName = "home",
             self$homeView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "ui_options",
             self$uiOptionsView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "playground",
             self$playgroundView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "scenario_irace_options",
             self$iraceOptionsView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "scenario_parameters",
             self$parametersView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "scenario_train_instances",
             self$trainInstancesView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "scenario_target_scripts",
             self$targetScriptsView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "scenario_initial_configurations",
             self$initialConfigurationsView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "scenario_forbidden",
             self$forbiddenView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "scenario_testing",
             self$testingView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "execution_irace_output",
             self$iraceOutputView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "execution_history",
             self$executionsHistoryView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "visualization_sandbox",
             self$sandboxView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "visualization_filter",
             self$filterView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "visualization_by_config",
             self$performanceConfig$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "visualization_by_instance",
             self$performanceInstance$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "report",
             self$reportView$ui()
           ),
-          bs4TabItem(
+          tabItem(
             tabName = "report_user_section",
             self$userSectionView$ui()
           )

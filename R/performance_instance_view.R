@@ -19,7 +19,7 @@ PerformanceInstanceView <- R6::R6Class(
           column(
             width = 4,
             h2("Performance by Instance"),
-            p("Visualize training performace by instance. Select the active execution and sandbox in the selectors."), 
+            p("Visualize training performace by instance. Select the active execution and sandbox in the selectors."),
             HTML("<ul>
                  <li>default sandbox includes data of final elite configurations</li>
                  <li>to add configurations in the current sandbox, go to the Filter menu</li>
@@ -35,7 +35,7 @@ PerformanceInstanceView <- R6::R6Class(
           )
         ),
         fluidRow(
-          bs4Card(
+          box(
             title = strong("Raw performance"),
             collapsible = FALSE,
             closable = FALSE,
@@ -43,7 +43,7 @@ PerformanceInstanceView <- R6::R6Class(
             plotlyOutput(outputId = ns("configurationPlot")) %>%
               shinycssloaders::withSpinner(type = 6)
           ),
-          bs4Card(
+          box(
             title = strong("Distance to best"),
             collapsible = FALSE,
             closable = FALSE,

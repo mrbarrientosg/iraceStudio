@@ -11,25 +11,25 @@ PlaygroundView <- R6::R6Class(
       tagList(
         div(class = "sub-header",
           h2("Playground"),
-          p("The playground contains a set of scenarios that will be availabe within an Irace Studio session. 
+          p("The playground contains a set of scenarios that will be availabe within an Irace Studio session.
             Check the name of your playground in the center of the upper bar."),
           p("Add the scenarios you would like to have access in your playground:"),
-          HTML("<ul> 
+          HTML("<ul>
                <li> to create a new scenario, click in the add button</li>
                <li> to import an scenario from an irace Rdata file, click the import button</li>
                </ul>"),
           p("Use the selector in the upper right corner to select the active scenario.")
         ),
         fluidRow(
-          bs4TabCard(
+          tabBox(
             id = ns("playground_options"),
-            title = "",
             collapsible = FALSE,
             closable = FALSE,
-            side = "left",
             width = 12,
-            bs4TabPanel(
-              tabName = "Scenarios",
+            type = "tabs",
+            status = "gray",
+            tabPanel(
+              "Scenarios",
               fluidRow(
                 column(
                   width = 8,
@@ -61,8 +61,8 @@ PlaygroundView <- R6::R6Class(
               br(),
               DT::dataTableOutput(outputId = ns("scenarios"))
             ),
-            bs4TabPanel(
-              tabName = "Options",
+            tabPanel(
+              "Options",
               disabled(
                 textInput(
                   inputId = ns("playgroundName"),

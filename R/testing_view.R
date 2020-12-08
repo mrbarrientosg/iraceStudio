@@ -13,13 +13,13 @@ TestingView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header", 
+        div(class = "sub-header",
             h2("Testing"),
             HTML("Activate the execution of a test phase in irace for evaluating the best configurations on a different set of problem instances.<br>
                  For more information, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
             ),
         fluidRow(
-          bs4Card(
+          box(
             inputId = ns("testingInstances"),
             title = strong("Testing Options"),
             collapsible = FALSE,
@@ -27,7 +27,7 @@ TestingView <- R6::R6Class(
             width = 12,
             uiOutput(outputId = ns("content"))
           ),
-          bs4Card(
+          box(
             inputId = ns("testingInstances"),
             title = strong("Test Instance File"),
             collapsible = FALSE,

@@ -23,15 +23,12 @@
     top: 0 !important;
 }
 
-.sidebar {
-    padding-top: 4.5rem;
-    height: 100%;
-}
 
 .brand-link {
     background-color: #242939 !important;
     border: 0 !important;
     color: white !important;
+    height: 58px;
 }
 
 .main-header {

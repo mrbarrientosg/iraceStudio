@@ -14,14 +14,14 @@ IraceOutputView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        
+
         fluidRow(
           class = "sub-header",
           column(
             width = 10,
-            h2("Irace Output"), 
+            h2("Irace Output"),
             p("See here the progress of the current irace execution. Click on start to launch irace."),
-            p("You will be asked to assign a name to your execution, 
+            p("You will be asked to assign a name to your execution,
               in this way you may execute your scenario more than once.")
           ),
           column(
@@ -31,8 +31,9 @@ IraceOutputView <- R6::R6Class(
           )
         ),
         fluidRow(
-          bs4Card(
+          box(
             inputId = ns("target"),
+            title = strong("Output"),
             collapsible = FALSE,
             closable = FALSE,
             width = 12,

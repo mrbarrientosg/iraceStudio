@@ -10,7 +10,7 @@ ForbiddenView <- R6::R6Class(
           class = "sub-header",
           column(
             width = 10,
-            h2("Forbidden Configurations"), 
+            h2("Forbidden Configurations"),
             HTML("Forbid parameter settings combinations for the configuration process.<br>
                  For more information and examples, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
           ),
@@ -26,7 +26,7 @@ ForbiddenView <- R6::R6Class(
           )
         ),
         fluidRow(
-          bs4Card(
+          box(
             title = strong("Coding Editor"),
             collapsible = FALSE,
             closable = FALSE,

@@ -5,7 +5,7 @@ SummaryCard <- R6::R6Class(
     ui = function(inputId) {
       ns <- NS(inputId)
 
-      bs4Card(
+      box(
         title = strong("Summary"),
         collapsible = FALSE,
         closable = FALSE,
@@ -139,7 +139,7 @@ BestConfigurationCard <- R6::R6Class(
     ui = function(inputId) {
       ns <- NS(inputId)
 
-      bs4Card(
+      box(
         title = strong("Best Configuration"),
         collapsible = FALSE,
         closable = FALSE,
@@ -283,16 +283,16 @@ CandidatesCard <- R6::R6Class(
     ui = function(inputId) {
       ns <- NS(inputId)
 
-      bs4Card(
+      box(
         title = strong("Candidates"),
         collapsible = FALSE,
         closable = FALSE,
         width = 12,
-        sidebar_width = "30%",
-        enable_sidebar = TRUE,
         height = "800px",
         inlineCSS(".direct-chat-contacts { z-index: 0 !important; }"),
-        sidebar = bs4Dash::bs4CardSidebar(
+        sidebar = boxSidebar(
+          startOpen = FALSE,
+          width = 30,
           tagList(
             sliderInput(
               inputId = ns("iterations"),
@@ -692,7 +692,7 @@ PerformanceCard <- R6::R6Class(
     ui = function(inputId) {
       ns <- NS(inputId)
 
-      bs4Card(
+      box(
         title = strong("Performance"),
         collapsible = FALSE,
         closable = FALSE,
@@ -858,20 +858,19 @@ DetailByIterationCard <- R6::R6Class(
     ui = function(inputId) {
       ns <- NS(inputId)
 
-      bs4Card(
+      box(
         title = strong("Details by Iteration"),
         collapsible = FALSE,
         closable = FALSE,
         width = 12,
-        enable_sidebar = TRUE,
-        sidebar = bs4CardSidebar(
-          tagList(
-            pickerInput(
-              inputId = ns("iterations"),
-              label = "Iterations",
-              choices = c(),
-              width = "100%"
-            )
+        sidebar = boxSidebar(
+          startOpen = FALSE,
+          width = 30,
+          pickerInput(
+            inputId = ns("iterations"),
+            label = "Iterations",
+            choices = c(),
+            width = "100%"
           )
         ),
         fluidRow(

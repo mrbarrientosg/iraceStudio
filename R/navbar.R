@@ -5,35 +5,32 @@ Navbar <- R6::R6Class(
     ui = function(id) {
       ns <- NS(id)
 
-      bs4Dash::bs4DashNavbar(
-        title = "Irace Studio",
-        status = "white",
+      dashboardHeader(
+        title = dashboardBrand(
+          title = h2("Irace Studio", style = "text-align:center; margin-bottom: 0;")
+        ),
+        #title = h1("Irace Studio", style = "color: white;text-align:center; margin-bottom: 0;"),
         fixed = TRUE,
-        border = FALSE,
-        style = "height: 75px;",
         rightUi = tagList(
-          fluidRow(
-            class = "align-items-center",
-            column(
-              width = 12,
-              class = "d-flex align-items-center",
-              div(
-                  class = "align-self-center",
-                  style = "height: 34px",
-                  selectInput(
-                    inputId = ns("scenarioPicker"),
-                    label = NULL,
-                    choices = "",
-                    width = 250
-                  )
-              ),
-              tags$a(
-                "Irace User Guide",
-                class = "btn-link",
-                style = "padding: 8px;",
-                href = "https://cran.r-project.org/web/packages/irace/vignettes/irace-package.pdf",
-                target = "_blank"
-              )
+          tags$li(
+            class = "dropdown",
+            style = "height: 34px;",
+            selectInput(
+              inputId = ns("scenarioPicker"),
+              label = NULL,
+              choices = "",
+              width = 250
+            )
+          ),
+          tags$li(
+            class = "dropdown",
+            style = "align-self: center;",
+            tags$a(
+              "Irace User Guide",
+              class = "btn-link",
+              style = "padding: 8px;",
+              href = "https://cran.r-project.org/web/packages/irace/vignettes/irace-package.pdf",
+              target = "_blank"
             )
           )
         ),

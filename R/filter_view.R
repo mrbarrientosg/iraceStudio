@@ -19,7 +19,7 @@ FilterView <- R6::R6Class(
         fluidRow(
           column(
             width = 4,
-            h2("Filter"), 
+            h2("Filter"),
             p("(Development) Search and add new configurations to the current sandbox."),
             HTML("<ul>
                   <li>search for configurations in the filter section. Once you have set all conditions, click in the filter button below</li>
@@ -36,8 +36,7 @@ FilterView <- R6::R6Class(
           )
         ),
         fluidRow(
-          bs4Card(
-            inputId = ns("filterOptions"),
+          box(
             title = strong("Filter Options"),
             collapsible = FALSE,
             closable = FALSE,
@@ -48,7 +47,7 @@ FilterView <- R6::R6Class(
                   <li>iteration</li>
                   <li>parameter values</li>
                   <li>configuration ID</li>
-                  <li>...</li> 
+                  <li>...</li>
                   </ul>"),
             checkboxInput(
               inputId = ns("elites"),
@@ -100,8 +99,7 @@ FilterView <- R6::R6Class(
             ),
             footer = actionButton(inputId = ns("filter"), label = "Filter", class = "btn-primary")
           ),
-          bs4Card(
-            inputId = ns("configOut"),
+          box(
             title = strong("Configurations"),
             collapsible = FALSE,
             closable = FALSE,
@@ -125,8 +123,7 @@ FilterView <- R6::R6Class(
             DT::dataTableOutput(outputId = ns("configurationsTable"), width = "100%"),
             br()
           ),
-          bs4Card(
-            inputId = ns("sandbox"),
+          box(
             title = strong("SandBox"),
             collapsible = FALSE,
             closable = FALSE,

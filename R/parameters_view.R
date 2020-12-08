@@ -12,7 +12,7 @@ ParametersView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header", 
+        div(class = "sub-header",
             h2("Parameters"),
             p("Add, remove or modify parameter definitions"),
             HTML("<ul>
@@ -62,7 +62,8 @@ ParametersView <- R6::R6Class(
         ),
         br(),
         fluidRow(
-          bs4Card(
+          box(
+            title = strong("Parameters"),
             collapsible = FALSE,
             closable = FALSE,
             width = 12,

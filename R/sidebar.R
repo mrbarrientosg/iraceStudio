@@ -2,101 +2,118 @@ Sidebar <- R6::R6Class(
   classname = "Sidebar",
   public = list(
     ui = function() {
-      bs4Dash::bs4DashSidebar(
-        title = h1("Irace Studio", style = "text-align:center; margin-bottom: 0;"),
-        fixed = FALSE,
-        elevation = 0,
-        inputId = "sidebarState",
-        bs4Dash::bs4SidebarMenu(
+      dashboardSidebar(
+        minified = FALSE,
+        #elevation = 0,
+        id = "sidebarState",
+        sidebarMenu(
           id = "sidebar",
-          bs4Dash::bs4SidebarMenuItem(
+          menuItem(
             text = "Home",
-            tabName = "home"
+            tabName = "home",
+            icon = NULL
           ),
-          bs4Dash::bs4SidebarMenuItem(
+          menuItem(
             text = "UI Options",
-            tabName = "ui_options"
+            tabName = "ui_options",
+            icon = NULL
           ),
-          bs4Dash::bs4SidebarMenuItem(
+          menuItem(
             text = "Playground",
-            tabName = "playground"
+            tabName = "playground",
+            icon = NULL
           ),
-          bs4Dash::bs4SidebarMenuItem(
+          menuItem(
             text = strong("Scenario"),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "Irace Options",
-              tabName = "scenario_irace_options"
+              tabName = "scenario_irace_options",
+              icon = NULL
             ),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "Parameters",
-              tabName = "scenario_parameters"
+              tabName = "scenario_parameters",
+              icon = NULL
             ),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "Target Scripts",
-              tabName = "scenario_target_scripts"
+              tabName = "scenario_target_scripts",
+              icon = NULL
             ),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "Train Instances",
-              tabName = "scenario_train_instances"
+              tabName = "scenario_train_instances",
+              icon = NULL
             ),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "Initial Configurations",
-              tabName = "scenario_initial_configurations"
+              tabName = "scenario_initial_configurations",
+              icon = NULL
             ),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "Forbidden",
-              tabName = "scenario_forbidden"
+              tabName = "scenario_forbidden",
+              icon = NULL
             ),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "Testing",
-              tabName = "scenario_testing"
+              tabName = "scenario_testing",
+              icon = NULL
             )
           ),
 
-          bs4Dash::bs4SidebarMenuItem(
+          menuItem(
             text = strong("Execution"),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "Irace output",
-              tabName = "execution_irace_output"
+              tabName = "execution_irace_output",
+              icon = NULL
             ),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "History",
-              tabName = "execution_history"
+              tabName = "execution_history",
+              icon = NULL
             )
           ),
 
-          bs4Dash::bs4SidebarMenuItem(
+          menuItem(
             text = strong("Visualization"),
-            bs4Dash::bs4SidebarMenuItem(
+            menuItem(
               text = strong("Performance"),
-              bs4SidebarMenuSubItem(
+              menuSubItem(
                 text = "Configuration",
-                tabName = "visualization_by_config"
+                tabName = "visualization_by_config",
+                icon = NULL
               ),
-              bs4SidebarMenuSubItem(
+              menuSubItem(
                 text = "Instance",
-                tabName = "visualization_by_instance"
+                tabName = "visualization_by_instance",
+                icon = NULL
               )
             ),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "Sandbox",
-              tabName = "visualization_sandbox"
+              tabName = "visualization_sandbox",
+              icon = NULL
             ),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "Filter",
-              tabName = "visualization_filter"
+              tabName = "visualization_filter",
+              icon = NULL
             )
           ),
 
-          bs4Dash::bs4SidebarMenuItem(
+          menuItem(
             text = strong("Report"),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "Summary",
-              tabName = "report"
+              tabName = "report",
+              icon = NULL
             ),
-            bs4Dash::bs4SidebarMenuSubItem(
+            menuSubItem(
               text = "User Section",
-              tabName = "report_user_section"
+              tabName = "report_user_section",
+              icon = NULL
             )
           )
         )
