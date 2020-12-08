@@ -301,8 +301,16 @@ importScenario <- function(name, path, scenario, onlyOptions = FALSE) {
     if (is.function(.scenario[[opt]]))
       next
 
+    value = as.character(.scenario[[opt]])
+
+    value = if (!grepl("\\D", value)) {
+      as.numeric(value)
+    } else {
+      .scenario[[opt]]
+    }
+
     log_info("{opt}: {as.character(.scenario[[opt]])}")
-    scenario$add_irace_option(opt, .scenario[[opt]])
+    scenario$add_irace_option(opt, value)
   }
 
   scenario$clear_scenario_temp()

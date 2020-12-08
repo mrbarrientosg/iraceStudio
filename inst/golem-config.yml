@@ -1,7 +1,7 @@
 default:
   golem_name: iraceStudio
   golem_version: 1.0.0
-  app_prod: yes
+  app_prod: no
 production:
   app_prod: yes
 dev:
