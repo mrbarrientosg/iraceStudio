@@ -119,10 +119,10 @@ UIOptionsView <- R6::R6Class(
 
     getWorkspacePath = function(path) {
       if (!private$checkPath(path)) {
-        return(file.path(fs::path_home(), "workspace"))
+        return(file.path(fs::path_home(), "workspace-irace"))
       }
 
-      return(file.path(path, "workspace"));
+      return(file.path(path, "workspace-irace"));
     }
   )
 )

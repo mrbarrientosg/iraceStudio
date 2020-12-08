@@ -75,6 +75,18 @@ Sidebar <- R6::R6Class(
               icon = NULL
             )
           ),
+          
+          bs4Dash::bs4SidebarMenuItem(
+            text = strong("Report"),
+            bs4Dash::bs4SidebarMenuSubItem(
+              text = "Summary",
+              tabName = "report"
+            ),
+            bs4Dash::bs4SidebarMenuSubItem(
+              text = "User Notes",
+              tabName = "report_user_section"
+            )
+          ),
 
           menuItem(
             text = strong("Visualization"),

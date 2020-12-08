@@ -88,7 +88,8 @@ PlaygroundView <- R6::R6Class(
         data$scenarios <- self$scenarios_as_data_frame(store)
       })
 
-      volumes <- getVolumes()()
+      #volumes <- getVolumes()()
+      volumes <- c("Home"=path.expand('~'), getVolumes()())
 
       shinyFileChoose(input, "load", roots = volumes)
 
