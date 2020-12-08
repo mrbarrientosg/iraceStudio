@@ -23,13 +23,13 @@ UserSectionView <- R6::R6Class(
           class = "justify-content-between sub-header",
           column(
             width = 3,
-            h2("User Section"),
+            h2("User Notes"),
           ),
           column(
             width = 4,
             actionButton(
               inputId = ns("add"),
-              label = "Add section",
+              label = "Add note",
               class = "float-right btn-primary",
               style = "margin-left: 5px;"
             )
@@ -51,7 +51,7 @@ UserSectionView <- R6::R6Class(
         } else {
           showModal(
             modalDialog(
-              title = "Add a new section",
+              title = "Add a new note",
               easyClose = TRUE,
               textInput(inputId = ns("title"), label = "Title"),
               footer = tagList(

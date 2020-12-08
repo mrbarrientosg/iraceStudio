@@ -64,6 +64,18 @@ Sidebar <- R6::R6Class(
               tabName = "execution_history"
             )
           ),
+          
+          bs4Dash::bs4SidebarMenuItem(
+            text = strong("Report"),
+            bs4Dash::bs4SidebarMenuSubItem(
+              text = "Summary",
+              tabName = "report"
+            ),
+            bs4Dash::bs4SidebarMenuSubItem(
+              text = "User Notes",
+              tabName = "report_user_section"
+            )
+          ),
 
           bs4Dash::bs4SidebarMenuItem(
             text = strong("Visualization"),
@@ -85,18 +97,6 @@ Sidebar <- R6::R6Class(
             bs4Dash::bs4SidebarMenuSubItem(
               text = "Filter",
               tabName = "visualization_filter"
-            )
-          ),
-
-          bs4Dash::bs4SidebarMenuItem(
-            text = strong("Report"),
-            bs4Dash::bs4SidebarMenuSubItem(
-              text = "Summary",
-              tabName = "report"
-            ),
-            bs4Dash::bs4SidebarMenuSubItem(
-              text = "User Section",
-              tabName = "report_user_section"
             )
           )
         )

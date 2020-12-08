@@ -1,5 +1,5 @@
 # Set options here
-options(golem.app.prod = T) # TRUE = production mode, FALSE = development mode
+options(golem.app.prod = FALSE) # TRUE = production mode, FALSE = development mode
 
 # Detach all loaded packages and clean your environment
 golem::detach_all_attached()
@@ -9,5 +9,6 @@ rm(list = ls(all.names = TRUE))
 golem::document_and_reload()
 
 reactlog::reactlog_enable()
+
 # Run the application
-runIraceStudio(debug = TRUE)
+run_app(debug = TRUE)

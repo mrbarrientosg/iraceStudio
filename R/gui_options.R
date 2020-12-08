@@ -1,7 +1,7 @@
 GUIOptions <- R6::R6Class(
   classname = "GUIOptions",
   public = list(
-    workspacePath = file.path(fs::path_home(), "workspace"),
+    workspacePath = file.path(fs::path_home(), "workspace-irace"),
     optionsPath = file.path(fs::path_home(), ".irace_studio"),
 
     initialize = function () {
@@ -35,7 +35,7 @@ GUIOptions <- R6::R6Class(
         path <- self$workspacePath
 
       if (is.null(path) || path == "") {
-        path <- file.path(fs::path_home(), "workspace")
+        path <- file.path(fs::path_home(), "workspace-irace")
       }
 
       if (!dir.exists(path)) {

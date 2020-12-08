@@ -127,7 +127,7 @@ ParametersView <- R6::R6Class(
           )
       })
 
-      volumes <- getVolumes()()
+      volumes <- c("Home"=path.expand('~'), getVolumes()())
 
       shinyFileChoose(input, "load", roots = volumes)
 

@@ -12,8 +12,9 @@ App <- R6::R6Class(
 
     initialModal = function(input) {
       if (is.null(isolate(private$store$pg))) {
-        workspaceVolume <- list(workspace = isolate(private$store$gui$workspacePath))
+        #workspaceVolume <- list(workspace = isolate(private$store$gui$workspacePath))
         importVolume <- getVolumes()()
+        workspaceVolume <- c("workspace"=isolate(private$store$gui$workspacePath), importVolume)
         showModal(
           modalDialog(
             title = "Welcome to Irace Studio",
@@ -147,6 +148,8 @@ App <- R6::R6Class(
             }
 
             private$setupModules()
+            #FIXME: check if this is correct here
+            dir.create(paste0(workPath, "/", name))
             private$store$pg <- playground$new(name = name)
           }
         )
@@ -275,7 +278,8 @@ App <- R6::R6Class(
       #  )
       #  file.remove(output)
       # }
-
+      
+      #FIXME: check what happens if the app gets closed unexpectedly. It would be better if the scenario data is saved when something changes
       gui$save()
 
       if (!is.null(pg)) {

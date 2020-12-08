@@ -39,7 +39,8 @@ IraceOptionsView <- R6::R6Class(
 
       update <- reactiveValues(id = NULL, section = NULL)
 
-      volumes <- getVolumes()()
+      #volumes <- getVolumes()()
+      volumes <- c("Home"=path.expand('~'), getVolumes()())
 
       shinyFileChoose(input, "load", roots = volumes)
       shinyFileSave(input = input, id = "export", roots = volumes)

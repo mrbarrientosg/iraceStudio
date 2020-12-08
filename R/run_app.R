@@ -1,5 +1,4 @@
 plan("future::sequential")
-
 pkg <- new.env(parent = emptyenv())
 pkg$reportStore <- list()
 
@@ -15,8 +14,13 @@ scenarioOptions <- jsonlite::fromJSON(
 #'
 #' @export
 runIraceStudio <- function(port = 4350, ...) {
-  app <- App$new()
+  options(golem.app.prod = TRUE) 
+  run_app(port, ...)
+}
 
+run_app <- function(port = 4350, ...) {
+  app <- App$new()
+  
   with_golem_options(
     app = shinyApp(
       ui = app$ui,

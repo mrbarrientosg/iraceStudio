@@ -110,7 +110,8 @@ TargetTab <- R6::R6Class(
         message = "This action will remove the target code. Are you sure?."
       )
 
-      volumes <- getVolumes()()
+      #volumes <- getVolumes()()
+      volumes <- c("Home"=path.expand('~'), getVolumes()())
 
       shinyFileSave(input = input, id = "export", roots = volumes)
 

@@ -48,7 +48,8 @@ ForbiddenView <- R6::R6Class(
       # Don't remove this line it's used by aceEditor
       ns <- session$ns
 
-      volumes <- getVolumes()()
+      #volumes <- getVolumes()()
+      volumes <- c("Home"=path.expand('~'), getVolumes()())
 
       shinyFileSave(input = input, id = "export", roots = volumes)
 
