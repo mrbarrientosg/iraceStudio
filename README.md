@@ -79,6 +79,12 @@ library(iraceStudio)
 
 runIraceStudio(port = 8080)
 ```
+Check the follwing videos for details:
+
+- [irace Studio walkthrough](https://drive.google.com/file/d/1SQa2tQcylo50pOS210gi9rhSE1IAoOPQ/view?usp=sharing) 
+- [scenario setup](https://drive.google.com/file/d/1wmJi7Mn_gJdDDoH34x3e8LTCWbYr_1HO/view?usp=sharing)
+
+
 
 ## Browsers support
 
