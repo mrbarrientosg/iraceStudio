@@ -53,12 +53,12 @@ $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/
 $ brew install poppler libmagic openssl pandoc pandoc-citeproc imagemagick@6
 ```
 ### Install Irace Studio
-Fot installing irace Studio you need to install the devtools package:
+For installing irace Studio you need to install the devtools package:
 ``` r
 install.packages("devtools")
 ```
 
-The Irace Studio package can be installed from Gtihub:
+Currently, the Irace Studio package can be installed from Gtihub:
 ``` r
 devtools::install_github("mrbarrientosg/iraceStudio")
 ```
@@ -71,14 +71,20 @@ library(iraceStudio)
 
 runIraceStudio()
 ```
-It's open automatically in the default browser, if not, you can open http://127.0.0.1:4350.
+It's open automatically in the default browser. In case this interface is not open automatically, you can paste this url http://127.0.0.1:4350 in your browser.
 
-By default Irace Studio is running in port 4350, you can change this by passing parameter as you can see in the example below.
+By default Irace Studio runs in port 4350, you can change this by passing a different port as parameter:
 ``` r
 library(iraceStudio)
 
 runIraceStudio(port = 8080)
 ```
+Check the follwing videos for details:
+
+- [irace Studio walkthrough](https://drive.google.com/file/d/1wmJi7Mn_gJdDDoH34x3e8LTCWbYr_1HO/view?usp=sharing) 
+- [scenario setup](https://drive.google.com/file/d/1SQa2tQcylo50pOS210gi9rhSE1IAoOPQ/view?usp=sharing)
+
+
 
 ## Browsers support
 
