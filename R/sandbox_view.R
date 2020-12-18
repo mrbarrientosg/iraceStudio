@@ -37,18 +37,17 @@ SandboxView <- R6::R6Class(
             title = strong("Boxes"),
             collapsible = FALSE,
             closable = FALSE,
-            side = "left",
             width = 12,
             fluidRow(
               column(
                 width = 12,
                 style = "padding-left: 0px !important;",
-                actionButton(
-                  inputId = ns("add"),
-                  label = "Add",
-                  icon = icon("plus")
-                ),
                 disabled(
+                  actionButton(
+                    inputId = ns("add"),
+                    label = "Add",
+                    icon = icon("plus")
+                  ),
                   actionButton(
                     inputId = ns("edit"),
                     label = "Edit",

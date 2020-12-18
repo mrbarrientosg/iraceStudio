@@ -23,6 +23,26 @@
     top: 0 !important;
 }
 
+.control-sidebar-light {
+    background-color: white !important;
+    border-style: none;
+    border-color: white !important;
+}
+
+.control-sidebar {
+    z-index: 2000;
+}
+
+.control-sidebar-content {
+    -webkit-box-shadow: -15px 0 20px -1px rgba(82, 63, 105, 0.1);
+    -moz-box-shadow: -15px 0 20px -1px rgba(82, 63, 105, 0.1);
+    box-shadow: -15px 0 20px -1px rgba(82, 63, 105, 0.1);
+}
+
+.control-sidebar .card {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
 
 .brand-link {
     background-color: #242939 !important;
@@ -34,8 +54,9 @@
 .main-header {
     background-color: #ffffff;
     border-bottom: 1px solid #eff0f6;
-    -webkit-box-shadow: 0 0 40px 0 rgba(82, 63, 105, 0.1);
-    box-shadow: 0 0 40px 0 rgba(82, 63, 105, 0.1);
+    -webkit-box-shadow: 0 10px 30px -1px rgba(82, 63, 105, 0.1);
+    -moz-box-shadow: 0 10px 30px -1px rgba(82, 63, 105, 0.1);
+    box-shadow: 0 10px 30px -1px rgba(82, 63, 105, 0.1);
 }
 
 .sub-header {
@@ -59,4 +80,15 @@ hr {
 
 body {
     background-color: #f2f3f8;
+}
+
+.modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    border-top-left-radius: 0.3rem;
+    border-top-right-radius: 0.3rem;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+    color: #fff !important;
 }

@@ -9,7 +9,7 @@ IraceOptionsView <- R6::R6Class(
         fluidRow(
           class = "sub-header",
           column(
-            width = 10,
+            width = 9,
             h2("Irace Options"),
             HTML("Set options for your scenario:<br>
                   <ul>
@@ -21,7 +21,7 @@ IraceOptionsView <- R6::R6Class(
                  <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
           ),
           column(
-            width = 2,
+            width = 3,
             class = "d-flex align-items-center justify-content-end",
             importButton(inputId = ns("load")),
             exportButton(inputId = ns("export"), filename = "scenario.txt",
@@ -39,7 +39,6 @@ IraceOptionsView <- R6::R6Class(
 
       update <- reactiveValues(id = NULL, section = NULL)
 
-      #volumes <- getVolumes()()
       volumes <- c("Home"=path.expand('~'), getVolumes()())
 
       shinyFileChoose(input, "load", roots = volumes)

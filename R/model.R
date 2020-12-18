@@ -2,13 +2,11 @@ report <- R6::R6Class(
   classname = "report",
   private = list(
     data = NULL,
-    count = 0,
-    update = NULL
+    count = 0
   ),
   public = list(
     initialize = function(report = NULL) {
       private$data <- list()
-      private$update <- 0
 
       if (!is.null(report)) {
         private$data <- report$data

@@ -63,7 +63,6 @@ TrainInstancesView <- R6::R6Class(
         message = "This action will remove all instances. Are you sure?."
       )
 
-      #volumes <- getVolumes()()
       volumes <- c("Home"=path.expand('~'), getVolumes()())
 
       shinyDirChoose(input, "dir", roots = volumes)

@@ -67,7 +67,6 @@ InitialConfigurationsView <- R6::R6Class(
 
       values <- reactiveValues(configurations = NULL)
 
-      #volumes <- getVolumes()()
       volumes <- c("Home"=path.expand('~'), getVolumes()())
 
       shinyFileSave(input = input, id = "export", roots = volumes)

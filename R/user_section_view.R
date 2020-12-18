@@ -103,13 +103,14 @@ UserSectionView <- R6::R6Class(
 
           local({
             myId <- id
+            .report <- report
             self$observe_delete_card[[id]] <- observe({
               req(self$cards[[myId]]$card$visible != TRUE)
 
               self$cards[[myId]] <- NULL
               self$observe_delete_card[[myId]]$destroy()
               self$observe_delete_card[[myId]] <- NULL
-              report$remove_data(myId)
+              .report$remove_data(myId)
               removeUI(
                 selector = paste0("div:has(> #", ns(myId), "-card)"),
                 immediate = TRUE
@@ -148,13 +149,14 @@ UserSectionView <- R6::R6Class(
 
         local({
           myId <- id
+          .report <- report
           self$observe_delete_card[[id]] <- observe({
             req(self$cards[[myId]]$card$visible != TRUE)
 
             self$cards[[myId]] <- NULL
             self$observe_delete_card[[myId]]$destroy()
             self$observe_delete_card[[myId]] <- NULL
-            report$remove_data(myId)
+            .report$remove_data(myId)
             removeUI(
               selector = paste0("div:has(> #", ns(myId), "-card)"),
               immediate = TRUE

@@ -2,11 +2,8 @@ ExecutionsHistoryView <- R6::R6Class(
   classname = "ExecutionsHistoryView",
   inherit = View,
   public = list(
-    executionSelect = NULL,
-
     initialize = function(id) {
       super$initialize(id)
-      self$executionSelect <- ExecutionSelect$new()
     },
 
     ui = function() {
@@ -15,15 +12,10 @@ ExecutionsHistoryView <- R6::R6Class(
       tagList(
         fluidRow(
           column(
-            width = 8,
+            width = 12,
             h2("History"),
             p("View the output of previous irace executions.
               Use the execution selector (right) to select the execution to display.")
-          ),
-          column(
-            width = 4,
-            class = "d-flex align-items-center justify-content-end",
-            self$executionSelect$ui(inputId = ns("executions"))
           )
         ),
         fluidRow(

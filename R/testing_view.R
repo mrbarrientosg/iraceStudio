@@ -84,7 +84,6 @@ TestingView <- R6::R6Class(
 
       obs_value <- reactiveVal(value = FALSE)
 
-      #volumes <- getVolumes()()
       volumes <- c("Home"=path.expand('~'), getVolumes()())
 
       shinyDirChoose(input, "dir", roots = volumes)

@@ -7,7 +7,6 @@ ReportView <- R6::R6Class(
     candidatesCard = NULL,
     performanceCard = NULL,
     detailByIterationCard = NULL,
-    executionSelect = NULL,
 
     initialize = function(id) {
       super$initialize(id)
@@ -16,7 +15,6 @@ ReportView <- R6::R6Class(
       self$candidatesCard <- CandidatesCard$new()
       self$performanceCard <- PerformanceCard$new()
       self$detailByIterationCard <- DetailByIterationCard$new()
-      self$executionSelect <- ExecutionSelect$new()
     },
 
     ui = function() {
@@ -27,14 +25,9 @@ ReportView <- R6::R6Class(
           class = "justify-content-between",
           style = "height: 90px;",
           column(
-            width = 5,
+            width = 12,
             h2("Report"),
             p("(Development) View here the irace execution report")
-          ),
-          column(
-            width = 7,
-            class = "d-flex align-items-center justify-content-end",
-            self$executionSelect$ui(inputId = ns("executions"))
           )
         ),
         fluidRow(

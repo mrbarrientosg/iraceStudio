@@ -41,7 +41,7 @@ UIOptionsView <- R6::R6Class(
     },
 
     server = function(input, output, session, store) {
-      volumes <- getVolumes()()
+      volumes <- c("Home"=path.expand('~'), getVolumes()())
 
       shinyDirChoose(input = input, id = "workspaceButton", roots = volumes)
       shinyDirChoose(input = input, id = "iraceButton", roots = volumes)

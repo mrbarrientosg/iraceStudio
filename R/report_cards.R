@@ -155,7 +155,7 @@ BestConfigurationCard <- R6::R6Class(
           column(
             width = 6,
             self$copyInput$ui(inputId = ns("copy"), label = "Copy Box Plot"),
-            plotOutput(outputId = ns("box_plot"), width = 550, height = 550)
+            plotOutput(outputId = ns("box_plot"))
           )
         )
       )
@@ -291,19 +291,19 @@ CandidatesCard <- R6::R6Class(
         height = "800px",
         inlineCSS(".direct-chat-contacts { z-index: 0 !important; }"),
         sidebar = boxSidebar(
+          id = ns("optionsSidebar"),
           startOpen = FALSE,
-          width = 30,
+          width = 35,
+          background = "#595959",
           tagList(
             sliderInput(
               inputId = ns("iterations"),
               label = "Iterations", min = 0, max = 1,
-              value = c(0, 0),
-              width = "100%"
+              value = c(0, 0)
             ),
             multiInput(
               inputId = ns("parameters"),
               label = "Parameters",
-              width = "100%",
               choices = "",
               selected = "",
               options = list(
@@ -313,7 +313,7 @@ CandidatesCard <- R6::R6Class(
               )
             ),
             inlineCSS(".multi-wrapper .non-selected-wrapper,
-            .multi-wrapper .selected-wrapper { height: 500px; }"),
+            .multi-wrapper .selected-wrapper { height: 350px; }"),
             actionButton(inputId = ns("update"), label = "Update", class = "btn-primary")
           )
         ),
@@ -864,13 +864,14 @@ DetailByIterationCard <- R6::R6Class(
         closable = FALSE,
         width = 12,
         sidebar = boxSidebar(
+          id = ns("optionsSidebar"),
           startOpen = FALSE,
-          width = 30,
+          width = 35,
+          background = "#595959",
           pickerInput(
             inputId = ns("iterations"),
             label = "Iterations",
-            choices = c(),
-            width = "100%"
+            choices = c()
           )
         ),
         fluidRow(

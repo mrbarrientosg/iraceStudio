@@ -25,6 +25,7 @@ addExternalResources <- function() {
   }
   "
 
+
   tags$head(
     bundle_resources(
       path = appSys("app/www"),

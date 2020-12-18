@@ -154,12 +154,12 @@ FilterView <- R6::R6Class(
     server = function(input, output, session, store) {
       ns <- session$ns
 
-      execution <- self$executionSelect$call(
+      self$executionSelect$call(
         id = "executions",
         store = store
       )
 
-      sandbox <- self$sandboxSelect$call(
+      self$sandboxSelect$call(
         id = "sandboxes",
         store = store
       )

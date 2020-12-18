@@ -6,15 +6,16 @@ App <- R6::R6Class(
     navbar = NULL,
     sidebar = NULL,
     body = NULL,
+    controlbar = NULL,
+    footer = NULL,
     store = NULL,
     logs = NULL,
     logger_path = NULL,
 
     initialModal = function(input) {
       if (is.null(isolate(private$store$pg))) {
-        #workspaceVolume <- list(workspace = isolate(private$store$gui$workspacePath))
         importVolume <- getVolumes()()
-        workspaceVolume <- c("workspace"=isolate(private$store$gui$workspacePath), importVolume)
+        workspaceVolume <- c("workspace" = isolate(private$store$gui$workspacePath), importVolume)
         showModal(
           modalDialog(
             title = "Welcome to Irace Studio",
@@ -77,6 +78,9 @@ App <- R6::R6Class(
       private$navbar <- Navbar$new()
       private$sidebar <- Sidebar$new()
       private$body <- Body$new()
+      private$controlbar <- ControlBar$new()
+      private$footer <- Footer$new()
+
       private$store <- reactiveValues(
         pg = NULL,
         gui = GUIOptions$new(),
@@ -90,8 +94,9 @@ App <- R6::R6Class(
         dark = FALSE,
         header = private$navbar$ui("navbar"),
         sidebar = private$sidebar$ui(),
-        body = private$body$ui()
-        #preloader = list(waiter = list(html = spin_1(), color = "#242939"), duration = 5)
+        body = private$body$ui(),
+        footer = private$footer$ui("footer"),
+        controlbar = private$controlbar$ui("controlbar")
       )
     },
 
@@ -109,10 +114,12 @@ App <- R6::R6Class(
       private$store$currentExecution <- NULL
 
       private$navbar$call(id = "navbar", store = private$store)
+      private$controlbar$call(id = "controlbar", store = private$store)
+      private$footer$call(id = "footer", store = private$store)
 
       workPath <- isolate(private$store$gui$workspacePath)
-      workspaceVolume <- list(workspace = workPath)
       importVolume <- getVolumes()()
+      workspaceVolume <- c("workspace" = workPath, importVolume)
 
       observeEvent(input$new, {
         removeModal()
@@ -149,7 +156,8 @@ App <- R6::R6Class(
 
             private$setupModules()
             #FIXME: check if this is correct here
-            dir.create(paste0(workPath, "/", name))
+            #MATIAS: Workspace check if exist when the app initialize
+            #dir.create(paste0(workPath, "/", name))
             private$store$pg <- playground$new(name = name)
           }
         )
@@ -204,11 +212,8 @@ App <- R6::R6Class(
 
       onSessionEnded(function() {
         self$destroy()
-        stopApp()
+        #stopApp()
       })
-
-      # Force production mode
-      options(golem.app.prod = T)
 
       if (app_prod()) {
         private$initialModal(input)
@@ -281,8 +286,9 @@ App <- R6::R6Class(
       #  )
       #  file.remove(output)
       # }
-      
+
       #FIXME: check what happens if the app gets closed unexpectedly. It would be better if the scenario data is saved when something changes
+      #MATIAS: Saving the data every time when something changes will affect the performance, but I think to overwrite Ctrl+S or add a timer when end trigger the action to save data.
       gui$save()
 
       if (!is.null(pg)) {

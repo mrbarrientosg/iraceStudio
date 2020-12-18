@@ -14,13 +14,13 @@ scenarioOptions <- jsonlite::fromJSON(
 #'
 #' @export
 runIraceStudio <- function(port = 4350, ...) {
-  options(golem.app.prod = TRUE) 
+  options(golem.app.prod = TRUE)
   run_app(port, ...)
 }
 
 run_app <- function(port = 4350, ...) {
   app <- App$new()
-  
+
   with_golem_options(
     app = shinyApp(
       ui = app$ui,
