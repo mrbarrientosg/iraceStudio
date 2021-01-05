@@ -1,3 +1,4 @@
+#' @export
 Component <- R6::R6Class(
   classname = "Component",
   public = list(

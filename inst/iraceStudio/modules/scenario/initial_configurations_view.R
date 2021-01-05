@@ -14,14 +14,14 @@ InitialConfigurationsView <- R6::R6Class(
         fluidRow(
           column(
             width = 8,
-            actionButton(inputId = ns("add"), label = "Add", icon = icon("plus")),
+            iraceStudio::actionButton(inputId = ns("add"), label = "Add", icon = icon("plus")),
             disabled(
-              actionButton(
+              iraceStudio::actionButton(
                 inputId = ns("edit"),
                 label = "Edit",
                 icon = icon("edit")
               ),
-              actionButton(
+              iraceStudio::actionButton(
                 inputId = ns("delete"),
                 label = "Delete",
                 icon = icon("minus")
@@ -148,7 +148,7 @@ InitialConfigurationsView <- R6::R6Class(
             create_initial_modal_content(ns, NULL, store),
             style = "overflow-y: scroll; max-height:650px;",
             footer = tagList(
-              actionButton(inputId = ns("add_config"), label = "Add", class = "btn-primary"),
+              iraceStudio::actionButton(inputId = ns("add_config"), label = "Add", class = "btn-primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -206,7 +206,7 @@ InitialConfigurationsView <- R6::R6Class(
             create_initial_modal_content(ns, configuration, store),
             style = "overflow-y:scroll; max-height:650px;",
             footer = tagList(
-              actionButton(inputId = ns("confirm_update"), label = "Update", class = "btn-primary"),
+              iraceStudio::actionButton(inputId = ns("confirm_update"), label = "Update", class = "btn-primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -254,7 +254,7 @@ InitialConfigurationsView <- R6::R6Class(
                 )
               ),
               footer = tagList(
-                actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
+                iraceStudio::actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
                 modalButton(label = "Cancel")
               ),
               easyClose = TRUE

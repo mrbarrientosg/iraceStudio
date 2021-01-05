@@ -27,7 +27,7 @@ UserSectionView <- R6::R6Class(
           ),
           column(
             width = 4,
-            actionButton(
+            iraceStudio::actionButton(
               inputId = ns("add"),
               label = "Add note",
               class = "float-right btn-primary",
@@ -55,7 +55,7 @@ UserSectionView <- R6::R6Class(
               easyClose = TRUE,
               textInput(inputId = ns("title"), label = "Title"),
               footer = tagList(
-                actionButton(inputId = ns("addSection"), label = "Add", class = "btn-primary"),
+                iraceStudio::actionButton(inputId = ns("addSection"), label = "Add", class = "btn-primary"),
                 modalButton(label = "Cancel")
               )
             )

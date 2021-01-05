@@ -39,7 +39,7 @@ ParameterCondition <- R6::R6Class(
             width = 5,
             class = "d-flex align-items-center",
             uiOutput(outputId = ns("valueCondition"), style = "width: 100%;"),
-            actionButton(
+            iraceStudio::actionButton(
               inputId = ns("addCondition"),
               label = "Add",
               style = "margin-left: 15px; margin-top: 15px;",
@@ -56,7 +56,7 @@ ParameterCondition <- R6::R6Class(
           column(
             width = 7,
             class = "d-flex align-items-center justify-content-end",
-            actionButton(
+            iraceStudio::actionButton(
               inputId = ns("deleteCondition"),
               label = "Delete",
               icon = icon("trash"),

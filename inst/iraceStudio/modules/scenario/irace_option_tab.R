@@ -127,7 +127,7 @@ IraceOptionTab <- R6::R6Class(
 
     addInputInfo = function(option, input, inputId) {
       info <- bs4Dash::bs4PopoverUI(
-        actionButton(
+        iraceStudio::actionButton:actionButton:actionButton(
           inputId = paste0(inputId, "-info"),
           label = NULL,
           icon = icon("info-circle"),

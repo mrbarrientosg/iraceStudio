@@ -1,3 +1,4 @@
+#' @export
 CopyInput <- R6::R6Class(
   classname = "CopyInput",
   inherit = Component,

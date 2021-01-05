@@ -34,18 +34,18 @@ PlaygroundView <- R6::R6Class(
                 column(
                   width = 8,
                   style = "padding-left: 0px !important;",
-                  actionButton(
+                  iraceStudio::actionButton(
                     inputId = ns("add"),
                     label = "Add",
                     icon = icon("plus")
                   ),
                   disabled(
-                    actionButton(
+                    iraceStudio::actionButton(
                       inputId = ns("edit"),
                       label = "Edit",
                       icon = icon("edit")
                     ),
-                    actionButton(
+                    iraceStudio::actionButton(
                       inputId = ns("delete"),
                       label = "Delete",
                       icon = icon("minus")
@@ -183,7 +183,7 @@ PlaygroundView <- R6::R6Class(
             textInput(inputId = ns("scenario_name"), label = "Name"),
             textAreaInput(inputId = ns("scenario_description"), label = "Description"),
             footer = tagList(
-              actionButton(inputId = ns("add_scenario"), label = "Add", class = "btn-primary"),
+              iraceStudio::actionButton(inputId = ns("add_scenario"), label = "Add", class = "btn-primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -220,7 +220,7 @@ PlaygroundView <- R6::R6Class(
             textInput(inputId = ns("scenario_name"), label = "Name", value = scenario$name),
             textAreaInput(inputId = ns("scenario_description"), label = "Description", value = scenario$description),
             footer = tagList(
-              actionButton(inputId = ns("update_scenario"), label = "Save", class = "btn-primary"),
+              iraceStudio::actionButton(inputId = ns("update_scenario"), label = "Save", class = "btn-primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -269,7 +269,7 @@ PlaygroundView <- R6::R6Class(
               )
             ),
             footer = tagList(
-              actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
+              iraceStudio::actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
               modalButton(label = "Cancel")
             ),
             easyClose = TRUE

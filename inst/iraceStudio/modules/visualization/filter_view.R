@@ -97,7 +97,7 @@ FilterView <- R6::R6Class(
                 size = 8
               )
             ),
-            footer = actionButton(inputId = ns("filter"), label = "Filter", class = "btn-primary")
+            footer = iraceStudio::actionButton(inputId = ns("filter"), label = "Filter", class = "btn-primary")
           ),
           box(
             title = strong("Configurations"),
@@ -107,15 +107,15 @@ FilterView <- R6::R6Class(
             column(
               width = 12,
               style = "margin-bottom: 15px; padding-left: 0px !important;",
-              actionButton(
+              iraceStudio::actionButton(
                 inputId = ns("addSandBox"),
                 label = "Add to SandBox"
               ),
-              actionButton(
+              iraceStudio::actionButton(
                 inputId = ns("selectAllConfigs"),
                 label = "Select All"
               ),
-              actionButton(
+              iraceStudio::actionButton(
                 inputId = ns("deselectAllConfigs"),
                 label = "Deselect All"
               )
@@ -131,15 +131,15 @@ FilterView <- R6::R6Class(
             column(
               width = 12,
               style = "margin-bottom: 15px; padding-left: 0px !important;",
-              actionButton(
+              iraceStudio::actionButton(
                 inputId = ns("selectAllSandBox"),
                 label = "Select All"
               ),
-              actionButton(
+              iraceStudio::actionButton(
                 inputId = ns("deselectAllSandBox"),
                 label = "Deselect All"
               ),
-              actionButton(
+              iraceStudio::actionButton(
                 inputId = ns("deleteSandBox"),
                 label = "Delete"
               ),

@@ -1,3 +1,4 @@
+#' @export
 report <- R6::R6Class(
   classname = "report",
   private = list(
@@ -49,6 +50,7 @@ report <- R6::R6Class(
   )
 )
 
+#' @export
 Sandbox <- R6::R6Class(
   classname = "Sandbox",
   cloneable = FALSE,
@@ -139,6 +141,7 @@ Sandbox <- R6::R6Class(
   )
 )
 
+#' @export
 SandBoxes <- R6::R6Class(
   classname = "SandBoxes",
   private = list(
@@ -190,6 +193,7 @@ SandBoxes <- R6::R6Class(
   )
 )
 
+#' @export
 execution <- R6::R6Class(
   classname = "execution",
   cloneable = FALSE,
@@ -264,6 +268,7 @@ execution <- R6::R6Class(
   )
 )
 
+#' @export
 executions <- R6::R6Class(
   classname = "executions",
   cloneable = FALSE,
@@ -332,6 +337,7 @@ executions <- R6::R6Class(
   )
 )
 
+#' @export
 configurations <- R6::R6Class(
   classname ="configurations",
   cloneable = FALSE,
@@ -388,6 +394,7 @@ configurations <- R6::R6Class(
   )
 )
 
+#' @export
 parameters <- R6::R6Class(
   classname = "parameters",
   cloneable = FALSE,
@@ -491,6 +498,7 @@ parameters <- R6::R6Class(
   )
 )
 
+#' @export
 scenario <- R6::R6Class(
   classname ="scenario",
   cloneable = FALSE,
@@ -685,6 +693,7 @@ scenario <- R6::R6Class(
   )
 )
 
+#' @export
 playground <- R6::R6Class(
   classname = "playground",
   cloneable = FALSE,

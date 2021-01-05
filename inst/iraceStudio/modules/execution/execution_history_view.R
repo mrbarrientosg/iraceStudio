@@ -31,15 +31,15 @@ ExecutionsHistoryView <- R6::R6Class(
     },
 
     server = function(input, output, session, store) {
-      executions <- self$executionSelect$call(id = "executions", store = store)
+      # executions <- self$executionSelect$call(id = "executions", store = store)
 
-      output$irace_output <- renderText({
-        shiny::validate(
-          need(executions$option != "", message = "")
-        )
+      # output$irace_output <- renderText({
+      #   shiny::validate(
+      #     need(executions$option != "", message = "")
+      #   )
 
-        store$pg$get_execution(executions$option)$get_output_log()
-      })
+      #   store$pg$get_execution(executions$option)$get_output_log()
+      # })
     }
   )
 )

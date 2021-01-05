@@ -12,9 +12,8 @@ appSys <- function(...) {
 #'
 #' This function is internally used to add external
 #' resources inside the Shiny application.
-#'
-#' @noRd
-addExternalResources <- function() {
+#' @export
+iraceStudioResources <- function() {
   add_resource_path(
     "www", appSys("app/www")
   )
@@ -24,17 +23,39 @@ addExternalResources <- function() {
     Plotly.Plots.resize(params[0]);
   }
   "
-
-
   tags$head(
-    bundle_resources(
-      path = appSys("app/www"),
-      app_title = "Irace Studio",
-      name = "irace_studio",
-      version = "1.0.7.9000"
-    ),
-    shinyalert::useShinyalert(),
-    shinyjs::useShinyjs(),
-    shinyjs::extendShinyjs(text = plotlyResize, functions = c("resizePlotly"))
+      htmltools::htmlDependency(
+        name = "summernote",
+        version = "1.0.0",
+        src = appSys("app/www"),
+        script = c("summernote-bs4.js", "summernote_binding.js"),
+        stylesheet = "summernote-bs4.css",
+        all_files = FALSE
+      ),
+      tags$link(rel = "stylesheet", href = file.path("www", "app-styles.css")),
+      shinyalert::useShinyalert(),
+      shinyjs::useShinyjs(),
+      useGridstack(),
+      shinyjs::extendShinyjs(text = plotlyResize, functions = c("resizePlotly"))
+    )
+}
+
+#' @export
+iraceVizzResources <- function() {
+  add_resource_path(
+    "www", appSys("app/www")
   )
+
+  plotlyResize <- "
+  shinyjs.resizePlotly = function(params) {
+    Plotly.Plots.resize(params[0]);
+  }
+  "
+  tags$head(
+      tags$link(rel = "stylesheet", href = file.path("www", "app-styles.css")),
+      shinyalert::useShinyalert(),
+      shinyjs::useShinyjs(),
+      useGridstack(),
+      shinyjs::extendShinyjs(text = plotlyResize, functions = c("resizePlotly"))
+    )
 }

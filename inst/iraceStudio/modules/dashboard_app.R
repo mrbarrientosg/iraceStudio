@@ -1,5 +1,5 @@
-Navbar <- R6::R6Class(
-  classname = "Navbar",
+NavbarApp <- R6::R6Class(
+  classname = "NavbarApp",
   inherit = Component,
   public = list(
     ui = function(id) {
@@ -49,8 +49,8 @@ Navbar <- R6::R6Class(
   )
 )
 
-Body <- R6::R6Class(
-  classname = "Body",
+BodyApp <- R6::R6Class(
+  classname = "BodyApp",
   public = list(
     homeView = NULL,
     uiOptionsView = NULL,
@@ -99,7 +99,7 @@ Body <- R6::R6Class(
 
     ui = function() {
       dashboardBody(
-        addExternalResources(),
+        iraceStudioResources(),
         tabItems(
           tabItem(
             tabName = "home",
@@ -203,8 +203,8 @@ Body <- R6::R6Class(
   )
 )
 
-ControlBar <- R6::R6Class(
-  classname = "ControlBar",
+ControlBarApp <- R6::R6Class(
+  classname = "ControlBarApp",
   inherit = Component,
   public = list(
     executionSelect = NULL,
@@ -297,8 +297,8 @@ ControlBar <- R6::R6Class(
   )
 )
 
-Sidebar <- R6::R6Class(
-  classname = "Sidebar",
+SidebarApp <- R6::R6Class(
+  classname = "SidebarApp",
   public = list(
     ui = function() {
       dashboardSidebar(
@@ -421,8 +421,8 @@ Sidebar <- R6::R6Class(
   )
 )
 
-Footer <- R6::R6Class(
-  classname = "Footer",
+FooterApp <- R6::R6Class(
+  classname = "FooterApp",
   inherit = Component,
   public = list(
     ui = function(id) {

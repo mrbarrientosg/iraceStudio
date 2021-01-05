@@ -113,7 +113,7 @@ UserSectionCard <- R6::R6Class(
             easyClose = TRUE,
             textInput(inputId = session$ns("title"), label = "Title"),
             footer = tagList(
-              actionButton(inputId = session$ns("addSection"), label = "Add"),
+              iraceStudio::actionButton(inputId = session$ns("addSection"), label = "Add"),
               modalButton(label = "Dissmis")
             )
           )

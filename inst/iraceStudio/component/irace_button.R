@@ -7,7 +7,7 @@ IraceButton <- R6::R6Class(
     ui = function(inputId, label = " Start Irace", ...) {
       ns <- NS(inputId)
 
-      actionButton(
+      iraceStudio::actionButton(
         inputId = ns("action"),
         label = label,
         icon = icon("play"),

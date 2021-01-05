@@ -1,3 +1,4 @@
+#' @export
 ExecutionSelect <- R6::R6Class(
   classname = "ExecutionSelect",
   inherit = Component,

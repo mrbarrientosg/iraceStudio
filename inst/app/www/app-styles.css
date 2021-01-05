@@ -92,3 +92,7 @@ body {
 .dropdown-item.active, .dropdown-item:active {
     color: #fff !important;
 }
+
+.plotly {
+    height: inherit !important;
+}

@@ -314,7 +314,7 @@ CandidatesCard <- R6::R6Class(
             ),
             inlineCSS(".multi-wrapper .non-selected-wrapper,
             .multi-wrapper .selected-wrapper { height: 350px; }"),
-            actionButton(inputId = ns("update"), label = "Update", class = "btn-primary")
+            iraceStudio::actionButton(inputId = ns("update"), label = "Update", class = "btn-primary")
           )
         ),
         fluidRow(

@@ -27,19 +27,19 @@ ParametersView <- R6::R6Class(
         fluidRow(
           column(
             width = 8,
-            actionButton(inputId = ns("add"), label = "Add", icon = icon("plus")),
+            iraceStudio::actionButton(inputId = ns("add"), label = "Add", icon = icon("plus")),
             disabled(
-              actionButton(
+              iraceStudio::actionButton(
                 inputId = ns("edit"),
                 label = "Edit",
                 icon = icon("edit")
               ),
-              actionButton(
+              iraceStudio::actionButton(
                 inputId = ns("delete"),
                 label = "Delete",
                 icon = icon("minus")
               ),
-              actionButton(
+              iraceStudio::actionButton(
                 inputId = ns("check"),
                 label = "Check",
                 icon = icon("check")
@@ -265,7 +265,7 @@ ParametersView <- R6::R6Class(
                 )
               ),
               footer = tagList(
-                actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
+                iraceStudio::actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
                 modalButton(label = "Cancel")
               ),
               easyClose = TRUE
@@ -375,8 +375,8 @@ ModalParameter <- R6::R6Class(
           value = private$checkValue("conditions", values)
         ),
         footer = tagList(
-          actionButton(inputId = ns("parameterSave"), label = "Save", class = "btn-primary"),
-          actionButton(inputId = ns("parameterCancel"), label = "Cancel")
+          iraceStudio::actionButton(inputId = ns("parameterSave"), label = "Save", class = "btn-primary"),
+          iraceStudio::actionButton(inputId = ns("parameterCancel"), label = "Cancel")
         )
       )
     },
@@ -405,7 +405,7 @@ ModalParameter <- R6::R6Class(
           parent$domainList <- domain
           tagList(
             textInput(ns("domainName"), "Domain values (press add)"),
-            actionButton(ns("addDomain"), "Add", class = "btn-link"),
+            iraceStudio::actionButton(ns("addDomain"), "Add", class = "btn-link"),
             uiOutput(ns("domainList"))
           )
         } else {
@@ -433,7 +433,7 @@ ModalParameter <- R6::R6Class(
             lapply(parent$domainList, function(name) {
               bs4ListGroupItem(
                 name,
-                actionButton(ns(paste0(name, "-delete")), labe = NULL, icon = icon("trash"), class = "btn-danger")
+                iraceStudio::actionButton(ns(paste0(name, "-delete")), labe = NULL, icon = icon("trash"), class = "btn-danger")
               )
             })
           ),

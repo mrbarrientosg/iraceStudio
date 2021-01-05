@@ -1,3 +1,4 @@
+#' @export
 SummonerInput <- R6::R6Class(
   classname = "SummonerInput",
   inherit = Component,

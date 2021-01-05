@@ -1,3 +1,4 @@
+#' @export
 SandboxSelect <- R6::R6Class(
   classname = "SandboxSelect",
   inherit = Component,

@@ -30,5 +30,5 @@ Shiny.inputBindings.register(summernoteBinding);
 
 Shiny.addCustomMessageHandler('updateSummernoteInput', function(message) {
   let el = document.getElementById(message.inputId);
-  $(el).summernote('pasteHTML', message.value); // Summernote-Input aktualisieren
+  $(el).summernote('pasteHTML', message.value);
 });

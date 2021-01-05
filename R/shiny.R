@@ -1,4 +1,4 @@
-#' @noRd
+#' @export
 actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
   btn <- shiny::actionButton(inputId, label, icon, width, ...)
   opts <- list(...)
@@ -10,6 +10,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
   return(btn)
 }
 
+#' @export
 exportButton <- function(inputId, filename, style = NULL, size = "default") {
   size <- match.arg(
     arg = size,
@@ -42,6 +43,7 @@ exportButton <- function(inputId, filename, style = NULL, size = "default") {
   return(btn)
 }
 
+#' @export
 importButton <- function(inputId, label = "Import", style = NULL, size = "default") {
   size <- match.arg(
     arg = size,
@@ -73,6 +75,7 @@ importButton <- function(inputId, label = "Import", style = NULL, size = "defaul
   return(btn)
 }
 
+#' @export
 directoryInput <- function(idButton, idInput, label, title, buttonText = "Browse" , width = NULL) {
   input <- textInput(
     inputId = idInput,

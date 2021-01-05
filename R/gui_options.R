@@ -1,3 +1,4 @@
+#' @export
 GUIOptions <- R6::R6Class(
   classname = "GUIOptions",
   public = list(

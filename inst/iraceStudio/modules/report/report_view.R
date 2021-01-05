@@ -46,7 +46,6 @@ ReportView <- R6::R6Class(
       self$candidatesCard$call(id = "candidates", store = store)
       self$performanceCard$call(id = "performance", store = store)
       self$detailByIterationCard$call(id = "detail_by_iteration", store = store)
-      self$executionSelect$call(id = "executions", store = store)
     }
   )
 )
