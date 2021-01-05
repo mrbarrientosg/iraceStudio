@@ -144,7 +144,7 @@ TrainInstancesView <- R6::R6Class(
         }
       })
 
-      observeEvent(c(playground_emitter$value(playground_events$current_scenario), store$pg), {
+      observeEvent(c(global_emitter$value(global_events$current_scenario), store$pg), {
         updateTextAreaInput(
           session = session,
           inputId = "source_instances_file",

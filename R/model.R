@@ -18,7 +18,7 @@ report <- R6::R6Class(
     add_title = function(title) {
       private$count <- private$count + 1
       private$data[[as.character(private$count)]]$title <- title
-      playground_emitter$emit(playground_events$update_report)
+      global_emitter$emit(global_events$update_report)
     },
 
     set_content = function(id, content) {
@@ -32,7 +32,7 @@ report <- R6::R6Class(
     remove_data = function(id) {
       private$data[[as.character(id)]] <- NULL
       private$count <- private$count - 1
-      playground_emitter$emit(playground_events$update_report)
+      global_emitter$emit(global_events$update_report)
     },
 
     get_id = function(section) {
@@ -166,13 +166,13 @@ SandBoxes <- R6::R6Class(
       private$count <- private$count + 1
       sandbox$setId(private$count)
       private$boxes[[as.character(private$count)]] <- sandbox
-      playground_emitter$emit(playground_events$update_sandboxes)
+      global_emitter$emit(global_events$update_sandboxes)
     },
 
     remove_sandbox = function(id) {
       private$boxes[[id]] <- NULL
       private$count <- private$count - 1
-      playground_emitter$emit(playground_events$update_sandboxes)
+      global_emitter$emit(global_events$update_sandboxes)
     },
 
     get_boxes = function() return(private$boxes),
@@ -293,7 +293,7 @@ executions <- R6::R6Class(
       new_id <- paste0("execution-", id, "-", private$last_insert)
       execution$set_id(new_id)
       private$executions[[new_id]] <- execution
-      playground_emitter$emit(playground_events$update_executions)
+      global_emitter$emit(global_events$update_executions)
     },
 
     add_irace_results = function(id, irace_results) {
@@ -312,7 +312,7 @@ executions <- R6::R6Class(
       private$executions <- NULL
       private$executions <- list()
       private$last_insert <- 0
-      playground_emitter$emit(playground_events$update_scenarios)
+      global_emitter$emit(global_events$update_scenarios)
     },
 
     is_empty = function() length(private$executions) == 0,
@@ -724,7 +724,7 @@ playground <- R6::R6Class(
         private$current_scenario <- private$scenarios[[playground$last_scenario]]
         private$last_scenario <- playground$last_scenario
         private$last_insert <- playground$last_insert
-        playground_emitter$emit(playground_events$update_scenarios)
+        global_emitter$emit(global_events$update_scenarios)
       } else {
         self$add_scenario(scenario$new(name = "scenario-1"))
       }
@@ -740,11 +740,11 @@ playground <- R6::R6Class(
 
       new_scenario$set_id(id)
       private$scenarios[[id]] <- new_scenario
-      playground_emitter$emit(playground_events$update_scenarios)
+      global_emitter$emit(global_events$update_scenarios)
 
       if (is.null(private$current_scenario)) {
         private$current_scenario <- new_scenario
-        playground_emitter$emit(playground_events$current_scenario)
+        global_emitter$emit(global_events$current_scenario)
       }
     },
 
@@ -754,7 +754,7 @@ playground <- R6::R6Class(
       if (is.null(private$scenarios) || length(private$scenarios) == 0) {
         self$add_scenario(scenario$new(name = "scenario-1"))
       } else {
-        playground_emitter$emit(playground_events$update_scenarios)
+        global_emitter$emit(global_events$update_scenarios)
       }
     },
 
@@ -862,7 +862,7 @@ playground <- R6::R6Class(
     change_current_scenario = function(id) {
       scenario <- private$scenarios[[id]]
       private$current_scenario <- scenario
-      playground_emitter$emit(playground_events$current_scenario)
+      global_emitter$emit(global_events$current_scenario)
     },
 
     clear_scenario_temp = function() {

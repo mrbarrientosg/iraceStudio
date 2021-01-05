@@ -37,7 +37,7 @@ CopyInput <- R6::R6Class(
       observeEvent(input$select_input, values$section <- input$select_input)
       observeEvent(input$action, values$action <- input$action)
 
-      observeEvent(c(store$currentExecution, playground_emitter$value(playground_events$update_report)), {
+      observeEvent(c(store$currentExecution, global_emitter$value(global_events$update_report)), {
         if (is.null(store$currentExecution)) {
           updatePickerInput(
             session = session,

@@ -95,9 +95,9 @@ SandboxView <- R6::R6Class(
       )
 
       observeEvent(c(
-        playground_emitter$value(playground_events$update_scenarios),
-        playground_emitter$value(playground_events$update_executions),
-        playground_emitter$value(playground_events$update_sandboxes)
+        global_emitter$value(global_events$update_scenarios),
+        global_emitter$value(global_events$update_executions),
+        global_emitter$value(global_events$update_sandboxes)
       ), {
         if (!is.null(store$currentExecution)) {
           data$sandbox <- self$sandbox_as_data_frame(store$currentExecution)
@@ -161,7 +161,7 @@ SandboxView <- R6::R6Class(
 
           sandbox$setName(input$sandbox_name)
           sandbox$setDescription(input$sandbox_description)
-          playground_emitter$emit(playground_events$update_sandboxes)
+          global_emitter$emit(global_events$update_sandboxes)
 
           data$sandbox <- self$sandbox_as_data_frame(store$currentExecution)
         }

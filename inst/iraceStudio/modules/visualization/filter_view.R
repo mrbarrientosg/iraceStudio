@@ -183,7 +183,7 @@ FilterView <- R6::R6Class(
 
       observeEvent(
         c(store$sandbox,
-          playground_emitter$value(playground_events$current_scenario)),  {
+          global_emitter$value(global_events$current_scenario)),  {
         updateValue$suspend()
 
         values$sandbox <- data.frame()

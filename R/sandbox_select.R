@@ -20,9 +20,9 @@ SandboxSelect <- R6::R6Class(
     server = function(input, output, session, store) {
       values <- reactiveValues()
 
-      observeEvent(c(playground_emitter$value(playground_events$current_scenario),
-        playground_emitter$value(playground_events$update_executions),
-        playground_emitter$value(playground_events$update_sandboxes),
+      observeEvent(c(global_emitter$value(global_events$current_scenario),
+        global_emitter$value(global_events$update_executions),
+        global_emitter$value(global_events$update_sandboxes),
         store$currentExecution), {
 
         boxes_id <- NULL

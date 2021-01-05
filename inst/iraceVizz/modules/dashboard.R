@@ -103,7 +103,7 @@ ControlBar <- R6::R6Class(
         pkg$outputLog <- NULL
       })
 
-      observeEvent(playground_emitter$value(playground_events$update_scenarios), {
+      observeEvent(global_emitter$value(global_events$update_scenarios), {
         scenarios <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_name())
         scenarios_id <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_id())
 

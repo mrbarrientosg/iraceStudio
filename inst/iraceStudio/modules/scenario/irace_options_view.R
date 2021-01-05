@@ -64,7 +64,7 @@ IraceOptionsView <- R6::R6Class(
             shinyalert(title = "Warning",
                       text = "Cannot be import all options from the scenario.",
                       type = "warning")
-            playground_emitter$emit(playground_events$current_scenario)
+            global_emitter$emit(global_events$current_scenario)
           } else {
             alert.error("Can't load scenario file, check if the file format is correct.")
           }

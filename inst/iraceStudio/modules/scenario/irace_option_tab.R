@@ -46,7 +46,7 @@ IraceOptionTab <- R6::R6Class(
           })
         })
 
-      observeEvent(playground_emitter$value(playground_events$current_scenario), {
+      observeEvent(global_emitter$value(global_events$current_scenario), {
         if (!isFast) {
           scenarioOptions %>%
             filter(section == .section) %>%

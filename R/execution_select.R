@@ -20,8 +20,8 @@ ExecutionSelect <- R6::R6Class(
     server = function(input, output, session, store) {
       values <- reactiveValues()
 
-      observeEvent(c(playground_emitter$value(playground_events$current_scenario),
-        playground_emitter$value(playground_events$update_executions)), {
+      observeEvent(c(global_emitter$value(global_events$current_scenario),
+        global_emitter$value(global_events$update_executions)), {
 
         if (length(store$pg$get_executions()) == 0) {
           store$iraceResults <- NULL

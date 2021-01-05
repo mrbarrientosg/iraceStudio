@@ -120,7 +120,7 @@ PerformanceInstanceView <- R6::R6Class(
         req(store$updateSandbox)
         req(store$sandbox)
         req(store$iraceResults)
-        playground_emitter$value(playground_events$current_scenario)
+        global_emitter$value(global_events$current_scenario)
 
         event <- event_data("plotly_click", "distanceBestPlot")
 

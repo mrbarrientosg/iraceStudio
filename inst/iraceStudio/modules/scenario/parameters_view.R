@@ -113,12 +113,12 @@ ParametersView <- R6::R6Class(
       # Para poder modificar la tabla de parametros despues de instanciarse
       proxy <- dataTableProxy(outputId = "parameters_table")
 
-      observeEvent(c(playground_emitter$value(playground_events$current_scenario), store$pg), {
+      observeEvent(c(global_emitter$value(global_events$current_scenario), store$pg), {
         values$parameters <- store$pg$get_parameters()
       })
 
       observeEvent(values$parameters, {
-        playground_emitter$emit(playground_events$update_parameters)
+        global_emitter$emit(global_events$update_parameters)
 
         proxy %>%
           replaceData(

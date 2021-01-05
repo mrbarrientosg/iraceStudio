@@ -165,7 +165,7 @@ IraceOutputView <- R6::R6Class(
       })
 
       observe({
-        playground_emitter$value(playground_events$current_scenario)
+        global_emitter$value(global_events$current_scenario)
 
         if (!store$startIrace) {
           if (!is.null(pkg$outputLog) && file.exists(pkg$outputLog)) {

@@ -11,5 +11,5 @@ golem::document_and_reload()
 #reactlog::reactlog_enable()
 
 # Run the application
-#run_app(debug = TRUE)
+run_app(debug = TRUE)
 #runIraceVizz(debug = TRUE)

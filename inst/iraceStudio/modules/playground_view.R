@@ -248,7 +248,7 @@ PlaygroundView <- R6::R6Class(
 
         scenario$set_name(input$scenario_name)
         scenario$set_description(input$scenario_description)
-        playground_emitter$emit(playground_events$update_scenarios)
+        global_emitter$emit(global_events$update_scenarios)
 
         data$scenarios <- self$scenarios_as_data_frame(store)
 

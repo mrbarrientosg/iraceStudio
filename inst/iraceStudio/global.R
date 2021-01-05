@@ -107,7 +107,6 @@ save_plot_as_base64 <- function(width = 550, height = 550) {
   return(knitr::image_uri(filePlot))
 }
 
-
 create_scenario_file <- function(path, pg, name = "scenario.txt", export = FALSE) {
   if (!is.null(name) && name != "") {
     path <- file.path(path, name)

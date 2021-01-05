@@ -1,5 +1,5 @@
-PlaygroundEventEmitter <- R6::R6Class(
-  classname = "PlaygroundEventEmitter",
+EventEmitter <- R6::R6Class(
+  classname = "EventEmitter",
   private = list(
     values = NULL
   ),
@@ -24,7 +24,8 @@ PlaygroundEventEmitter <- R6::R6Class(
   )
 )
 
-playground_events <- list(
+#' @export
+global_events <- list(
   update_scenarios = "update_scenarios",
   current_scenario = "current_scenario",
   update_executions = "update_executions",
@@ -33,4 +34,5 @@ playground_events <- list(
   update_report = "update_report"
 )
 
-playground_emitter <- PlaygroundEventEmitter$new()
+#' @export
+global_emitter <- EventEmitter$new()

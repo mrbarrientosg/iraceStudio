@@ -258,6 +258,7 @@ ControlBarApp <- R6::R6Class(
       observeEvent(input$scenarioPicker, {
         req(input$scenarioPicker)
         store$pg$change_current_scenario(input$scenarioPicker)
+        store$didChangeScenario <- store$didChangeScenario + 1
         pkg$outputLog <- NULL
       })
 
@@ -269,7 +270,7 @@ ControlBarApp <- R6::R6Class(
         }
       })
 
-      observeEvent(playground_emitter$value(playground_events$update_scenarios), {
+      observeEvent(global_emitter$value(global_events$update_scenarios), {
         scenarios <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_name())
         scenarios_id <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_id())
 
@@ -469,7 +470,7 @@ FooterApp <- R6::R6Class(
     server = function(input, output, session, store) {
       output$scenario <- renderUI({
         shiny::validate(
-          need(playground_emitter$value(playground_events$current_scenario), "Nothing")
+          need(global_emitter$value(global_events$current_scenario), "Nothing")
         )
         store$pg$get_current_scenario()$get_name()
       })
