@@ -103,7 +103,7 @@ InitialConfigurationsView <- R6::R6Class(
       output$initial_config_table <- DT::renderDataTable({
         shiny::validate(
           need(global_emitter$value(global_events$update_parameters) > 0, ""),
-          need(nrow(store$pg$get_parameters()) > 0, "Empty parameters"),
+          need(nrow(store$pg$get_parameters()) > 0, "Add a parameter first to add a configuration."),
           need(store$pg, "")
         )
 

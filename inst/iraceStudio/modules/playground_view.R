@@ -27,14 +27,13 @@ PlaygroundView <- R6::R6Class(
             closable = FALSE,
             width = 12,
             type = "tabs",
-            status = "gray",
+            status = "primary",
             tabPanel(
               "Scenarios",
               fluidRow(
                 column(
                   width = 8,
-                  style = "padding-left: 0px !important;",
-                  iraceStudio::actionButton(
+                  actionButton(
                     inputId = ns("add"),
                     label = "Add",
                     icon = icon("plus")
@@ -220,7 +219,7 @@ PlaygroundView <- R6::R6Class(
             textInput(inputId = ns("scenario_name"), label = "Name", value = scenario$name),
             textAreaInput(inputId = ns("scenario_description"), label = "Description", value = scenario$description),
             footer = tagList(
-              iraceStudio::actionButton(inputId = ns("update_scenario"), label = "Save", class = "btn-primary"),
+              actionButton(inputId = ns("update_scenario"), label = "Save", class = "btn-primary"),
               modalButton(label = "Cancel")
             )
           )

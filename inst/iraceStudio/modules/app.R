@@ -75,11 +75,11 @@ App <- R6::R6Class(
 
   public = list(
     initialize = function() {
-      private$navbar <- NavbarApp$new()
-      private$sidebar <- SidebarApp$new()
-      private$body <- BodyApp$new()
-      private$controlbar <- ControlBarApp$new()
-      private$footer <- FooterApp$new()
+      private$navbar <- Navbar$new()
+      private$sidebar <- Sidebar$new()
+      private$body <- Body$new()
+      private$controlbar <- ControlBar$new()
+      private$footer <- Footer$new()
 
       private$store <- reactiveValues(
         pg = NULL,
@@ -92,6 +92,7 @@ App <- R6::R6Class(
       dashboardPage(
         title = "Irace Studio",
         dark = FALSE,
+        freshTheme = common_theme,
         header = private$navbar$ui("navbar"),
         sidebar = private$sidebar$ui(),
         body = private$body$ui(),

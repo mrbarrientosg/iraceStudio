@@ -97,7 +97,7 @@ IraceOptionsView <- R6::R6Class(
           closable = FALSE,
           width = 12,
           type = "tabs",
-          status = "gray"
+          status = "primary"
         )
 
         do.call(tabBox, args)

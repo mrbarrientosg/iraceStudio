@@ -1,42 +1,32 @@
 .card-header {
-    border-bottom: 1px solid #ebedf2;
+    border-bottom: 1px solid #ebedf2 !important;
 }
 
 .card {
-    -webkit-box-shadow: 0 0 13px 0 rgba(82, 63, 105, 0.05);
-    box-shadow: 0 0 13px 0 rgba(82, 63, 105, 0.05);
-    border-radius: 4px;
+    -webkit-box-shadow: 0 0 13px 0 rgba(82, 63, 105, 0.05) !important;
+    -moz-box-shadow: 0 0 13px 0 rgba(82, 63, 105, 0.05) !important;
+    box-shadow: 0 0 13px 0 rgba(82, 63, 105, 0.05) !important;
+    border-radius: 4px !important;
 }
 
 .content-wrapper {
-    background-color: #f2f3f8;
-    padding-top: 16px;
-}
-
-.main-sidebar {
-    background-color: #242939;
-    bottom: 0 !important;
-    float: none !important;
-    height: 100vh !important;
-    left: 0 !important;
-    position: fixed !important;
-    top: 0 !important;
+    padding-top: 16px !important;
 }
 
 .control-sidebar-light {
     background-color: white !important;
-    border-style: none;
+    border-style: none !important;
     border-color: white !important;
 }
 
 .control-sidebar {
-    z-index: 2000;
+    z-index: 2000 !important;
 }
 
 .control-sidebar-content {
-    -webkit-box-shadow: -15px 0 20px -1px rgba(82, 63, 105, 0.1);
-    -moz-box-shadow: -15px 0 20px -1px rgba(82, 63, 105, 0.1);
-    box-shadow: -15px 0 20px -1px rgba(82, 63, 105, 0.1);
+    -webkit-box-shadow: -15px 0 20px -1px rgba(82, 63, 105, 0.1) !important;
+    -moz-box-shadow: -15px 0 20px -1px rgba(82, 63, 105, 0.1) !important;
+    box-shadow: -15px 0 20px -1px rgba(82, 63, 105, 0.1) !important;
 }
 
 .control-sidebar .card {
@@ -45,18 +35,17 @@
 }
 
 .brand-link {
-    background-color: #242939 !important;
     border: 0 !important;
     color: white !important;
     height: 58px;
 }
 
 .main-header {
-    background-color: #ffffff;
-    border-bottom: 1px solid #eff0f6;
-    -webkit-box-shadow: 0 10px 30px -1px rgba(82, 63, 105, 0.1);
-    -moz-box-shadow: 0 10px 30px -1px rgba(82, 63, 105, 0.1);
-    box-shadow: 0 10px 30px -1px rgba(82, 63, 105, 0.1);
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #eff0f6 !important;
+    -webkit-box-shadow: 0 10px 30px -1px rgba(82, 63, 105, 0.1) !important;
+    -moz-box-shadow: 0 10px 30px -1px rgba(82, 63, 105, 0.1) !important;
+    box-shadow: 0 10px 30px -1px rgba(82, 63, 105, 0.1) !important;
 }
 
 .sub-header {

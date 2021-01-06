@@ -30,4 +30,5 @@
 #' @import sortable
 #' @import htmlwidgets
 #' @import shinyhelper
+#' @import fresh
 NULL

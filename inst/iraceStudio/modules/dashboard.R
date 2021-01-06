@@ -1,5 +1,5 @@
-NavbarApp <- R6::R6Class(
-  classname = "NavbarApp",
+Navbar <- R6::R6Class(
+  classname = "Navbar",
   inherit = Component,
   public = list(
     ui = function(id) {
@@ -9,31 +9,7 @@ NavbarApp <- R6::R6Class(
         title = dashboardBrand(
           title = h2("Irace Studio", style = "text-align:center; margin-bottom: 0;")
         ),
-      #title = h1("Irace Studio", style = "color: white;text-align:center; margin-bottom: 0;"),
         fixed = TRUE,
-      # rightUi = tagList(
-      #   tags$li(
-      #     class = "dropdown",
-      #     style = "height: 34px;",
-      #     selectInput(
-      #       inputId = ns("scenarioPicker"),
-      #       label = NULL,
-      #       choices = "",
-      #       width = 250
-      #     )
-      #   ),
-      #   tags$li(
-      #     class = "dropdown",
-      #     style = "align-self: center;",
-          # tags$a(
-          #   "Irace User Guide",
-          #   class = "btn-link",
-          #   style = "padding: 8px;",
-          #   href = "https://cran.r-project.org/web/packages/irace/vignettes/irace-package.pdf",
-          #   target = "_blank"
-          # )
-      #   )
-      # ),
         h4(
           textOutput(
             outputId = ns("playgroundName")
@@ -49,8 +25,8 @@ NavbarApp <- R6::R6Class(
   )
 )
 
-BodyApp <- R6::R6Class(
-  classname = "BodyApp",
+Body <- R6::R6Class(
+  classname = "Body",
   public = list(
     homeView = NULL,
     uiOptionsView = NULL,
@@ -203,8 +179,8 @@ BodyApp <- R6::R6Class(
   )
 )
 
-ControlBarApp <- R6::R6Class(
-  classname = "ControlBarApp",
+ControlBar <- R6::R6Class(
+  classname = "ControlBar",
   inherit = Component,
   public = list(
     executionSelect = NULL,
@@ -298,8 +274,8 @@ ControlBarApp <- R6::R6Class(
   )
 )
 
-SidebarApp <- R6::R6Class(
-  classname = "SidebarApp",
+Sidebar <- R6::R6Class(
+  classname = "Sidebar",
   public = list(
     ui = function() {
       dashboardSidebar(
@@ -422,8 +398,8 @@ SidebarApp <- R6::R6Class(
   )
 )
 
-FooterApp <- R6::R6Class(
-  classname = "FooterApp",
+Footer <- R6::R6Class(
+  classname = "Footer",
   inherit = Component,
   public = list(
     ui = function(id) {
