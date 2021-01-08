@@ -35,7 +35,6 @@ UserSectionView <- R6::R6Class(
             )
           )
         ),
-        hr(),
         fluidRow(
           id = "userSectionContent"
         )

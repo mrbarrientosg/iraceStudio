@@ -42,8 +42,7 @@ Imports:
     shinycssloaders (>= 0.3),
     sortable (>= 0.4.2),
     htmlwidgets (>= 1.5.1),
-    shinyhelper (>= 0.3.2),
-    fresh
+    shinyhelper (>= 0.3.2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
