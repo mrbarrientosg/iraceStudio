@@ -85,7 +85,7 @@ App <- R6::R6Class(
       dashboardPage(
         title = "Irace Vizz",
         dark = FALSE,
-        freshTheme = common_theme,
+        #freshTheme = common_theme,
         header = private$navbar$ui("navbar"),
         sidebar = private$sidebar$ui(),
         body = private$body$ui()

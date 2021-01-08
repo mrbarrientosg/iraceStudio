@@ -28,10 +28,10 @@ Navbar <- R6::R6Class(
 Body <- R6::R6Class(
   classname = "Body",
   public = list(
-    analyticView = NULL,
+    overview = NULL,
 
     initialize = function() {
-      self$analyticView <- AnalyticView$new("analytic")
+      self$overview <- Overview$new("overview")
     },
 
     ui = function() {
@@ -39,15 +39,15 @@ Body <- R6::R6Class(
         iraceVizzResources(),
         tabItems(
           tabItem(
-            tabName = "analytic",
-            self$analyticView$ui()
+            tabName = "overview",
+            self$overview$ui()
           )
         )
       )
     },
 
     setupModules = function(store) {
-      self$analyticView$call(store = store)
+      self$overview$call(store = store)
     }
   )
 )
@@ -139,8 +139,8 @@ Sidebar <- R6::R6Class(
         minified = FALSE,
         sidebarMenu(
           menuItem(
-            text = "Analytic",
-            tabName = "analytic",
+            text = "Overview",
+            tabName = "overview",
             icon = NULL
           )
         )
