@@ -1,48 +1,52 @@
-IraceButton <- R6::R6Class(
+IraceButton <- R6::R6Class( # nolint
   classname = "IraceButton",
   inherit = Component,
   public = list(
     state = FALSE,
 
-    ui = function(inputId, label = " Start Irace", ...) {
-      ns <- NS(inputId)
+    ui = function(input_id, label = " Start Irace", ...) {
+      ns <- NS(input_id)
 
-      iraceStudio::actionButton(
+      bs4Dash::actionButton(
         inputId = ns("action"),
         label = label,
         icon = icon("play"),
-        class = "btn-primary btn-lg",
+        status = "primary",
+        size = "lg",
         ...
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       values <- reactiveValues()
 
-      observeEvent(input$action, {
-        if (store$startIrace) {
-          shinyalert(
-            title = "Stop Irace",
-            text = "Are you sure stop irace?.",
-            type = "warning",
-            showConfirmButton = TRUE,
-            showCancelButton = TRUE,
-            closeOnEsc = FALSE,
-            confirmButtonText = "Yes",
-            callbackR = function(event) {
-              if (event) {
-                log_info("Stop irace")
-                values$action <- input$action
+      observeEvent(input$action,
+        {
+          if (events$is_irace_running) {
+            shinyalert(
+              title = "Stop Irace",
+              text = "Are you sure stop irace?.",
+              type = "warning",
+              showConfirmButton = TRUE,
+              showCancelButton = TRUE,
+              closeOnEsc = FALSE,
+              confirmButtonText = "Yes",
+              callbackR = function(event) {
+                if (event) {
+                  log_info("Stop irace")
+                  values$action <- input$action
+                }
               }
-            }
-          )
-          return(invisible())
-        }
+            )
+            return(invisible())
+          }
 
-        values$action <- input$action
-      }, ignoreInit = TRUE)
+          values$action <- input$action
+        },
+        ignoreInit = TRUE
+      )
 
-      observeEvent(store$startIrace, self$changeState(session), ignoreInit = TRUE)
+      observeEvent(events$is_irace_running, self$changeState(session), ignoreInit = TRUE)
 
       return(values)
     },

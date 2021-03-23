@@ -1,4 +1,4 @@
-IraceOptionsView <- R6::R6Class(
+IraceOptionsView <- R6::R6Class( # nolint
   classname = "IraceOptionsView",
   inherit = View,
   public = list(
@@ -18,14 +18,17 @@ IraceOptionsView <- R6::R6Class(
                   <li>for a quick setup, just define either <b>maxExperiments</b> or <b>maxTime</b> options </li>
                   </ul>
                   Check each option information for details, or go to the irace package
-                 <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
+                  <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ") # nolint
           ),
           column(
             width = 3,
             class = "d-flex align-items-center justify-content-end",
-            importButton(inputId = ns("load")),
-            exportButton(inputId = ns("export"), filename = "scenario.txt",
-              style = "margin-left: 5px;")
+            import_button(input_id = ns("load")),
+            export_button(
+              input_id = ns("export"),
+              filename = "scenario.txt",
+              style = "margin-left: 5px;"
+            )
           )
         ),
         fluidRow(
@@ -34,39 +37,50 @@ IraceOptionsView <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       ns <- session$ns
 
       update <- reactiveValues(id = NULL, section = NULL)
 
-      volumes <- c("Home"=path.expand('~'), getVolumes()())
+      volumes <- c("Home" = path.expand("~"), getVolumes()())
 
       shinyFileChoose(input, "load", roots = volumes)
       shinyFileSave(input = input, id = "export", roots = volumes)
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- tryCatch({
-            parseFilePaths(roots = volumes, input$load)
-          }, error = function(err) {
-            log_error("{err}")
-            return(NULL)
-          })
+          file <- tryCatch(
+            {
+              parseFilePaths(roots = volumes, input$load)
+            },
+            error = function(err) {
+              log_error("{err}")
+              return(NULL)
+            }
+          )
 
           if (is.null(file)) {
-            alert.error("Can't load scenario file, check if the file format is correct.")
+            alert_error("Can't load scenario file, check if the file format is correct.")
             return(invisible())
           }
 
-          result <- importScenario(file$name, file$datapath, store$pg$get_current_scenario(), TRUE)
+          result <- import_scenario(
+            name = file$name,
+            path = file$datapath,
+            scenario = store$pg$get_current_scenario(),
+            events = events,
+            onlyOptions = TRUE
+          )
 
           if (result) {
-            shinyalert(title = "Warning",
-                      text = "Cannot be import all options from the scenario.",
-                      type = "warning")
-            global_emitter$emit(global_events$current_scenario)
+            shinyalert(
+              title = "Warning",
+              text = "Cannot be import all options from the scenario.",
+              type = "warning"
+            )
+            update_reactive_counter(events$change_scenario)
           } else {
-            alert.error("Can't load scenario file, check if the file format is correct.")
+            alert_error("Can't load scenario file, check if the file format is correct.")
           }
         }
       })
@@ -91,7 +105,7 @@ IraceOptionsView <- R6::R6Class(
         )
 
         args <- c(
-          self$create_tabs(ns, store, update),
+          self$create_tabs(ns, store, events, update),
           id = ns("tabs"),
           collapsible = FALSE,
           closable = FALSE,
@@ -104,10 +118,10 @@ IraceOptionsView <- R6::R6Class(
       })
     },
 
-    create_tabs = function(ns, store, update) {
+    create_tabs = function(ns, store, events, update) {
       option <- IraceOptionTab$new()
 
-      data <- scenarioOptions %>%
+      data <- scenario_options %>%
         distinct(section) %>%
         filter(section != "Testing")
 
@@ -118,10 +132,22 @@ IraceOptionsView <- R6::R6Class(
 
       tab <- tabPanel(
         quick_section,
-        option$ui(inputId = ns(quick), section = quick_section, store = store, isFast = TRUE)
+        option$ui(
+          input_id = ns(quick),
+          section = quick_section,
+          store = store,
+          is_fast = TRUE
+        )
       )
 
-      option$call(id = quick, store = store, .section = quick_section, update = update, isFast = TRUE)
+      option$call(
+        id = quick,
+        store = store,
+        events = events,
+        .section = quick_section,
+        update = update,
+        is_fast = TRUE
+      )
 
       tabs <- c(tabs, list(tab))
 
@@ -131,10 +157,22 @@ IraceOptionsView <- R6::R6Class(
 
         tab <- tabPanel(
           section,
-          option$ui(inputId = ns(name), section = section, store = store, isFast = FALSE)
+          option$ui(
+            input_id = ns(name),
+            section = section,
+            store = store,
+            is_fast = FALSE
+          )
         )
 
-        option$call(id = name, store = store, .section = section, update = update, isFast = FALSE)
+        option$call(
+          id = name,
+          store = store,
+          events = events,
+          .section = section,
+          update = update,
+          is_fast = FALSE
+        )
 
         tabs <- c(tabs, list(tab))
       }

@@ -1,202 +1,201 @@
-run_irace <- function(store, executionName = "") {
-
-  createFolders <- function(store) {
+run_irace <- function(store, events, execution_name = "") {
+  create_folders <- function(store) {
     store$gui$createWorkspaceDirectory()
 
-    workspacePath <- store$gui$workspacePath
-    playgroundPath <- file.path(workspacePath, store$pg$get_name())
+    workspace_path <- store$gui$workspace_path
+    playground_path <- file.path(workspace_path, store$pg$get_name())
 
-    if (!dir.exists(playgroundPath)) {
-      dir.create(playgroundPath)
+    if (!dir.exists(playground_path)) {
+      dir.create(playground_path)
     }
 
-    scenarioPath <- file.path(playgroundPath, store$pg$get_scenario_name())
+    scenario_path <- file.path(playground_path, store$pg$get_scenario_name())
 
-    if (!dir.exists(scenarioPath)) {
-      dir.create(scenarioPath)
+    if (!dir.exists(scenario_path)) {
+      dir.create(scenario_path)
     }
 
-    pkg$tempFolder <- file.path(scenarioPath, ".data")
-    pkg$executionFolder <- file.path(scenarioPath, "executions")
+    pkg$temp_folder <- file.path(scenario_path, ".data")
+    pkg$execution_folder <- file.path(scenario_path, "executions")
 
-    log_trace("Data folder {pkg$tempFolder}")
+    log_trace("Data folder {pkg$temp_folder}")
 
-    if (!dir.exists(pkg$executionFolder)) {
-      dir.create(pkg$executionFolder)
+    if (!dir.exists(pkg$execution_folder)) {
+      dir.create(pkg$execution_folder)
     }
 
-    if (dir.exists(pkg$tempFolder)) {
-        unlink(pkg$tempFolder, recursive = TRUE, force = TRUE)
+    if (dir.exists(pkg$temp_folder)) {
+      unlink(pkg$temp_folder, recursive = TRUE, force = TRUE)
     }
 
-    createHiddenDirectory(pkg$tempFolder)
+    create_hidden_directory(pkg$temp_folder)
   }
 
-  createFolders(store)
+  create_folders(store)
 
-  path <- file.path(pkg$tempFolder, "parameter.txt")
+  path <- file.path(pkg$temp_folder, "parameter.txt")
   log_trace("1. Set parameter file {path}")
   store$pg$add_irace_option(
     option = "parameterFile",
     value = dQuote(path, FALSE)
   )
 
-  path <- file.path(pkg$tempFolder, "instances.txt")
+  path <- file.path(pkg$temp_folder, "instances.txt")
   log_trace("2. Set train instances file {path}")
   store$pg$add_irace_option(
     option = "trainInstancesFile",
     value = dQuote(path, FALSE)
   )
 
-  path <- file.path(pkg$tempFolder, "scenario.txt")
+  path <- file.path(pkg$temp_folder, "scenario.txt")
   log_trace("3. Set scenario file {path}")
   store$pg$add_irace_option(
     option = "scenarioFile",
     value = dQuote(path, FALSE)
   )
 
-  path <- file.path(pkg$tempFolder)
+  path <- file.path(pkg$temp_folder)
   log_trace("4. Set execDir {path}")
   store$pg$add_irace_option(
     option = "execDir",
     value = dQuote(path, FALSE)
   )
 
-  logFileName <- sprintf("irace-%s.Rdata", executionName)
-  path <- file.path(pkg$executionFolder, logFileName)
+  log_file_name <- sprintf("irace-%s.Rdata", execution_name)
+  path <- file.path(pkg$execution_folder, log_file_name)
   log_trace("5. Set log file {path}")
   store$pg$add_irace_option(
     option = "logFile",
     value = dQuote(path, FALSE)
   )
 
-  pkg$outputLog <- sprintf("output-%s.log", executionName)
-  pkg$outputLog <- file.path(pkg$executionFolder, pkg$outputLog)
+  pkg$output_log <- sprintf("output-%s.log", execution_name)
+  pkg$output_log <- file.path(pkg$execution_folder, pkg$output_log)
 
   if (nrow(store$pg$get_parameters()) == 0) {
     log_error("No parameters")
-    alert.error("Provide parameters to run irace.")
+    alert_error("Provide parameters to run irace.")
     return(invisible())
   }
 
   if (is.null(store$pg$get_train_instances()) || store$pg$get_train_instances() == "" ||
     length(store$pg$get_train_instances()) == 0) {
     log_error("No train instances")
-    alert.error("Provide train instances to run irace.")
+    alert_error("Provide train instances to run irace.")
     return(invisible())
   }
 
   if (is.null(store$pg$get_target_runner()) || store$pg$get_target_runner() == "" ||
     length(store$pg$get_target_runner()) == 0) {
     log_error("No target runner")
-    alert.error("Provide a target runner to run irace.")
+    alert_error("Provide a target runner to run irace.")
     return(invisible())
   }
 
   log_trace("6. Create all data files")
-  create_parameter_file(pkg$tempFolder, store$pg)
-  create_instances_file(pkg$tempFolder, store$pg)
-  create_target_runner_file(pkg$tempFolder, store$pg)
+  create_parameter_file(pkg$temp_folder, store$pg)
+  create_instances_file(pkg$temp_folder, store$pg)
+  create_target_runner_file(pkg$temp_folder, store$pg)
 
   if (nrow(store$pg$get_configurations()) > 0) {
-    path <- file.path(pkg$tempFolder, "configurations.txt")
+    path <- file.path(pkg$temp_folder, "configurations.txt")
     log_trace("7. Create initial configuration file {path}")
     store$pg$add_irace_option(
       option = "configurationsFile",
       value = dQuote(path, FALSE)
     )
 
-    create_initial_config_file(pkg$tempFolder, store$pg)
+    create_initial_config_file(pkg$temp_folder, store$pg)
   }
 
   if (!is.null(store$pg$get_forbidden()) && store$pg$get_forbidden() != "" &&
     length(store$pg$get_forbidden()) != 0) {
-    path <- file.path(pkg$tempFolder, "forbidden.txt")
+    path <- file.path(pkg$temp_folder, "forbidden.txt")
     log_trace("8. Create forbidden file {path}")
     store$pg$add_irace_option(
       option = "forbiddenFile",
       value = dQuote(path, FALSE)
     )
 
-    create_forbidden_file(pkg$tempFolder, store$pg)
+    create_forbidden_file(pkg$temp_folder, store$pg)
   }
 
   if (!is.null(store$pg$get_test_instances()) && store$pg$get_test_instances() != "" &&
     length(store$pg$get_test_instances()) != 0) {
-    path <- file.path(pkg$tempFolder, "test-instances.txt")
+    path <- file.path(pkg$temp_folder, "test-instances.txt")
     log_trace("9. Create test instances file {path}")
     store$pg$add_irace_option(
       option = "testInstancesFile",
       value = dQuote(path, FALSE)
     )
 
-    create_test_instances_file(pkg$tempFolder, store$pg)
+    create_test_instances_file(pkg$temp_folder, store$pg)
   }
 
   if (!is.null(store$pg$get_target_evaluator()) && store$pg$get_target_evaluator() != "" &&
     length(store$pg$get_target_evaluator()) != 0) {
     log_trace("10. Set target evaluator ./target-evaluator")
 
-    targetEvaluator <- "target-evaluator"
+    target_evaluator <- "target-evaluator"
 
     if (.Platform$OS.type == "windows") {
-      targetEvaluator <- paste0(targetEvaluator,  ".bat")
+      target_evaluator <- paste0(target_evaluator, ".bat")
     } else {
-      targetEvaluator <- paste0("./", targetEvaluator)
+      target_evaluator <- paste0("./", target_evaluator)
     }
 
     store$pg$add_irace_option(
       option = "targetEvaluator",
-      value = dQuote(targetEvaluator, FALSE)
+      value = dQuote(target_evaluator, FALSE)
     )
 
-    create_target_evaluator_file(pkg$tempFolder, store$pg)
+    create_target_evaluator_file(pkg$temp_folder, store$pg)
   }
 
   log_trace("11. Set target runner")
 
-  targetRunner <- "target-runner"
+  target_runner <- "target-runner"
 
   if (.Platform$OS.type == "windows") {
-    targetRunner <- paste0(targetRunner,  ".bat")
+    target_runner <- paste0(target_runner, ".bat")
   } else {
-    targetRunner <- paste0("./", targetRunner)
+    target_runner <- paste0("./", target_runner)
   }
 
   store$pg$add_irace_option(
     option = "targetRunner",
-    value = dQuote(targetRunner, FALSE)
+    value = dQuote(target_runner, FALSE)
   )
 
   store$pg$add_irace_option(option = "trainInstancesDir", value = '""')
   store$pg$add_irace_option(option = "testInstancesDir", value = '""')
 
   log_trace("12. Create scenario file")
-  create_scenario_file(pkg$tempFolder, store$pg)
+  create_scenario_file(pkg$temp_folder, store$pg)
 
   log_trace("13. Create run script")
-  scriptPath <- file.path(pkg$tempFolder, "run_irace.R")
-  file.copy(system.file("app/script/run_irace.R", package = packageName()), scriptPath)
+  script_path <- file.path(pkg$temp_folder, "run_irace.R")
+  file.copy(system.file("app/script/run_irace.R", package = "iraceStudio"), script_path)
 
   log_trace("14. Run irace script")
-  log_debug("Script run with: {store$pg$get_irace_path()}\n{pkg$tempFolder}\n{pkg$outputLog}")
-  store$iraceProcess <- process$new(
+  log_debug("Script run with: {store$pg$get_irace_path()}\n{pkg$temp_folder}\n{pkg$output_log}")
+  store$irace_process <- process$new(
     command = "Rscript",
     args = c(
-      scriptPath,
+      script_path,
       store$pg$get_irace_path(),
-      pkg$tempFolder,
-      pkg$outputLog
+      pkg$temp_folder,
+      pkg$output_log
     ),
     stdout = "|", stderr = "|"
   )
 
-  #if (get_option("debug", FALSE)) {
-  #  store$iraceProcess$poll_io(3000)
-  #  log_info("stdout: {store$iraceProcess$read_output_lines()}")
-  #  log_info("stderr: {store$iraceProcess$read_error_lines()}")
-  #}
+  # if (get_option("debug", FALSE)) {
+  #  store$irace_process$poll_io(3000)
+  #  log_info("stdout: {store$irace_process$read_output_lines()}")
+  #  log_info("stderr: {store$irace_process$read_error_lines()}")
+  # }
 
-  store$startIrace <- TRUE
+  events$is_irace_running <- TRUE
   shinyalert(title = "IRACE is now running", type = "success", timer = 1500)
 }

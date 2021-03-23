@@ -1,5 +1,5 @@
 #' @export
-createHiddenDirectory <- function(path) {
+create_hidden_directory <- function(path) {
   if (!dir.exists(path)) {
     dir.create(path)
     if (.Platform$OS.type == "windows") {
@@ -11,14 +11,15 @@ createHiddenDirectory <- function(path) {
 
 #' @export
 get_option <- function(name, default = NULL) {
-  if (is.null(get_golem_options(name)))
+  if (is.null(get_golem_options(name))) {
     return(default)
+  }
 
-  return(get_golem_options(name))
+  return(golem::get_golem_options(name))
 }
 
 #' @export
-alert.error <- function(message = NULL) {
+alert_error <- function(message = NULL) {
   shinyalert(
     title = "Error",
     text = message,
@@ -28,111 +29,112 @@ alert.error <- function(message = NULL) {
 }
 
 #' @export
-checkNull <- function(x, default) {
-  if (is.null(x))
+check_null <- function(x, default) {
+  if (is.null(x)) {
     default
-  else
+  } else {
     x
-}
-
-descentConfigurationTree <- function(iraceResults, configuration_id) {
-
-  recursiveChilds <- function(id) {
-    ids <- data.frame()
-    childs <- subset(iraceResults$allConfigurations, .PARENT. == id, select = ".ID.")
-
-    if (nrow(childs) == 0)
-      return(ids)
-
-    ids <- data.frame(from = id, to = childs$.ID.)
-
-    for (row in seq_len(nrow(childs))) {
-      childId <- childs[row,]
-      ids <- rbind(ids, recursiveChilds(childId))
-    }
-
-    return(ids)
   }
-
-  return(unique(recursiveChilds(configuration_id)))
 }
 
-configurationTrajectory <- function(iraceResults, configuration_id) {
+# descentConfigurationTree <- function(iraceResults, configuration_id) {
 
-  recursiveParents <- function(id) {
-    ids <- data.frame()
-    parent <- subset(iraceResults$allConfigurations, .ID. == id, select = ".PARENT.")$.PARENT.
+#   recursiveChilds <- function(id) {
+#     ids <- data.frame()
+#     childs <- subset(iraceResults$allConfigurations, .PARENT. == id, select = ".ID.")
 
-    if (length(parent) == 0 || is.na(parent))
-      return(ids)
+#     if (nrow(childs) == 0)
+#       return(ids)
 
-    ids <- data.frame(from = id, to = parent)
-    ids <- rbind(ids, recursiveParents(parent))
+#     ids <- data.frame(from = id, to = childs$.ID.)
 
-    return(ids)
-  }
+#     for (row in seq_len(nrow(childs))) {
+#       childId <- childs[row,]
+#       ids <- rbind(ids, recursiveChilds(childId))
+#     }
 
-  return(recursiveParents(configuration_id))
-}
+#     return(ids)
+#   }
 
-treePlot <- function(data, title) {
-  G <- graph_from_data_frame(data)
+#   return(unique(recursiveChilds(configuration_id)))
+# }
 
-  vs <- V(G)
-  es <- as.data.frame(get.edgelist(G, names = FALSE))
-  node.data <- get.data.frame(G, what = "vertices")
+# configurationTrajectory <- function(iraceResults, configuration_id) {
 
-  ne <- length(es[1]$V1)
+#   recursiveParents <- function(id) {
+#     ids <- data.frame()
+#     parent <- subset(iraceResults$allConfigurations, .ID. == id, select = ".PARENT.")$.PARENT.
 
-  L <- layout_as_tree(G)
-  Xn <- L[, 1]
-  Yn <- L[, 2]
+#     if (length(parent) == 0 || is.na(parent))
+#       return(ids)
 
-  tree <- plot_ly(
-    x = ~Xn,
-    y = ~Yn,
-    type = "scatter",
-    mode = "markers",
-    text = vs$name,
-    hoverinfo = "text",
-    marker = list(
-      color = as.factor(node.data$name),
-      size = I(50)
-    )
-  )
+#     ids <- data.frame(from = id, to = parent)
+#     ids <- rbind(ids, recursiveParents(parent))
 
-  edge_shapes <- list()
+#     return(ids)
+#   }
 
-  for (i in seq_len(ne)) {
-    v0 <- es[i,]$V1
-    v1 <- es[i,]$V2
+#   return(recursiveParents(configuration_id))
+# }
 
-    if (v0 == v1)
-      next
+# treePlot <- function(data, title) {
+#   G <- graph_from_data_frame(data)
 
-      edge_shape <- list(
-      type = "line",
-      layer = "below",
-      line = list(color = "#030303", width = 0.3),
-      x0 = Xn[v0],
-      y0 = Yn[v0],
-      x1 = Xn[v1],
-      y1 = Yn[v1]
-    )
+#   vs <- V(G)
+#   es <- as.data.frame(get.edgelist(G, names = FALSE))
+#   node.data <- get.data.frame(G, what = "vertices")
 
-    edge_shapes[[i]] <- edge_shape
-  }
+#   ne <- length(es[1]$V1)
 
-  axis <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
+#   L <- layout_as_tree(G)
+#   Xn <- L[, 1]
+#   Yn <- L[, 2]
 
-  plot_tree <- layout(
-    tree,
-    title = title,
-    shapes = edge_shapes,
-    xaxis = axis,
-    yaxis = axis,
-    showlegend = FALSE
-  )
+#   tree <- plot_ly(
+#     x = ~Xn,
+#     y = ~Yn,
+#     type = "scatter",
+#     mode = "markers",
+#     text = vs$name,
+#     hoverinfo = "text",
+#     marker = list(
+#       color = as.factor(node.data$name),
+#       size = I(50)
+#     )
+#   )
 
-  return(plot_tree)
-}
+#   edge_shapes <- list()
+
+#   for (i in seq_len(ne)) {
+#     v0 <- es[i,]$V1
+#     v1 <- es[i,]$V2
+
+#     if (v0 == v1)
+#       next
+
+#       edge_shape <- list(
+#       type = "line",
+#       layer = "below",
+#       line = list(color = "#030303", width = 0.3),
+#       x0 = Xn[v0],
+#       y0 = Yn[v0],
+#       x1 = Xn[v1],
+#       y1 = Yn[v1]
+#     )
+
+#     edge_shapes[[i]] <- edge_shape
+#   }
+
+#   axis <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE)
+
+#   plot_tree <- layout(
+#     tree,
+#     title = title,
+#     shapes = edge_shapes,
+#     xaxis = axis,
+#     yaxis = axis,
+#     showlegend = FALSE
+#   )
+
+#   return(plot_tree)
+# }

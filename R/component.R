@@ -1,5 +1,5 @@
 #' @export
-Component <- R6::R6Class(
+Component <- R6::R6Class( # nolint
   classname = "Component",
   public = list(
     ui = function(id) {

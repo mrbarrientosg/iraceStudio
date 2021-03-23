@@ -1,13 +1,13 @@
 #' @export
-clear_button <- function(inputId, label = "Clear", ...) {
-  ns <- NS(inputId)
+clear_button <- function(input_id, label = "Clear", ...) {
+  ns <- shiny::NS(input_id)
 
-  actionButton(inputId = ns("action"), label = label, icon = icon("trash"), class = "btn-danger", ...)
+  bs4Dash::actionButton(inputId = ns("action"), label = label, icon = icon("trash"), status = "danger", ...) # nolint
 }
 
 #' @export
-clear_button_sv <- function (input, output, session, message) {
-  values <- reactiveValues(action = NULL)
+clear_button_sv <- function(input, output, session, message) {
+  values <- shiny::reactiveValues(action = NULL)
 
   observeEvent(input$action, {
     shinyalert::shinyalert(

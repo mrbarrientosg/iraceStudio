@@ -1,15 +1,15 @@
-UserSectionCard <- R6::R6Class(
+UserSectionCard <- R6::R6Class( # nolint
   classname = "UserSectionCard",
   inherit = Component,
   public = list(
-    summonerInput = NULL,
+    summoner_input = NULL,
 
     initialize = function() {
-      self$summonerInput <- SummonerInput$new()
+      self$summoner_input <- SummonerInput$new()
     },
 
-    ui = function(inputId, title, value = "") {
-      ns <- NS(inputId)
+    ui = function(input_id, title, value = "") {
+      ns <- NS(input_id)
 
       box(
         id = ns("card"),
@@ -17,11 +17,11 @@ UserSectionCard <- R6::R6Class(
         collapsible = TRUE,
         closable = TRUE,
         width = 12,
-        self$summonerInput$ui(inputId = ns("content"), value = value, height = 300)
+        self$summoner_input$ui(input_id = ns("content"), value = value, height = 300)
       )
     },
 
-    server = function(input, output, session, report_id, report, store) {
+    server = function(input, output, session, report_id, report, store, events) {
       values <- reactiveValues()
 
       observeEvent(input$card, {
@@ -36,38 +36,38 @@ UserSectionCard <- R6::R6Class(
       })
 
       # Plot
-      observeEvent(store$copy$plot, {
-        req(store$copy$id)
-        req(store$copy$id == report_id)
+      observeEvent(events$copy$plot, {
+        req(events$copy$id)
+        req(events$copy$id == report_id)
 
-        images <- lapply(pkg$reportStore[[store$copy$plot]], function(plot) {
+        images <- lapply(pkg$report_store[[events$copy$plot]], function(plot) {
           paste0(tags$img(src = plot))
         })
 
-        self$summonerInput$updateSummernoteInput(
+        self$summoner_input$updateSummernoteInput(
           session$ns("content"),
           paste(images, "</br>", collapse = "</br>", sep = "</br>")
         )
 
-        store$copy$id <- NULL
-        store$copy$plot <- NULL
+        events$copy$id <- NULL
+        events$copy$plot <- NULL
       })
 
       # Table
 
-      observeEvent(store$copy$table, {
-        req(store$copy$id)
-        req(store$copy$id == report_id)
+      observeEvent(events$copy$table, {
+        req(events$copy$id)
+        req(events$copy$id == report_id)
 
-        table <- pkg$reportStore[[store$copy$table]]
+        table <- pkg$report_store[[events$copy$table]]
 
         header <- ""
-        headerType <- 0
-        if (store$copy$table == "bestSoFarTable") {
-          headerType <- 1
+        header_type <- 0
+        if (events$copy$table == "bestSoFarTable") {
+          header_type <- 1
           header <- strong("Best so far configuration:")
         } else {
-          headerType <- 2
+          header_type <- 2
           header <- "Configuration of Final Elite %d:"
         }
 
@@ -90,20 +90,20 @@ UserSectionCard <- R6::R6Class(
         for (row in seq_len(nrow(table))) {
           ul <- ""
           ul <- paste(ul, lapply(l[[row]], paste), collapse = "\n")
-          if (headerType == 1) {
+          if (header_type == 1) {
             data <- c(data, paste(header, "<ul>", ul, "</ul>", sep = "\n"))
           } else {
             data <- c(data, paste0(strong(sprintf(header, row)), "<ul>", ul, "</ul>", collapse = ""))
           }
         }
 
-        self$summonerInput$updateSummernoteInput(
+        self$summoner_input$updateSummernoteInput(
           session$ns("content"),
           paste(data, "</br>")
         )
 
-        store$copy$id <- NULL
-        store$copy$table <- NULL
+        events$copy$id <- NULL
+        events$copy$table <- NULL
       })
 
       observeEvent(input$add, {
@@ -113,7 +113,7 @@ UserSectionCard <- R6::R6Class(
             easyClose = TRUE,
             textInput(inputId = session$ns("title"), label = "Title"),
             footer = tagList(
-              iraceStudio::actionButton(inputId = session$ns("addSection"), label = "Add"),
+              bs4Dash::actionButton(inputId = session$ns("addSection"), label = "Add", status = "primary"),
               modalButton(label = "Dissmis")
             )
           )

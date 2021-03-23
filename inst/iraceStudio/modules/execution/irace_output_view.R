@@ -1,20 +1,19 @@
-IraceOutputView <- R6::R6Class(
+IraceOutputView <- R6::R6Class( # nolint
   classname = "IraceOutputView",
   inherit = View,
   public = list(
-    iraceButton = NULL,
+    irace_button = NULL,
     execution = NULL,
 
     initialize = function(id) {
       super$initialize(id)
-      self$iraceButton <- IraceButton$new()
+      self$irace_button <- IraceButton$new()
     },
 
     ui = function() {
       ns <- NS(self$id)
 
       tagList(
-
         fluidRow(
           class = "sub-header",
           column(
@@ -27,7 +26,7 @@ IraceOutputView <- R6::R6Class(
           column(
             width = 2,
             class = "d-flex align-items-center justify-content-end",
-            self$iraceButton$ui(inputId = ns("start_irace"))
+            self$irace_button$ui(input_id = ns("start_irace"))
           )
         ),
         fluidRow(
@@ -38,40 +37,41 @@ IraceOutputView <- R6::R6Class(
             closable = FALSE,
             width = 12,
             verbatimTextOutput(outputId = ns("irace_output"))
-          # tags$head(
-          #  tags$style(
-          #    sprintf("#%s{overflow-y:scroll; max-height:550px;}", ns("irace_output"))
-          #  ),
-          #  tags$script(
-          #    sprintf(
-          #      '
-          #      Shiny.addCustomMessageHandler("iraceOuputScroll", function (x) {
-          #        var obj = document.getElementById("%s");
-          #        obj.scrollTop = obj.scrollHeight;
-          #      });
-          #      ',
-          #      ns("irace_output")
-          #    )
-          #  )
-          # )
+            # tags$head(
+            #  tags$style(
+            #    sprintf("#%s{overflow-y:scroll; max-height:550px;}", ns("irace_output"))
+            #  ),
+            #  tags$script(
+            #    sprintf(
+            #      '
+            #      Shiny.addCustomMessageHandler("iraceOuputScroll", function (x) {
+            #        var obj = document.getElementById("%s");
+            #        obj.scrollTop = obj.scrollHeight;
+            #      });
+            #      ',
+            #      ns("irace_output")
+            #    )
+            #  )
+            # )
           )
         )
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       values <- reactiveValues(
         source = NULL,
         timer = reactiveTimer(intervalMs = 900) # Change refresh timer for running log
       )
 
-      start <- self$iraceButton$call(id = "start_irace", store = store)
+      start <- self$irace_button$call(id = "start_irace", store = store, events = events)
 
-      observeEvent(start$action, {
-        if (store$startIrace) {
-          store$startIrace <- FALSE
-          store$iraceProcess$kill_tree()
-          store$iraceProcess$finalize()
+      observeEvent(start$action,
+      {
+        if (events$is_irace_running) {
+          events$is_irace_running <- FALSE
+          store$irace_process$kill_tree()
+          store$irace_process$finalize()
         } else {
           shinyalert(
             title = "Execution name",
@@ -86,14 +86,14 @@ IraceOutputView <- R6::R6Class(
               }
 
               if (is.null(name) || name == "") {
-                alert.error("Give a name.")
+                alert_error("Give a name.")
                 return(invisible())
               }
 
-              run_irace(store, name)
+              run_irace(store, events, name)
 
-              if (store$startIrace) {
-                self$execution <- execution$new(name = name)
+              if (events$is_irace_running) {
+                self$execution <- Execution$new(name = name)
               }
             }
           )
@@ -101,22 +101,22 @@ IraceOutputView <- R6::R6Class(
       })
 
       observe({
-        if (!store$startIrace) {
+        if (!events$is_irace_running) {
           return(invisible())
         }
 
-        store$iraceAlive()
+        events$is_irace_alive()
 
-        if (!store$iraceProcess$is_alive()) {
+        if (!store$irace_process$is_alive()) {
           log_info("Irace end.")
           enable(id = "scenarioPicker")
 
           if (!get_option("debug", FALSE)) {
-            unlink(pkg$tempFolder, recursive = TRUE, force = TRUE)
+            unlink(pkg$temp_folder, recursive = TRUE, force = TRUE)
           }
 
-          store$iraceProcess$poll_io(1500)
-          error <- store$iraceProcess$read_error_lines()
+          store$irace_process$poll_io(1500)
+          error <- store$irace_process$read_error_lines()
 
           if (get_option("debug", FALSE)) {
             log_error("Optional: {error}")
@@ -130,20 +130,21 @@ IraceOutputView <- R6::R6Class(
             if (nrow(iraceResults$allConfigurations) != 0) {
               self$execution$set_irace_results(iraceResults)
 
-              if (file.exists(pkg$outputLog)) {
-                self$execution$set_output_log(paste(readLines(pkg$outputLog), collapse = "\n"))
+              if (file.exists(pkg$output_log)) {
+                self$execution$set_output_log(paste(readLines(pkg$output_log), collapse = "\n"))
               }
 
               store$pg$add_execution(self$execution)
+              update_reactive_counter(events$update_executions)
 
               shinyalert(title = "The execution has ended", type = "success", timer = 1500)
             } else {
               file.remove(log)
-              file.remove(pkg$outputLog)
+              file.remove(pkg$output_log)
 
               if (!is.null(error) && error != "" && length(error) > 0) {
                 log_error("Stop irace with error: {error}")
-                alert.error(paste(error, collapse = "\n"))
+                alert_error(paste(error, collapse = "\n"))
                 self$execution <- NULL
               }
             }
@@ -152,24 +153,24 @@ IraceOutputView <- R6::R6Class(
           } else {
             if (!is.null(error) && error != "" && length(error) > 0) {
               log_error("Stop irace with error: {error}")
-              alert.error(paste(error, collapse = "\n"))
+              alert_error(paste(error, collapse = "\n"))
               self$execution <- NULL
             }
           }
 
           store$pg$clear_scenario_temp()
 
-          store$iraceProcess <- NULL
-          store$startIrace <- FALSE
+          store$irace_process <- NULL
+          events$is_irace_running <- FALSE
         }
       })
 
       observe({
-        global_emitter$value(global_events$current_scenario)
+        events$change_scenario
 
-        if (!store$startIrace) {
-          if (!is.null(pkg$outputLog) && file.exists(pkg$outputLog)) {
-            values$source <- paste(readLines(pkg$outputLog), collapse = "\n")
+        if (!events$is_irace_running) {
+          if (!is.null(pkg$output_log) && file.exists(pkg$output_log)) {
+            values$source <- paste(readLines(pkg$output_log), collapse = "\n")
           } else {
             values$source <- ""
           }
@@ -179,8 +180,8 @@ IraceOutputView <- R6::R6Class(
         values$timer()
 
         future({
-          if (file.exists(pkg$outputLog)) {
-            paste(readLines(pkg$outputLog), collapse = "\n")
+          if (file.exists(pkg$output_log)) {
+            paste(readLines(pkg$output_log), collapse = "\n")
           } else {
             ""
           }

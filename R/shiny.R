@@ -1,17 +1,5 @@
 #' @export
-actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
-  btn <- shiny::actionButton(inputId, label, icon, width, ...)
-  opts <- list(...)
-
-  if (!is.null(opts$class)) {
-    btn$attribs$class <- gsub("btn-default", "", btn$attribs$class)
-  }
-
-  return(btn)
-}
-
-#' @export
-exportButton <- function(inputId, filename, style = NULL, size = "default") {
+export_button <- function(input_id, filename, style = NULL, size = "default") {
   size <- match.arg(
     arg = size,
     choices = c("large", "default", "small")
@@ -30,7 +18,7 @@ exportButton <- function(inputId, filename, style = NULL, size = "default") {
   }
 
   btn <- shinySaveButton(
-    id = inputId,
+    id = input_id,
     label = "Export",
     title = "Select a folder",
     filename = filename,
@@ -44,7 +32,7 @@ exportButton <- function(inputId, filename, style = NULL, size = "default") {
 }
 
 #' @export
-importButton <- function(inputId, label = "Import", style = NULL, size = "default") {
+import_button <- function(input_id, label = "Import", style = NULL, size = "default") {
   size <- match.arg(
     arg = size,
     choices = c("large", "default", "small")
@@ -63,7 +51,7 @@ importButton <- function(inputId, label = "Import", style = NULL, size = "defaul
   }
 
   btn <- shinyFilesButton(
-    id = inputId,
+    id = input_id,
     label = label,
     title = "Select a file",
     multiple = FALSE,
@@ -76,17 +64,17 @@ importButton <- function(inputId, label = "Import", style = NULL, size = "defaul
 }
 
 #' @export
-directoryInput <- function(idButton, idInput, label, title, buttonText = "Browse" , width = NULL) {
+directory_input <- function(id_button, id_input, label, title, button_text = "Browse", width = NULL) {
   input <- textInput(
-    inputId = idInput,
+    inputId = id_input,
     label = label,
     width = width
   ) %>% tagAppendChild(
     div(
       class = "input-group-append",
       shinyDirButton(
-        id = idButton,
-        label = buttonText,
+        id = id_button,
+        label = button_text,
         title = title,
         buttonType = "primary"
       )
@@ -99,4 +87,9 @@ directoryInput <- function(idButton, idInput, label, title, buttonText = "Browse
   input$attribs$class <- gsub("form-group", "input-group", input$attribs$class)
 
   return(div(label, input))
+}
+
+#' @export
+update_reactive_counter <- function(counter) {
+  counter <- counter + 1
 }

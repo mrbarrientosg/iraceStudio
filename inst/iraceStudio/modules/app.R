@@ -9,13 +9,14 @@ App <- R6::R6Class(
     controlbar = NULL,
     footer = NULL,
     store = NULL,
+    events = NULL,
     logs = NULL,
     logger_path = NULL,
 
     initialModal = function(input) {
       if (is.null(isolate(private$store$pg))) {
-        importVolume <- getVolumes()()
-        workspaceVolume <- c("workspace" = isolate(private$store$gui$workspacePath), importVolume)
+        import_volume <- getVolumes()()
+        workspace_volume <- c("workspace" = isolate(private$store$gui$workspace_path), import_volume)
         showModal(
           modalDialog(
             title = "Welcome to Irace Studio",
@@ -41,7 +42,7 @@ App <- R6::R6Class(
                 multiple = FALSE,
                 buttonType = "outline-primary"
               ),
-              iraceStudio::actionButton(inputId = "new", label = "New", class = "btn-primary")
+              bs4Dash::actionButton(inputId = "new", label = "New", status = "primary")
             )
           )
         )
@@ -49,13 +50,13 @@ App <- R6::R6Class(
         shinyFileChoose(
           input = input,
           id = "select",
-          roots = workspaceVolume,
+          roots = workspace_volume,
           filetypes = "rds"
         )
         shinyFileChoose(
           input = input,
           id = "import",
-          roots = importVolume,
+          roots = import_volume,
           filetypes = "rds"
         )
       }
@@ -68,8 +69,18 @@ App <- R6::R6Class(
 
     setupModules = function() {
       shinybusy::show_modal_spinner(text = "Loading workspace...")
-      private$body$setupModules(private$store)
+      private$body$setupModules(private$store, private$events)
       shinybusy::remove_modal_spinner()
+    },
+
+    create_playground = function(name = NULL, pg = NULL) {
+      if (is.null(name)) {
+        private$store$pg <- Playground$new(playground = pg)
+      } else {
+        private$store$pg <- Playground$new(name = name)
+      }
+      update_reactive_counter(private$events$update_scenarios)
+      update_reactive_counter(private$events$change_scenario)
     }
   ),
 
@@ -84,7 +95,26 @@ App <- R6::R6Class(
       private$store <- reactiveValues(
         pg = NULL,
         gui = GUIOptions$new(),
-        app = self
+        app = self,
+        playground_name = "",
+        irace_results = NULL,
+        current_execution = NULL,
+        sandbox = NULL,
+        irace_process = NULL,
+        current_scenario = NULL
+      )
+
+      private$events <- reactiveValues(
+        update_scenarios = 0,
+        change_scenario = 0,
+        update_executions = 0,
+        update_parameters = 0,
+        update_sandboxes = 0,
+        update_report = 0,
+        update_sandbox = 0,
+        is_irace_running = FALSE,
+        is_irace_alive = reactiveTimer(intervalMs = 1050),
+        copy = list(id = NULL, plot = NULL, table = NULL)
       )
     },
 
@@ -92,7 +122,7 @@ App <- R6::R6Class(
       dashboardPage(
         title = "Irace Studio",
         dark = FALSE,
-        #freshTheme = common_theme,
+        # freshTheme = common_theme,
         header = private$navbar$ui("navbar"),
         sidebar = private$sidebar$ui(),
         body = private$body$ui(),
@@ -103,24 +133,15 @@ App <- R6::R6Class(
 
     server = function(input, output, session) {
       shinyhelper::observe_helpers(withMathJax = TRUE)
-
-      private$store$playgroundName <- ""
-      private$store$startIrace <- FALSE
-      private$store$iraceAlive <- reactiveTimer(intervalMs = 1050)
-      private$store$copy <- list(id = NULL, plot = NULL, table = NULL)
-      private$store$updateSandbox <- 0
-
-      # actions
-      private$store$iraceResults <- NULL
-      private$store$currentExecution <- NULL
+      logger::log_shiny_input_changes(input)
 
       private$navbar$call(id = "navbar", store = private$store)
-      private$controlbar$call(id = "controlbar", store = private$store)
-      private$footer$call(id = "footer", store = private$store)
+      private$controlbar$call(id = "controlbar", store = private$store, events = private$events)
+      private$footer$call(id = "footer", store = private$store, events = private$events)
 
-      workPath <- isolate(private$store$gui$workspacePath)
-      importVolume <- getVolumes()()
-      workspaceVolume <- c("workspace" = workPath, importVolume)
+      work_path <- isolate(private$store$gui$workspace_path)
+      import_volume <- getVolumes()()
+      workspace_volume <- c("workspace" = work_path, import_volume)
 
       observeEvent(input$new, {
         removeModal()
@@ -138,11 +159,11 @@ App <- R6::R6Class(
             }
 
             if (is.null(name) || name == "") {
-              alert.error("Playground name is empty.")
+              alert_error("Playground name is empty.")
               return(invisible())
             }
 
-            if (private$validateName(name, workPath)) {
+            if (private$validateName(name, work_path)) {
               shinyalert(
                 title = "Error",
                 text = "Playground name is repeated.",
@@ -156,45 +177,45 @@ App <- R6::R6Class(
             }
 
             private$setupModules()
-            #FIXME: check if this is correct here
-            #MATIAS: Workspace check if exist when the app initialize
-            #dir.create(paste0(workPath, "/", name))
-            private$store$pg <- playground$new(name = name)
+            # FIXME: check if this is correct here
+            # MATIAS: Workspace check if exist when the app initialize
+            # dir.create(paste0(work_path, "/", name))
+            private$create_playground(name = name)
           }
         )
       })
 
       observeEvent(input$select, {
         if (!is.integer(input$select)) {
-          file <- parseFilePaths(roots = workspaceVolume, input$select)
+          file <- parseFilePaths(roots = workspace_volume, input$select)
           pg <- readRDS(file = file$datapath)
 
-          if (is.null(pg$.iraceStudio) || !pg$.iraceStudio) {
-            alert.error("Bad Irace Studio playground.")
+          if (is.null(pg$irace_studio) || !pg$irace_studio) {
+            alert_error("Bad Irace Studio playground.")
             return()
           }
 
           removeModal()
 
           private$setupModules()
-          private$store$pg <- playground$new(playground = pg)
+          private$create_playground(pg = pg)
         }
       })
 
       observeEvent(input$import, {
         if (!is.integer(input$import)) {
-          file <- parseFilePaths(roots = importVolume, input$import)
+          file <- parseFilePaths(roots = import_volume, input$import)
           pg <- readRDS(file = file$datapath)
 
-          if (is.null(pg$.iraceStudio) || !pg$.iraceStudio) {
-            alert.error("Bad Irace Studio playground.")
+          if (is.null(pg$irace_studio) || !pg$irace_studio) {
+            alert_error("Bad Irace Studio playground.")
             return()
           }
 
           removeModal()
 
           private$setupModules()
-          private$store$pg <- playground$new(playground = pg)
+          private$create_playground(pg = pg)
         }
       })
 
@@ -213,14 +234,14 @@ App <- R6::R6Class(
 
       onSessionEnded(function() {
         self$destroy()
-        #stopApp()
+        # stopApp()
       })
 
       if (app_prod()) {
         private$initialModal(input)
       } else {
         private$setupModules()
-        private$store$pg <- playground$new("dev-test")
+        private$create_playground(name = "dev-test")
       }
       session$userData$sidebar <- reactive(input$sidebar)
     },
@@ -233,7 +254,7 @@ App <- R6::R6Class(
 
       time <- format(Sys.time(), "%d%m%Y%H%M%S")
 
-      path <- file.path(gui$optionsPath, "logs")
+      path <- file.path(gui$options_path, "logs")
 
       if (!dir.exists(path)) {
         dir.create(path)
@@ -248,11 +269,12 @@ App <- R6::R6Class(
     setup = function() {
       logger <- layout_glue_generator(format = "{level} [{format(time, \"%Y-%m-%d %H:%M:%S\")}] {msg}")
       log_layout(logger)
-      if (get_option("debug", FALSE)) {
-        log_threshold(TRACE)
-      } else {
-        log_threshold(FATAL)
-      }
+      # if (get_option("debug", FALSE)) {
+      #   log_threshold(TRACE)
+      # } else {
+      #   log_threshold(FATAL)
+      # }
+      log_threshold(TRACE)
 
       gui <- isolate(private$store$gui)
       pg <- isolate(private$store$pg)
@@ -260,7 +282,7 @@ App <- R6::R6Class(
       gui$createWorkspaceDirectory()
 
       # TODO: Implements logger in a correct way.
-      #private$logger_path <- self$setupLogger()
+      # private$logger_path <- self$setupLogger()
 
       log_info("Irace Studio Start")
 
@@ -288,12 +310,12 @@ App <- R6::R6Class(
       #  file.remove(output)
       # }
 
-      #FIXME: check what happens if the app gets closed unexpectedly. It would be better if the scenario data is saved when something changes
-      #MATIAS: Saving the data every time when something changes will affect the performance, but I think to overwrite Ctrl+S or add a timer when end trigger the action to save data.
+      # FIXME: check what happens if the app gets closed unexpectedly. It would be better if the scenario data is saved when something changes
+      # MATIAS: Saving the data every time when something changes will affect the performance, but I think to overwrite Ctrl+S or add a timer when end trigger the action to save data.
       gui$save()
 
       if (!is.null(pg)) {
-        path <- file.path(gui$workspacePath, pg$get_name())
+        path <- file.path(gui$workspace_path, pg$get_name())
 
         if (!dir.exists(path)) {
           dir.create(path)
@@ -308,17 +330,17 @@ App <- R6::R6Class(
         pg$save(path)
       }
 
-      iraceProcess <- isolate(private$store$iraceProcess)
+      irace_process <- isolate(private$store$irace_process)
 
-      if (!is.null(iraceProcess)) {
-        iraceProcess$kill_tree()
-        iraceProcess$finalize()
+      if (!is.null(irace_process)) {
+        irace_process$kill_tree()
+        irace_process$finalize()
       }
 
-      unlink(file.path(gui$optionsPath, ".Fimages"), recursive = TRUE, force = TRUE)
-      unlink(file.path(gui$optionsPath, ".Pimages"), recursive = TRUE, force = TRUE)
+      unlink(file.path(gui$options_path, ".Fimages"), recursive = TRUE, force = TRUE)
+      unlink(file.path(gui$options_path, ".Pimages"), recursive = TRUE, force = TRUE)
       if (!get_option("debug", FALSE)) {
-        unlink(pkg$tempFolder, recursive = TRUE, force = TRUE)
+        unlink(pkg$temp_folder, recursive = TRUE, force = TRUE)
       }
     }
   )

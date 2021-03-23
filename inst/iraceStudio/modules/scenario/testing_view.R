@@ -1,4 +1,4 @@
-TestingView <- R6::R6Class(
+TestingView <- R6::R6Class( # nolint
   classname = "TestingView",
   inherit = View,
   public = list(
@@ -13,11 +13,12 @@ TestingView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header",
-            h2("Testing"),
-            HTML("Activate the execution of a test phase in irace for evaluating the best configurations on a different set of problem instances.<br>
-                 For more information, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
-            ),
+        div(
+          class = "sub-header",
+          h2("Testing"),
+          HTML("Activate the execution of a test phase in irace for evaluating the best configurations on a different set of problem instances.<br>
+                 For more information, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ") # nolint
+        ),
         fluidRow(
           box(
             inputId = ns("testingInstances"),
@@ -44,8 +45,8 @@ TestingView <- R6::R6Class(
                   title = "Select a directory",
                   buttonType = "outline-primary"
                 ),
-                importButton(
-                  inputId = ns("load"),
+                import_button(
+                  input_id = ns("load"),
                   label = "Import File",
                   style = "margin-left: 5px;"
                 ),
@@ -56,12 +57,12 @@ TestingView <- R6::R6Class(
                   buttonType = "outline-primary",
                   style = "margin-left: 5px;"
                 ),
-                exportButton(
-                  inputId = ns("export"),
+                export_button(
+                  input_id = ns("export"),
                   filename = "instances.txt",
                   style = "margin-left: 5px;"
                 ),
-                clear_button(inputId = ns("clear"), style = "margin-left: 5px;")
+                clear_button(input_id = ns("clear"), style = "margin-left: 5px;")
               )
             ),
             tags$textarea(
@@ -73,7 +74,7 @@ TestingView <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       ns <- session$ns
 
       clear <- callModule(
@@ -84,7 +85,7 @@ TestingView <- R6::R6Class(
 
       obs_value <- reactiveVal(value = FALSE)
 
-      volumes <- c("Home"=path.expand('~'), getVolumes()())
+      volumes <- c("Home" = path.expand("~"), getVolumes()())
 
       shinyDirChoose(input, "dir", roots = volumes)
       shinyDirChoose(input, "absolute", roots = volumes)
@@ -141,15 +142,18 @@ TestingView <- R6::R6Class(
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- tryCatch({
-            parseFilePaths(roots = volumes, input$load)
-          }, error = function(err) {
-            log_error("{err}")
-            return(NULL)
-          })
+          file <- tryCatch(
+            {
+              parseFilePaths(roots = volumes, input$load)
+            },
+            error = function(err) {
+              log_error("{err}")
+              return(NULL)
+            }
+          )
 
           if (is.null(file)) {
-            alert.error("Can't load testing instances file, check if the file format is correct.")
+            alert_error("Can't load testing instances file, check if the file format is correct.")
             return(invisible())
           }
 
@@ -168,24 +172,28 @@ TestingView <- R6::R6Class(
         shiny::validate(
           need(store$pg, "")
         )
-
-        global_emitter$value(global_events$current_scenario)
+        events$change_scenario
 
         obs_value(TRUE)
-        self$testingOptions$ui(inputId = ns("testing"), "Testing", store, FALSE)
+        self$testingOptions$ui(input_id = ns("testing"), "Testing", store, FALSE)
       })
 
-      observeEvent(c(global_emitter$value(global_events$current_scenario), store$pg), {
-        updateTextAreaInput(
-          session = session,
-          inputId = "source_instances_file",
-          value = store$pg$get_test_instances()
-        )
-      })
+      observeEvent(c(events$change_scenario, store$pg),
+        {
+          updateTextAreaInput(
+            session = session,
+            inputId = "source_instances_file",
+            value = store$pg$get_test_instances()
+          )
+        },
+        ignoreNULL = TRUE,
+        ignoreInit = TRUE
+      )
 
       observeEvent(input$source_instances_file,
-                   store$pg$set_test_instances(input$source_instances_file),
-                   ignoreInit = TRUE)
+        store$pg$set_test_instances(input$source_instances_file),
+        ignoreInit = TRUE
+      )
 
       observe({
         if (obs_value()) {
@@ -194,7 +202,8 @@ TestingView <- R6::R6Class(
             store = store,
             .section = "Testing",
             update = NULL,
-            isFast = FALSE
+            is_fast = FALSE,
+            events = events
           )
           obs_value(FALSE)
         }

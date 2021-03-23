@@ -1,20 +1,20 @@
-ReportView <- R6::R6Class(
+ReportView <- R6::R6Class( # nolint
   classname = "ReportView",
   inherit = View,
   public = list(
-    summaryCard = NULL,
-    bestConfigurationCard = NULL,
-    candidatesCard = NULL,
-    performanceCard = NULL,
-    detailByIterationCard = NULL,
+    summary_card = NULL,
+    best_configuration_card = NULL,
+    candidates_card = NULL,
+    performance_card = NULL,
+    detail_by_iteration_card = NULL,
 
     initialize = function(id) {
       super$initialize(id)
-      self$summaryCard <- SummaryCard$new()
-      self$bestConfigurationCard <- BestConfigurationCard$new()
-      self$candidatesCard <- CandidatesCard$new()
-      self$performanceCard <- PerformanceCard$new()
-      self$detailByIterationCard <- DetailByIterationCard$new()
+      self$summary_card <- SummaryCard$new()
+      self$best_configuration_card <- BestConfigurationCard$new()
+      self$candidates_card <- CandidatesCard$new()
+      self$performance_card <- PerformanceCard$new()
+      self$detail_by_iteration_card <- DetailByIterationCard$new()
     },
 
     ui = function() {
@@ -31,21 +31,21 @@ ReportView <- R6::R6Class(
           )
         ),
         fluidRow(
-          self$summaryCard$ui(inputId = ns("summary")),
-          self$bestConfigurationCard$ui(inputId = ns("best_config")),
-          self$candidatesCard$ui(inputId = ns("candidates")),
-          self$performanceCard$ui(inputId = ns("performance")),
-          self$detailByIterationCard$ui(inputId = ns("detail_by_iteration"))
+          self$summary_card$ui(input_id = ns("summary")),
+          self$best_configuration_card$ui(input_id = ns("best_config")),
+          self$candidates_card$ui(input_id = ns("candidates")),
+          self$performance_card$ui(input_id = ns("performance")),
+          self$detail_by_iteration_card$ui(input_id = ns("detail_by_iteration"))
         )
       )
     },
 
-    server = function(input, output, session, store) {
-      self$summaryCard$call(id = "summary", store = store)
-      self$bestConfigurationCard$call(id = "best_config", store = store)
-      self$candidatesCard$call(id = "candidates", store = store)
-      self$performanceCard$call(id = "performance", store = store)
-      self$detailByIterationCard$call(id = "detail_by_iteration", store = store)
+    server = function(input, output, session, store, events) {
+      self$summary_card$call(id = "summary", store = store, events = events)
+      self$best_configuration_card$call(id = "best_config", store = store, events = events)
+      self$candidates_card$call(id = "candidates", store = store, events = events)
+      self$performance_card$call(id = "performance", store = store, events = events)
+      self$detail_by_iteration_card$call(id = "detail_by_iteration", store = store, events = events)
     }
   )
 )

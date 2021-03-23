@@ -1,4 +1,4 @@
-UIOptionsView <- R6::R6Class(
+UIOptionsView <- R6::R6Class( # nolint
   classname = "UIOptionsView",
   inherit = View,
   public = list(
@@ -6,7 +6,8 @@ UIOptionsView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header",
+        div(
+          class = "sub-header",
           h2("UI Options"),
           p("Set here Irace Studio options:"),
           HTML("<ul>
@@ -20,17 +21,17 @@ UIOptionsView <- R6::R6Class(
             collapsible = FALSE,
             closable = FALSE,
             width = 12,
-            directoryInput(
-              idButton = ns("iraceButton"),
-              idInput = ns("iracePath"),
+            directory_input(
+              id_button = ns("iraceButton"),
+              id_input = ns("iracePath"),
               label = "Irace Path",
               title = "Irace Library Directory",
               width = "auto"
             ),
             tags$br(),
-            directoryInput(
-              idButton = ns("workspaceButton"),
-              idInput = ns("workspacePath"),
+            directory_input(
+              id_button = ns("workspaceButton"),
+              id_input = ns("workspacePath"),
               label = "Workspace Path",
               title = "Workspace Directory",
               width = "auto"
@@ -40,30 +41,34 @@ UIOptionsView <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
-      volumes <- c("Home"=path.expand('~'), getVolumes()())
+    server = function(input, output, session, store, events) {
+      volumes <- c("Home" = path.expand("~"), getVolumes()())
 
       shinyDirChoose(input = input, id = "workspaceButton", roots = volumes)
       shinyDirChoose(input = input, id = "iraceButton", roots = volumes)
 
-      observeEvent(c(store$gui, store$pg), {
-        shinyjs::disable(id = "workspacePath")
-        shinyjs::disable(id = "iracePath")
+      observeEvent(c(store$gui, store$pg),
+        {
+          shinyjs::disable(id = "workspacePath")
+          shinyjs::disable(id = "iracePath")
 
-        if (!is.null(store$pg)) {
+          if (!is.null(store$pg)) {
+            updateTextInput(
+              session = session,
+              inputId = "iracePath",
+              value = store$pg$get_irace_path()
+            )
+          }
+
           updateTextInput(
             session = session,
-            inputId = "iracePath",
-            value = store$pg$get_irace_path()
+            inputId = "workspacePath",
+            value = store$gui$workspace_path
           )
-        }
-
-        updateTextInput(
-          session = session,
-          inputId = "workspacePath",
-          value = store$gui$workspacePath
-        )
-      })
+        },
+        ignoreNULL = TRUE,
+        ignoreInit = TRUE
+      )
 
       observeEvent(input$workspaceButton, {
         if (!is.integer(input$workspaceButton)) {
@@ -74,14 +79,14 @@ UIOptionsView <- R6::R6Class(
           # TODO: Move all files inside of workspace to the new path and
           # validating if another workspace do not exist
           if (store$gui$createWorkspaceDirectory(path)) {
-            store$gui$workspacePath <- path
+            store$gui$workspace_path <- path
             updateTextInput(
               session = session,
               inputId = "workspacePath",
               value = path
             )
           } else {
-            alert.error("Can't create workspace directory, because there is an another folder called workspace.")
+            alert_error("Can't create workspace directory, because there is an another folder called workspace.")
           }
         }
       })
@@ -92,7 +97,7 @@ UIOptionsView <- R6::R6Class(
 
           path <- .libPaths()[1]
 
-          if (private$checkPath(dir)) {
+          if (private$check_path(dir)) {
             path <- dir
           }
 
@@ -105,11 +110,10 @@ UIOptionsView <- R6::R6Class(
           store$pg$set_irace_path(path)
         }
       })
-
     }
   ),
   private = list(
-    checkPath = function(path) {
+    check_path = function(path) {
       if (is.null(path) || path == "") {
         return(FALSE)
       }
@@ -118,11 +122,11 @@ UIOptionsView <- R6::R6Class(
     },
 
     getWorkspacePath = function(path) {
-      if (!private$checkPath(path)) {
+      if (!private$check_path(path)) {
         return(file.path(fs::path_home(), "workspace-irace"))
       }
 
-      return(file.path(path, "workspace-irace"));
+      return(file.path(path, "workspace-irace"))
     }
   )
 )

@@ -1,4 +1,4 @@
-Navbar <- R6::R6Class(
+Navbar <- R6::R6Class( # nolint
   classname = "Navbar",
   inherit = Component,
   public = list(
@@ -12,7 +12,7 @@ Navbar <- R6::R6Class(
         fixed = TRUE,
         h4(
           textOutput(
-            outputId = ns("playgroundName")
+            outputId = ns("playground_name")
           ),
           style = "text-align: center; flex: 1 0 auto; margin-top: 5px;"
         )
@@ -20,274 +20,293 @@ Navbar <- R6::R6Class(
     },
 
     server = function(input, output, session, store) {
-      output$playgroundName <- renderText(store$playgroundName)
+      output$playground_name <- renderText(store$playground_name)
     }
   )
 )
 
-Body <- R6::R6Class(
+Body <- R6::R6Class( # nolint
   classname = "Body",
   public = list(
-    homeView = NULL,
-    uiOptionsView = NULL,
-    playgroundView = NULL,
-    iraceOptionsView = NULL,
-    parametersView = NULL,
-    trainInstancesView = NULL,
-    targetScriptsView = NULL,
-    initialConfigurationsView = NULL,
-    forbiddenView = NULL,
-    testingView = NULL,
+    home_view = NULL,
+    ui_options_view = NULL,
+    playground_view = NULL,
+    irace_options_view = NULL,
+    parameters_view = NULL,
+    train_instances_view = NULL,
+    target_scripts_view = NULL,
+    initial_configurations_view = NULL,
+    forbidden_view = NULL,
+    testing_view = NULL,
 
-    iraceOutputView = NULL,
-    executionsHistoryView = NULL,
+    irace_output_view = NULL,
+    executions_history_view = NULL,
 
-    sandboxView = NULL,
-    filterView = NULL,
-    performanceInstance = NULL,
-    performanceConfig = NULL,
+    sandbox_view = NULL,
+    filter_view = NULL,
+    performance_instance = NULL,
+    performance_config = NULL,
 
-    reportView = NULL,
-    userSectionView = NULL,
+    report_view = NULL,
+    user_section_view = NULL,
 
     initialize = function() {
-      self$homeView <- HomeView$new("welcome")
-      self$uiOptionsView <- UIOptionsView$new("ui_options")
-      self$playgroundView <- PlaygroundView$new("playground")
-      self$iraceOptionsView <- IraceOptionsView$new("scenario_irace_options")
-      self$parametersView <- ParametersView$new("scenario_parameters")
-      self$trainInstancesView <- TrainInstancesView$new("scenario_train_instances")
-      self$targetScriptsView <- TargetScriptsView$new("scenario_target_scripts")
-      self$initialConfigurationsView <- InitialConfigurationsView$new("scenario_initial_configurations")
-      self$forbiddenView <- ForbiddenView$new("scenario_forbidden")
-      self$testingView <- TestingView$new("scenario_testing")
-      self$iraceOutputView <- IraceOutputView$new("execution_irace_output")
-      self$executionsHistoryView <- ExecutionsHistoryView$new("execution_history")
+      self$home_view <- HomeView$new("welcome")
+      self$ui_options_view <- UIOptionsView$new("ui_options")
+      self$playground_view <- PlaygroundView$new("playground")
+      self$irace_options_view <- IraceOptionsView$new("scenario_irace_options")
+      self$parameters_view <- ParametersView$new("scenario_parameters")
+      self$train_instances_view <- TrainInstancesView$new("scenario_train_instances")
+      self$target_scripts_view <- TargetScriptsView$new("scenario_target_scripts")
+      self$initial_configurations_view <- InitialConfigurationsView$new("scenario_initial_configurations")
+      self$forbidden_view <- ForbiddenView$new("scenario_forbidden")
+      self$testing_view <- TestingView$new("scenario_testing")
+      self$irace_output_view <- IraceOutputView$new("execution_irace_output")
+      self$executions_history_view <- ExecutionsHistoryView$new("execution_history")
 
-      self$sandboxView <- SandboxView$new("visualization_sandbox")
-      self$filterView <- FilterView$new("visualization_filter")
-      self$performanceInstance <- PerformanceInstanceView$new("visualization_by_instance")
-      self$performanceConfig <- PerformanceConfigView$new("visualization_by_config")
+      self$sandbox_view <- SandboxView$new("visualization_sandbox")
+      self$filter_view <- FilterView$new("visualization_filter")
+      self$performance_instance <- PerformanceInstanceView$new("visualization_by_instance")
+      self$performance_config <- PerformanceConfigView$new("visualization_by_config")
 
-      self$reportView <- ReportView$new("report")
-      self$userSectionView <- UserSectionView$new("report_user_section")
+      self$report_view <- ReportView$new("report")
+      self$user_section_view <- UserSectionView$new("report_user_section")
     },
 
     ui = function() {
       dashboardBody(
-        iraceStudioResources(),
+        irace_studio_resources(),
         tabItems(
           tabItem(
             tabName = "home",
-            self$homeView$ui()
+            self$home_view$ui()
           ),
           tabItem(
             tabName = "ui_options",
-            self$uiOptionsView$ui()
+            self$ui_options_view$ui()
           ),
           tabItem(
             tabName = "playground",
-            self$playgroundView$ui()
+            self$playground_view$ui()
           ),
           tabItem(
             tabName = "scenario_irace_options",
-            self$iraceOptionsView$ui()
+            self$irace_options_view$ui()
           ),
           tabItem(
             tabName = "scenario_parameters",
-            self$parametersView$ui()
+            self$parameters_view$ui()
           ),
           tabItem(
             tabName = "scenario_train_instances",
-            self$trainInstancesView$ui()
+            self$train_instances_view$ui()
           ),
           tabItem(
             tabName = "scenario_target_scripts",
-            self$targetScriptsView$ui()
+            self$target_scripts_view$ui()
           ),
           tabItem(
             tabName = "scenario_initial_configurations",
-            self$initialConfigurationsView$ui()
+            self$initial_configurations_view$ui()
           ),
           tabItem(
             tabName = "scenario_forbidden",
-            self$forbiddenView$ui()
+            self$forbidden_view$ui()
           ),
           tabItem(
             tabName = "scenario_testing",
-            self$testingView$ui()
+            self$testing_view$ui()
           ),
           tabItem(
             tabName = "execution_irace_output",
-            self$iraceOutputView$ui()
+            self$irace_output_view$ui()
           ),
           tabItem(
             tabName = "execution_history",
-            self$executionsHistoryView$ui()
+            self$executions_history_view$ui()
           ),
           tabItem(
             tabName = "visualization_sandbox",
-            self$sandboxView$ui()
+            self$sandbox_view$ui()
           ),
           tabItem(
             tabName = "visualization_filter",
-            self$filterView$ui()
+            self$filter_view$ui()
           ),
           tabItem(
             tabName = "visualization_by_config",
-            self$performanceConfig$ui()
+            self$performance_config$ui()
           ),
           tabItem(
             tabName = "visualization_by_instance",
-            self$performanceInstance$ui()
+            self$performance_instance$ui()
           ),
           tabItem(
             tabName = "report",
-            self$reportView$ui()
+            self$report_view$ui()
           ),
           tabItem(
             tabName = "report_user_section",
-            self$userSectionView$ui()
+            self$user_section_view$ui()
           )
         )
       )
     },
 
-    setupModules = function(store) {
-      self$homeView$call(store = store)
-      self$uiOptionsView$call(store = store)
-      self$playgroundView$call(store = store)
-      self$iraceOptionsView$call(store = store)
-      self$parametersView$call(store = store)
-      self$trainInstancesView$call(store = store)
-      self$targetScriptsView$call(store = store)
-      self$initialConfigurationsView$call(store = store)
-      self$forbiddenView$call(store = store)
-      self$testingView$call(store = store)
+    setupModules = function(store, events) {
+      self$home_view$call(store = store, events = events)
+      self$ui_options_view$call(store = store, events = events)
+      self$playground_view$call(store = store, events = events)
+      self$irace_options_view$call(store = store, events = events)
+      self$parameters_view$call(store = store, events = events)
+      self$train_instances_view$call(store = store, events = events)
+      self$target_scripts_view$call(store = store, events = events)
+      self$initial_configurations_view$call(store = store, events = events)
+      self$forbidden_view$call(store = store, events = events)
+      self$testing_view$call(store = store, events = events)
 
-      self$iraceOutputView$call(store = store)
-      self$executionsHistoryView$call(store = store)
+      self$irace_output_view$call(store = store, events = events)
+      self$executions_history_view$call(store = store, events = events)
 
-      self$sandboxView$call(store = store)
-      self$filterView$call(store = store)
-      self$performanceInstance$call(store = store)
-      self$performanceConfig$call(store = store)
+      self$sandbox_view$call(store = store, events = events)
+      self$filter_view$call(store = store, events = events)
+      self$performance_instance$call(store = store, events = events)
+      self$performance_config$call(store = store, events = events)
 
-      self$reportView$call(store = store)
-      self$userSectionView$call(store = store)
+      self$report_view$call(store = store, events = events)
+      self$user_section_view$call(store = store, events = events)
     }
   )
 )
 
-ControlBar <- R6::R6Class(
+ControlBar <- R6::R6Class( # nolint
   classname = "ControlBar",
   inherit = Component,
   public = list(
-    executionSelect = NULL,
-    sandboxSelect = NULL,
+    execution_select = NULL,
+    sandbox_select = NULL,
 
     initialize = function() {
-      self$executionSelect <- ExecutionSelect$new()
-      self$sandboxSelect <- SandboxSelect$new()
+      self$execution_select <- ExecutionSelect$new()
+      self$sandbox_select <- SandboxSelect$new()
     },
 
     ui = function(id) {
       ns <- NS(id)
 
       dashboardControlbar(
-          id = ns("sidebar"),
-          skin = "light",
-          overlay = TRUE,
-          collapsed = TRUE,
-          fluidRow(
-             box(
-              title = strong("Global Options"),
-              collapsible = FALSE,
-              closable = FALSE,
-              width = 12,
-              pickerInput(
-                inputId = ns("scenarioPicker"),
-                label = "Scenario",
-                choices = "",
-                options = list(
-                  size = 8
-                )
-              ),
-              self$executionSelect$ui(inputId = ns("executions")),
-              self$sandboxSelect$ui(inputId = ns("sandboxes")),
-              tags$a(
-                "Irace User Guide",
-                class = "btn-link",
-                style = "padding: 8px;",
-                href = "https://cran.r-project.org/web/packages/irace/vignettes/irace-package.pdf",
-                target = "_blank"
+        id = ns("sidebar"),
+        skin = "light",
+        overlay = TRUE,
+        collapsed = TRUE,
+        fluidRow(
+          box(
+            title = strong("Global Options"),
+            collapsible = FALSE,
+            closable = FALSE,
+            width = 12,
+            pickerInput(
+              inputId = ns("scenarioPicker"),
+              label = "Scenario",
+              choices = "",
+              options = list(
+                size = 8
               )
+            ),
+            self$execution_select$ui(input_id = ns("executions")),
+            self$sandbox_select$ui(input_id = ns("sandboxes")),
+            tags$a(
+              "Irace User Guide",
+              class = "btn-link",
+              style = "padding: 8px;",
+              href = "https://cran.r-project.org/web/packages/irace/vignettes/irace-package.pdf",
+              target = "_blank"
             )
           )
         )
+      )
     },
 
-    server = function(input, output, session, store) {
-      self$executionSelect$call(id = "executions", store = store)
-      self$sandboxSelect$call(id = "sandboxes", store = store)
+    server = function(input, output, session, store, events) {
+      self$execution_select$call(
+        id = "executions",
+        store = store,
+        events = events
+      )
+
+      self$sandbox_select$call(
+        id = "sandboxes",
+        store = store,
+        events = events
+      )
 
       observeEvent(input$scenarioPicker, {
         req(input$scenarioPicker)
         store$pg$change_current_scenario(input$scenarioPicker)
-        store$didChangeScenario <- store$didChangeScenario + 1
-        pkg$outputLog <- NULL
+        update_reactive_counter(events$current_scenario)
+        pkg$output_log <- NULL
       })
 
-      observeEvent(store$startIrace, {
-        if (store$startIrace) {
+      observeEvent(events$is_irace_running, {
+        if (events$is_irace_running) {
           disable(id = "scenarioPicker")
         } else {
           enable(id = "scenarioPicker")
         }
       })
 
-      observeEvent(global_emitter$value(global_events$update_scenarios), {
-        scenarios <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_name())
-        scenarios_id <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_id())
+      observeEvent(c(store$pg, events$update_scenarios),
+        {
+          scenarios <- lapply(store$pg$get_scenarios(), function(scenario) {
+            scenario$get_name()
+          })
 
-        if (length(scenarios) == 0) {
-          scenarios_id <- ""
-        } else {
-          names(scenarios_id) <- unlist(scenarios, use.names = FALSE)
-        }
+          scenarios_id <- lapply(store$pg$get_scenarios(), function(scenario) {
+            scenario$get_id()
+          })
 
-         selected <- NULL
+          if (length(scenarios) == 0) {
+            scenarios_id <- ""
+          } else {
+            names(scenarios_id) <- unlist(scenarios, use.names = FALSE)
+          }
 
-        if (!is.null(store$pg$get_last_scenario())) {
-          selected <- store$pg$get_last_scenario()
-          store$pg$set_last_scenario(NULL)
-        }
+          selected <- NULL
 
-        updatePickerInput(
-          session = session,
-          inputId = "scenarioPicker",
-          choices = scenarios_id,
-          selected = selected
-        )
-      })
+          if (!is.null(store$pg$get_last_scenario())) {
+            selected <- store$pg$get_last_scenario()
+            store$pg$set_last_scenario(NULL)
+          }
+
+          updatePickerInput(
+            session = session,
+            inputId = "scenarioPicker",
+            choices = scenarios_id,
+            selected = selected
+          )
+        },
+        ignoreNULL = TRUE,
+        ignoreInit = TRUE
+      )
     }
   )
 )
 
-Sidebar <- R6::R6Class(
+Sidebar <- R6::R6Class( # nolint
   classname = "Sidebar",
   public = list(
     ui = function() {
       dashboardSidebar(
         minified = FALSE,
-      #elevation = 0,
+        # elevation = 0,
         id = "sidebarState",
         sidebarMenu(
           id = "sidebar",
           menuItem(
             text = "Home",
             tabName = "home",
-            icon = NULL
+            icon = NULL,
+            selected = TRUE
           ),
           menuItem(
             text = "UI Options",
@@ -398,7 +417,7 @@ Sidebar <- R6::R6Class(
   )
 )
 
-Footer <- R6::R6Class(
+Footer <- R6::R6Class( # nolint
   classname = "Footer",
   inherit = Component,
   public = list(
@@ -443,31 +462,31 @@ Footer <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       output$scenario <- renderUI({
         shiny::validate(
-          need(global_emitter$value(global_events$current_scenario), "Nothing")
+          need(events$change_scenario, "Nothing"),
+          need(store$pg, "Nothing")
         )
         store$pg$get_current_scenario()$get_name()
       })
 
       output$execution <- renderUI({
         shiny::validate(
-          need(store$currentExecution, "Nothing")
+          need(store$current_execution, "Nothing")
         )
-        store$currentExecution$get_name()
+        store$current_execution$get_name()
       })
 
       output$sandbox <- renderUI({
         shiny::validate(
           need(store$sandbox, "Nothing")
         )
-        store$sandbox$getName()
+        store$sandbox$get_name()
       })
 
-
       output$status <- renderUI({
-        if (store$startIrace) {
+        if (events$is_irace_running) {
           dashboardBadge(
             "Running",
             position = "right",
@@ -483,7 +502,6 @@ Footer <- R6::R6Class(
           )
         }
       })
-
     }
   )
 )

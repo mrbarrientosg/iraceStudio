@@ -27,11 +27,11 @@ suppressMessages(library(shinyhelper))
 
 plan("future::sequential")
 
-for (f in list.files("component", recursive = T, pattern = '.R', full.names = T)) {
+for (f in list.files("component", recursive = T, pattern = ".R", full.names = T)) {
   source(f)
 }
 
-for (f in list.files("modules", recursive = T, pattern = '.R', full.names = T)) {
+for (f in list.files("modules", recursive = T, pattern = ".R", full.names = T)) {
   source(f)
 }
 
@@ -39,9 +39,9 @@ app <- App$new()
 app$setup()
 
 pkg <- new.env(parent = emptyenv())
-pkg$reportStore <- list()
+pkg$report_store <- list()
 
-scenarioOptions <- jsonlite::fromJSON(
+scenario_options <- jsonlite::fromJSON(
   system.file("app/static/scenario_options.json", package = "iraceStudio"),
   simplifyDataFrame = TRUE,
   flatten = TRUE
@@ -49,14 +49,14 @@ scenarioOptions <- jsonlite::fromJSON(
 
 parameters_as_irace <- function(parameters) {
   params <- capture.output(
-            write.table(
-              parameters,
-              row.names = FALSE,
-              col.names = FALSE,
-              sep = "\t",
-              quote = F
-            )
-          )
+    write.table(
+      parameters,
+      row.names = FALSE,
+      col.names = FALSE,
+      sep = "\t",
+      quote = F
+    )
+  )
   params <- paste0(params, collapse = "\n")
 
   irace::readParameters(text = params)
@@ -194,7 +194,7 @@ create_test_instances_file <- function(path, pg, name = "test-instances.txt") {
   write(paste(pg$get_test_instances(), collapse = "\n"), file = path)
 }
 
-extract.parameters <- function(parameters) {
+extract_parameters <- function(parameters) {
   log_info("Extracting paremeters from irace format to data frame")
   types <- c()
   switches <- c()
@@ -211,114 +211,129 @@ extract.parameters <- function(parameters) {
     }
   }
 
-  df <- data.frame(list(names = parameters$names, switches = switches, types = types, domain = domain, conditions = conditions), stringsAsFactors = FALSE)
+  df <- data.frame(list(names = parameters$names, switches = switches, types = types, domain = domain, conditions = conditions), stringsAsFactors = FALSE) # nolint
 
   return(df)
 }
 
 convert_vector_to_string <- function(vector) {
-  newVector <- c()
+  new_vector <- c()
   for (i in 1:length(vector)) {
-    newVector[i] <- paste0(vector[i])
+    new_vector[i] <- paste0(vector[i])
   }
-  return(newVector)
+  return(new_vector)
 }
 
-checkPath <- function(path) {
+check_path <- function(path) {
   return(!is.null(path) && fs::is_absolute_path(path) && file.exists(path))
 }
 
-importScenario <- function(name, path, scenario, onlyOptions = FALSE) {
+import_scenario <- function(name, path, scenario, events, only_options = FALSE) {
   log_info("Load scenario {path}")
   .scenario <- if (grepl(".Rdata", name, fixed = TRUE)) {
     load(path)
-    scenario$add_parameter(extract.parameters(iraceResults$parameters))
+    scenario$add_parameter(extract_parameters(iraceResults$parameters))
     if (nrow(iraceResults$allConfigurations) != 0) {
-      exe <- execution$new(name = "execution-1")
+      exe <- Execution$new(name = "execution-1")
       exe$set_irace_results(iraceResults)
       scenario$add_execution(exe)
+      update_reactive_counter(events$update_executions)
     }
     aux <- iraceResults$scenario
     rm(iraceResults)
     aux
   } else {
-    tryCatch({
-      irace::readScenario(filename = path)
-    }, error = function(err) {
-      log_error("{err}")
-      return(NULL)
-    })
+    tryCatch(
+      {
+        irace::readScenario(filename = path)
+      },
+      error = function(err) {
+        log_error("{err}")
+        return(NULL)
+      }
+    )
   }
 
-  if (!onlyOptions) {
+  if (!only_options) {
     if (is.null(.scenario)) {
       log_error("Can't load scenario file")
       return(FALSE)
     }
 
     path <- scenario$targetRunner
-    if (checkPath(path)) {
+    if (check_path(path)) {
       log_info("Add target runner from {path}")
       scenario$set_target_runner(paste(readLines(path), collapse = "\n"))
     }
 
     path <- scenario$targetEvaluator
-    if (checkPath(path)) {
+    if (check_path(path)) {
       log_info("Add target evaluator from {path}")
       scenario$set_target_evaluator(paste(readLines(path), collapse = "\n"))
     }
 
     path <- scenario$parameterFile
     parameters <- NULL
-    if (checkPath(path) && nrow(scenario$get_parameters()) == 0) {
+    if (check_path(path) && nrow(scenario$get_parameters()) == 0) {
       log_info("Add parameters from {path}")
-      parameters <- tryCatch({
-        data <- irace::readParameters(file = path)
-        scenario$add_parameter(extract.parameters(data))
-        data
-      }, error = function(err) {
-        log_error("{err}")
-      })
+      parameters <- tryCatch(
+        {
+          data <- irace::readParameters(file = path)
+          scenario$add_parameter(extract_parameters(data))
+          data
+        },
+        error = function(err) {
+          log_error("{err}")
+        }
+      )
     }
 
     path <- scenario$forbiddenFile
-    if (checkPath(path)) {
+    if (check_path(path)) {
       log_info("Add forbidden file from {path}")
-      tryCatch({
-        irace:::readForbiddenFile(path)
-        source <- readLines(path)
-        scenario$add_forbidden(source)
-      }, error = function(err) {
-        log_error("{err}")
-      })
+      tryCatch(
+        {
+          irace:::readForbiddenFile(path)
+          source <- readLines(path)
+          scenario$add_forbidden(source)
+        },
+        error = function(err) {
+          log_error("{err}")
+        }
+      )
     }
 
     path <- scenario$configurationsFile
-    if (checkPath(path)) {
+    if (check_path(path)) {
       log_info("Add initial configurations {path}")
 
-      tryCatch({
-        if (is.null(parameters)) {
-          parameters <- parameters_as_irace(scenario$get_parameters())
+      tryCatch(
+        {
+          if (is.null(parameters)) {
+            parameters <- parameters_as_irace(scenario$get_parameters())
+          }
+          config <- irace::readConfigurationsFile(filename = path, parameters = parameters)
+          scenario$add_configuration(config)
+        },
+        error = function(err) {
+          log_error("{err}")
         }
-        config <- irace::readConfigurationsFile(filename = path, parameters = parameters)
-        scenario$add_configuration(config)
-      }, error = function(err) {
-        log_error("{err}")
-      })
+      )
     }
   }
 
   for (opt in names(.scenario)) {
-    if (!availableOption(opt))
+    if (!available_option(opt)) {
       next
+    }
 
-    if (is.function(.scenario[[opt]]))
+    if (is.function(.scenario[[opt]])) {
       next
+    }
 
-    value = as.character(.scenario[[opt]])
+    value <- as.character(.scenario[[opt]])
 
-    value = if (!grepl("\\D", value)) {
+    value <- if (!grepl("\\D", value)) {
       as.numeric(value)
     } else {
       .scenario[[opt]]
@@ -333,8 +348,8 @@ importScenario <- function(name, path, scenario, onlyOptions = FALSE) {
   return(TRUE)
 }
 
-availableOption <- function(option) {
-  if (option %in% scenarioOptions$id) {
+available_option <- function(option) {
+  if (option %in% scenario_options$id) {
     return(TRUE)
   }
   return(FALSE)

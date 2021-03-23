@@ -1,4 +1,4 @@
-ForbiddenView <- R6::R6Class(
+ForbiddenView <- R6::R6Class( # nolint
   classname = "ForbiddenView",
   inherit = View,
   public = list(
@@ -12,14 +12,14 @@ ForbiddenView <- R6::R6Class(
             width = 10,
             h2("Forbidden Configurations"),
             HTML("Forbid parameter settings combinations for the configuration process.<br>
-                 For more information and examples, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
+                 For more information and examples, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ") # nolint
           ),
           column(
             width = 2,
             class = "d-flex align-items-center justify-content-end",
-            importButton(inputId = ns("load")),
-            exportButton(
-              inputId = ns("export"),
+            import_button(input_id = ns("load")),
+            export_button(
+              input_id = ns("export"),
               filename = "forbidden.txt",
               style = "margin-left: 5px;"
             )
@@ -44,11 +44,8 @@ ForbiddenView <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
-      # Don't remove this line it's used by aceEditor
-      ns <- session$ns
-
-      volumes <- c("Home"=path.expand('~'), getVolumes()())
+    server = function(input, output, session, store, events) {
+      volumes <- c("Home" = path.expand("~"), getVolumes()())
 
       shinyFileSave(input = input, id = "export", roots = volumes)
 
@@ -70,50 +67,63 @@ ForbiddenView <- R6::R6Class(
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- tryCatch({
-            parseFilePaths(roots = volumes, input$load)
-          }, error = function(err) {
-            log_error("{err}")
-            return(NULL)
-          })
+          file <- tryCatch(
+            {
+              parseFilePaths(roots = volumes, input$load)
+            },
+            error = function(err) {
+              log_error("{err}")
+              return(NULL)
+            }
+          )
 
           if (is.null(file)) {
-            alert.error("Can't load forbidden file, check if the file format is correct.")
+            alert_error("Can't load forbidden file, check if the file format is correct.")
             return(invisible())
           }
 
-          tryCatch({
-            irace:::readForbiddenFile(file$datapath)
-            source <- readLines(file$datapath)
+          tryCatch(
+            {
+              irace:::readForbiddenFile(file$datapath)
+              source <- readLines(file$datapath)
 
-            updateAceEditor(
-              session = session,
-              editorId = "conditions",
-              value = paste(source, collapse = "\n")
-            )
-          }, error = function(err) {
-            log_error("{err}")
-            alert.error(err$message)
-          })
+              shinyAce::updateAceEditor(
+                session = session,
+                editorId = "conditions",
+                value = paste(source, collapse = "\n")
+              )
+            },
+            error = function(err) {
+              log_error("{err}")
+              alert_error(err$message)
+            }
+          )
         }
       })
 
-      observeEvent(input$conditions, {
-        store$pg$add_forbidden(input$conditions)
-      }, ignoreInit = TRUE)
+      observeEvent(input$conditions,
+        {
+          store$pg$add_forbidden(input$conditions)
+        },
+        ignoreInit = TRUE
+      )
 
-      observeEvent(c(global_emitter$value(global_events$current_scenario), store$pg), {
-        updateAceEditor(
-          session = session,
-          editorId = "conditions",
-          value = store$pg$get_forbidden()
-        )
-      })
+      observeEvent(c(events$change_scenario, store$pg),
+        {
+          shinyAce::updateAceEditor(
+            session = session,
+            editorId = "conditions",
+            value = store$pg$get_forbidden()
+          )
+        },
+        ignoreNULL = TRUE,
+        ignoreInit = TRUE
+      )
 
       observeEvent(input$clear, {
         log_debug("Removing forbidden code")
 
-        updateAceEditor(
+        shinyAce::updateAceEditor(
           session = session,
           editorId = "conditions",
           value = ""

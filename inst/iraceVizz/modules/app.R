@@ -5,40 +5,26 @@ App <- R6::R6Class(
     navbar = NULL,
     sidebar = NULL,
     body = NULL,
+    controlbar = NULL,
+    footer = NULL,
     store = NULL,
     logs = NULL,
     logger_path = NULL,
 
     initialModal = function(input) {
-      if (is.null(isolate(private$store$pg))) {
-        importVolume <- getVolumes()()
-        workspaceVolume <- c("workspace" = isolate(private$store$gui$workspacePath), importVolume)
+      if (length(isolate(private$store$scenarios)) == 0) {
+        volumes <- c("Home" = path.expand("~"), getVolumes()())
         showModal(
           modalDialog(
-            title = "Welcome to Irace Studio",
-            p("To start, you must select/create playground, click on:"),
-            HTML("<ul>
-                 <li>Select, to open a previuously saved playground in your workspace (Rds file)</li>
-                 <li>Import, to create new playground from an irace Rdata file</li>
-                 <li>New, to create a new playground and start an scenario from scratch</li>
-                 </ul>"),
-            p("If its your first time using Irace Studio, click on New and follow the instructions in Home!"),
+            title = "Welcome to Irace Vizz",
             footer = tagList(
               shinyFilesButton(
                 id = "select",
                 label = "Select",
-                title = "Select a Playground",
+                title = "Select a Scenario",
                 multiple = FALSE,
-                buttonType = "outline-primary"
-              ),
-              shinyFilesButton(
-                id = "import",
-                label = "Import",
-                title = "Import a Playground",
-                multiple = FALSE,
-                buttonType = "outline-primary"
-              ),
-              iraceStudio::actionButton(inputId = "new", label = "New", class = "btn-primary")
+                buttonType = "primary"
+              )
             )
           )
         )
@@ -46,14 +32,7 @@ App <- R6::R6Class(
         shinyFileChoose(
           input = input,
           id = "select",
-          roots = workspaceVolume,
-          filetypes = "rds"
-        )
-        shinyFileChoose(
-          input = input,
-          id = "import",
-          roots = importVolume,
-          filetypes = "rds"
+          roots = volumes
         )
       }
     },
@@ -64,7 +43,10 @@ App <- R6::R6Class(
     },
 
     setupModules = function() {
-      shinybusy::show_modal_spinner(text = "Loading workspace...")
+      shinybusy::show_modal_spinner(text = "Loading scenario...")
+      private$navbar$call(id = "navbar", store = private$store)
+      private$controlbar$call(id = "controlbar", store = private$store)
+      private$footer$call(id = "footer", store = private$store)
       private$body$setupModules(private$store)
       shinybusy::remove_modal_spinner()
     }
@@ -75,9 +57,13 @@ App <- R6::R6Class(
       private$navbar <- Navbar$new()
       private$sidebar <- Sidebar$new()
       private$body <- Body$new()
+      private$controlbar <- ControlBar$new()
+      private$footer <- Footer$new()
 
       private$store <- reactiveValues(
-        pg = NULL
+        scenarios = list(),
+        iraceResults = NULL,
+        currentScenario = NULL
       )
     },
 
@@ -85,111 +71,73 @@ App <- R6::R6Class(
       dashboardPage(
         title = "Irace Vizz",
         dark = FALSE,
-        #freshTheme = common_theme,
+        # freshTheme = common_theme,
         header = private$navbar$ui("navbar"),
         sidebar = private$sidebar$ui(),
-        body = private$body$ui()
+        body = private$body$ui(),
+        controlbar = private$controlbar$ui("controlbar"),
+        footer = private$footer$ui("footer")
       )
     },
 
     server = function(input, output, session) {
-      shinyhelper::observe_helpers(withMathJax = TRUE)
+      # shinyhelper::observe_helpers(withMathJax = TRUE)
 
-      private$store$playgroundName <- ""
-      private$store$updateSandbox <- 0
-
-      # actions
-      private$store$currentScenario <- NULL
-      private$store$iraceResults <- NULL
-      private$store$currentExecution <- NULL
-
-      private$navbar$call(id = "navbar", store = private$store)
-
-      workPath <- isolate(private$store$gui$workspacePath)
-      importVolume <- getVolumes()()
-      workspaceVolume <- c("workspace" = workPath, importVolume)
-
-      observeEvent(input$new, {
-        removeModal()
-        shinyalert(
-          title = "Playground name",
-          text = "Give a name to identify the playground.",
-          type = "input",
-          inputType = "text",
-          showCancelButton = TRUE,
-          closeOnEsc = FALSE,
-          callbackR = function(name) {
-            if (is.logical(name) && !name) {
-              private$initialModal(input)
-              return(invisible())
-            }
-
-            if (is.null(name) || name == "") {
-              alert.error("Playground name is empty.")
-              return(invisible())
-            }
-
-            if (private$validateName(name, workPath)) {
-              shinyalert(
-                title = "Error",
-                text = "Playground name is repeated.",
-                closeOnEsc = FALSE,
-                type = "error",
-                callbackR = function() {
-                  private$initialModal(input)
-                }
-              )
-              return(invisible())
-            }
-
-            private$setupModules()
-            #FIXME: check if this is correct here
-            #MATIAS: Workspace check if exist when the app initialize
-            #dir.create(paste0(workPath, "/", name))
-            private$store$pg <- playground$new(name = name)
-          }
-        )
-      })
+      volumes <- c("Home" = path.expand("~"), getVolumes()())
 
       observeEvent(input$select, {
         if (!is.integer(input$select)) {
-          file <- parseFilePaths(roots = workspaceVolume, input$select)
-          pg <- readRDS(file = file$datapath)
-
-          if (is.null(pg$.iraceStudio) || !pg$.iraceStudio) {
-            alert.error("Bad Irace Studio playground.")
-            return()
-          }
-
+          file <- parseFilePaths(roots = volumes, input$select)
           removeModal()
+          shinyalert(
+            title = "Scenario name",
+            text = "Give a name to identify the scenario.",
+            type = "input",
+            inputType = "text",
+            showCancelButton = TRUE,
+            closeOnEsc = FALSE,
+            callbackR = function(name) {
+              if (is.logical(name) && !name) {
+                private$initialModal(input)
+                return(invisible())
+              }
 
-          private$setupModules()
-          private$store$pg <- playground$new(playground = pg)
-        }
-      })
+              if (is.null(name) || name == "") {
+                alert_error("Scenario name is empty.")
+                return(invisible())
+              }
 
-      observeEvent(input$import, {
-        if (!is.integer(input$import)) {
-          file <- parseFilePaths(roots = importVolume, input$import)
-          pg <- readRDS(file = file$datapath)
+              # if (private$validateName(name, workPath)) {
+              #   shinyalert(
+              #     title = "Error",
+              #     text = "Playground name is repeated.",
+              #     closeOnEsc = FALSE,
+              #     type = "error",
+              #     callbackR = function() {
+              #       private$initialModal(input)
+              #     }
+              #   )
+              #   return(invisible())
+              # }
 
-          if (is.null(pg$.iraceStudio) || !pg$.iraceStudio) {
-            alert.error("Bad Irace Studio playground.")
-            return()
-          }
-
-          removeModal()
-
-          private$setupModules()
-          private$store$pg <- playground$new(playground = pg)
+              load(file$datapath)
+              private$store$scenarios[[name]] <- iraceResults
+              rm(iraceResults)
+              private$setupModules()
+            }
+          )
         }
       })
 
       if (app_prod()) {
         private$initialModal(input)
       } else {
+        isolate({
+          load(app_sys("data/irace-acotsp.Rdata"))
+          private$store$scenarios[["test"]] <- iraceResults
+          rm(iraceResults)
+        })
         private$setupModules()
-        private$store$pg <- playground$new("dev-test")
       }
     },
 
@@ -203,7 +151,7 @@ App <- R6::R6Class(
       }
 
       # TODO: Implements logger in a correct way.
-      #private$logger_path <- self$setupLogger()
+      # private$logger_path <- self$setupLogger()
 
       log_info("Irace Studio Start")
 

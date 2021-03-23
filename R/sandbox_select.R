@@ -1,10 +1,10 @@
 #' @export
-SandboxSelect <- R6::R6Class(
+SandboxSelect <- R6::R6Class( # nolint
   classname = "SandboxSelect",
   inherit = Component,
   public = list(
-    ui = function(inputId, ...) {
-      ns <- NS(inputId)
+    ui = function(input_id, ...) {
+      ns <- NS(input_id)
 
       pickerInput(
         inputId = ns("options"),
@@ -17,21 +17,23 @@ SandboxSelect <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       values <- reactiveValues()
 
-      observeEvent(c(global_emitter$value(global_events$current_scenario),
-        global_emitter$value(global_events$update_executions),
-        global_emitter$value(global_events$update_sandboxes),
-        store$currentExecution), {
-
+      observeEvent(c(
+        events$change_scenario,
+        events$update_executions,
+        events$update_sandboxes,
+        store$current_execution
+      ),
+      {
         boxes_id <- NULL
 
-        if (!is.null(store$currentExecution)) {
-          sandboxes <- store$currentExecution$get_sandboxes()
+        if (!is.null(store$current_execution)) {
+          sandboxes <- store$current_execution$get_sandboxes()
 
-          boxes <- lapply(sandboxes$get_boxes(), function(box) box$getName())
-          boxes_id <- lapply(sandboxes$get_boxes(), function(box) box$getId())
+          boxes <- lapply(sandboxes$get_boxes(), function(box) box$get_name())
+          boxes_id <- lapply(sandboxes$get_boxes(), function(box) box$get_id())
 
           if (length(boxes) == 0) {
             store$sandbox <- NULL
@@ -51,23 +53,34 @@ SandboxSelect <- R6::R6Class(
           inputId = "options",
           choices = boxes_id
         )
-      }, ignoreNULL = FALSE, ignoreInit = TRUE)
+      },
+      ignoreNULL = FALSE,
+      ignoreInit = TRUE
+      )
 
       observeEvent(input$options, values$option <- input$options)
 
-      observeEvent(store$currentExecution, {
-        req(input$options != "")
-        sandboxes <- store$currentExecution$get_sandboxes()
-        store$sandbox <- sandboxes$get_box(input$options)
-      }, ignoreInit = TRUE)
+      observeEvent(store$current_execution,
+        {
+          req(input$options != "")
+          sandboxes <- store$current_execution$get_sandboxes()
+          store$sandbox <- sandboxes$get_box(input$options)
+        },
+        ignoreNULL = TRUE,
+        ignoreInit = TRUE
+      )
 
-      observeEvent(store$sandbox, {
-        updatePickerInput(
-          session = session,
-          inputId = "options",
-          selected = store$sandbox$getId()
-        )
-      }, ignoreInit = TRUE)
+      observeEvent(store$sandbox,
+        {
+          updatePickerInput(
+            session = session,
+            inputId = "options",
+            selected = store$sandbox$get_id()
+          )
+        },
+        ignoreNULL = TRUE,
+        ignoreInit = TRUE
+      )
 
       return(values)
     }

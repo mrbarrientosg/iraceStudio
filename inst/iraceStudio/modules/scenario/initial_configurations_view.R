@@ -1,4 +1,4 @@
-InitialConfigurationsView <- R6::R6Class(
+InitialConfigurationsView <- R6::R6Class( # nolint
   classname = "InitialConfigurationsView",
   inherit = View,
   public = list(
@@ -6,22 +6,23 @@ InitialConfigurationsView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header",
-            h2("Initial Configurations"),
-            HTML("Provide initial parameter settings for starting the configuration process.<br>
-                 For more information and examples, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
-            ),
+        div(
+          class = "sub-header",
+          h2("Initial Configurations"),
+          HTML("Provide initial parameter settings for starting the configuration process.<br>
+                 For more information and examples, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ") # nolint
+        ),
         fluidRow(
           column(
             width = 8,
-            iraceStudio::actionButton(inputId = ns("add"), label = "Add", icon = icon("plus")),
+            bs4Dash::actionButton(inputId = ns("add"), label = "Add", icon = icon("plus")),
             disabled(
-              iraceStudio::actionButton(
+              bs4Dash::actionButton(
                 inputId = ns("edit"),
                 label = "Edit",
                 icon = icon("edit")
               ),
-              iraceStudio::actionButton(
+              bs4Dash::actionButton(
                 inputId = ns("delete"),
                 label = "Delete",
                 icon = icon("minus")
@@ -31,13 +32,13 @@ InitialConfigurationsView <- R6::R6Class(
           column(
             width = 4,
             class = "d-flex align-items-center justify-content-end",
-            importButton(inputId = ns("load")),
-            exportButton(
-              inputId = ns("export"),
+            import_button(input_id = ns("load")),
+            export_button(
+              input_id = ns("export"),
               filename = "configurations.txt",
               style = "margin-left: 5px;"
             ),
-            clear_button(inputId = ns("clear"), style = "margin-left: 5px;")
+            clear_button(input_id = ns("clear"), style = "margin-left: 5px;")
           )
         ),
         br(),
@@ -56,7 +57,7 @@ InitialConfigurationsView <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       ns <- session$ns
 
       clear <- callModule(
@@ -67,7 +68,7 @@ InitialConfigurationsView <- R6::R6Class(
 
       values <- reactiveValues(configurations = NULL)
 
-      volumes <- c("Home"=path.expand('~'), getVolumes()())
+      volumes <- c("Home" = path.expand("~"), getVolumes()())
 
       shinyFileSave(input = input, id = "export", roots = volumes)
 
@@ -87,9 +88,13 @@ InitialConfigurationsView <- R6::R6Class(
         }
       })
 
-      observeEvent(c(global_emitter$value(global_events$current_scenario), store$pg), {
-        values$configurations <- store$pg$get_configurations()
-      })
+      observeEvent(c(events$change_scenario, store$pg),
+        {
+          values$configurations <- store$pg$get_configurations()
+        },
+        ignoreNULL = TRUE,
+        ignoreInit = TRUE
+      )
 
       observeEvent(values$configurations, {
         proxy %>%
@@ -102,7 +107,7 @@ InitialConfigurationsView <- R6::R6Class(
 
       output$initial_config_table <- DT::renderDataTable({
         shiny::validate(
-          need(global_emitter$value(global_events$update_parameters) > 0, ""),
+          need(events$update_parameters > 0, ""),
           need(nrow(store$pg$get_parameters()) > 0, "Add a parameter first to add a configuration."),
           need(store$pg, "")
         )
@@ -136,7 +141,7 @@ InitialConfigurationsView <- R6::R6Class(
 
       observeEvent(input$add, {
         if (nrow(store$pg$get_parameters()) == 0) {
-          alert.error(
+          alert_error(
             message = "There are no parameters. First add a parameter in the parameter section."
           )
           return(invisible())
@@ -148,7 +153,7 @@ InitialConfigurationsView <- R6::R6Class(
             create_initial_modal_content(ns, NULL, store),
             style = "overflow-y: scroll; max-height:650px;",
             footer = tagList(
-              iraceStudio::actionButton(inputId = ns("add_config"), label = "Add", class = "btn-primary"),
+              bs4Dash::actionButton(inputId = ns("add_config"), label = "Add", status = "primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -158,41 +163,45 @@ InitialConfigurationsView <- R6::R6Class(
       observeEvent(input$add_config, {
         log_debug("Adding a new configuration")
 
-        tryCatch({
-          data <- list()
-          changed <- c()
+        tryCatch(
+          {
+            data <- list()
+            changed <- c()
 
-          parameters <- parameters_as_irace(store$pg$get_parameters())
+            parameters <- parameters_as_irace(store$pg$get_parameters())
 
-          for (name in parameters$names) {
+            for (name in parameters$names) {
               data[[name]] <- input[[name]]
-          }
-
-          for (name in parameters$names) {
-            if (!irace:::conditionsSatisfied(parameters, data, name)) {
-              changed <- c(changed, name)
-              data[[name]] <- NA
             }
+
+            for (name in parameters$names) {
+              if (!irace:::conditionsSatisfied(parameters, data, name)) {
+                changed <- c(changed, name)
+                data[[name]] <- NA
+              }
+            }
+
+            newRow <- data.frame(data, stringsAsFactors = FALSE)
+
+            store$pg$add_configuration(newRow)
+
+            values$configurations <- store$pg$get_configurations()
+
+            if (length(changed) != 0) {
+              shinyalert(
+                title = "Warning",
+                text = sprintf("These (%s) configuration has been set NA by parameter condition.", paste0(changed, collapse = ", ")), # nolint
+                type = "warning"
+              )
+            }
+
+            log_debug("Configuration added")
+          },
+          error = function(err) {
+            log_error("{err}")
+            alert_error(err$message)
           }
-
-          newRow <- data.frame(data, stringsAsFactors = FALSE)
-
-          store$pg$add_configuration(newRow)
-
-          values$configurations <- store$pg$get_configurations()
-
-          if (length(changed) != 0) {
-            shinyalert(title = "Warning",
-                      text = sprintf("These (%s) configuration has been set NA by parameter condition.", paste0(changed, collapse = ", ")),
-                      type = "warning")
-          }
-
-          log_debug("Configuration added")
-        },
-        error = function(err) {
-          log_error("{err}")
-          alert.error(err$message)
-        })
+        )
 
         removeModal()
       })
@@ -206,7 +215,7 @@ InitialConfigurationsView <- R6::R6Class(
             create_initial_modal_content(ns, configuration, store),
             style = "overflow-y:scroll; max-height:650px;",
             footer = tagList(
-              iraceStudio::actionButton(inputId = ns("confirm_update"), label = "Update", class = "btn-primary"),
+              bs4Dash::actionButton(inputId = ns("confirm_update"), label = "Update", status = "primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -254,7 +263,7 @@ InitialConfigurationsView <- R6::R6Class(
                 )
               ),
               footer = tagList(
-                iraceStudio::actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
+                bs4Dash::actionButton(inputId = ns("confirm_delete"), label = "Yes", status = "danger"),
                 modalButton(label = "Cancel")
               ),
               easyClose = TRUE

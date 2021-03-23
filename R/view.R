@@ -1,5 +1,5 @@
 #' @export
-View <- R6::R6Class(
+View <- R6::R6Class( # nolint
   classname = "View",
   public = list(
     id = NULL,

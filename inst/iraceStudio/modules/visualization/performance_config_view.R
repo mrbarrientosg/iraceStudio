@@ -1,14 +1,14 @@
-PerformanceConfigView <- R6::R6Class(
+PerformanceConfigView <- R6::R6Class( # nolint
   classname = "PerformanceConfigView",
   inherit = View,
   public = list(
-    executionSelect = NULL,
-    sandboxSelect = NULL,
+    execution_select = NULL,
+    sandbox_select = NULL,
 
     initialize = function(id) {
       super$initialize(id)
-      self$executionSelect <- ExecutionSelect$new()
-      self$sandboxSelect <- SandboxSelect$new()
+      self$execution_select <- ExecutionSelect$new()
+      self$sandbox_select <- SandboxSelect$new()
     },
 
     ui = function() {
@@ -19,7 +19,7 @@ PerformanceConfigView <- R6::R6Class(
           column(
             width = 4,
             h2("Configuration performance"),
-            p("Visualize training performace by configuration. Select the active execution and sandbox in the selectors."),
+            p("Visualize training performace by configuration. Select the active execution and sandbox in the selectors."), # nolint
             HTML("<ul>
                  <li>default sandbox includes final elite configurations</li>
                  <li>to add configurations in the current sandbox, go to the Filter menu</li>
@@ -29,9 +29,9 @@ PerformanceConfigView <- R6::R6Class(
           column(
             width = 8,
             class = "d-flex align-items-center justify-content-end",
-            self$executionSelect$ui(inputId = ns("executions")),
+            self$execution_select$ui(input_id = ns("executions")),
             div(style = "padding: 8px;"),
-            self$sandboxSelect$ui(inputId = ns("sandboxes"))
+            self$sandbox_select$ui(input_id = ns("sandboxes"))
           )
         ),
         fluidRow(
@@ -40,52 +40,54 @@ PerformanceConfigView <- R6::R6Class(
             collapsible = FALSE,
             closable = FALSE,
             width = 12,
-            plotlyOutput(outputId = ns("solutionCostConfig")) %>%
+            plotlyOutput(outputId = ns("solution_cost_config")) %>%
               shinycssloaders::withSpinner(type = 6)
           )
         )
       )
     },
 
-    server = function(input, output, session, store) {
-
-      self$executionSelect$call(
+    server = function(input, output, session, store, events) {
+      self$execution_select$call(
         id = "executions",
-        store = store
+        store = store,
+        events = events
       )
 
-      self$sandboxSelect$call(
+      self$sandbox_select$call(
         id = "sandboxes",
-        store = store
+        store = store,
+        events = events
       )
 
       values <- reactiveValues(data = NULL)
 
-      observeEvent(store$iraceResults, {
+      observeEvent(store$irace_results, {
         future({
-          self$configurationByPerformance(isolate(store$iraceResults))
+          self$configurationByPerformance(isolate(store$irace_results))
         }) %...>% {
           values$data <- .
         }
       })
 
-      filtered_config_data <- eventReactive(c(values$data, store$updateSandbox, store$sandbox), {
-        req(store$updateSandbox)
+      filtered_config_data <- eventReactive(c(values$data, events$update_sandbox, store$sandbox), {
+        req(events$update_sandbox)
         req(store$sandbox)
 
-        id <- store$sandbox$getConfigurations()$ID
+        id <- store$sandbox$get_configurations()$ID
 
-        if (length(id) == 0)
-          id <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
+        if (length(id) == 0) {
+          id <- isolate(store$irace_results$allElites[[length(store$irace_results$allElites)]])
+        }
 
         values$data %>%
           filter(configuration %in% id)
       })
 
-      output$solutionCostConfig <- renderPlotly({
+      output$solution_cost_config <- renderPlotly({
         shiny::validate(
           need(store$sandbox, ""),
-          need(store$iraceResults, "")
+          need(store$irace_results, "")
         )
 
         legend <- list(
@@ -96,9 +98,9 @@ PerformanceConfigView <- R6::R6Class(
 
         plot_ly(data) %>%
           add_boxplot(
-            x = ~as.factor(configuration),
+            x = ~ as.factor(configuration),
             y = ~performance,
-            color = ~as.factor(configuration),
+            color = ~ as.factor(configuration),
             showlegend = TRUE,
             hoverinfo = "y",
             boxpoints = "all",
@@ -118,18 +120,18 @@ PerformanceConfigView <- R6::R6Class(
       observeEvent(session$userData$sidebar(), {
         sidebar <- session$userData$sidebar()
         if (sidebar == "visualization_by_config") {
-          js$resizePlotly(session$ns("solutionCostConfig"))
+          js$resizePlotly(session$ns("solution_cost_config"))
         }
       })
     },
 
-    configurationByPerformance = function(iraceResults) {
-      exp <- iraceResults$experiments
+    configurationByPerformance = function(irace_results) {
+      exp <- irace_results$experiments
       performance <- c(exp)
       configuration <- as.numeric(colnames(exp)[col(exp)])
 
       df <- data.frame(performance = performance, configuration = configuration)
-      df <- df[complete.cases(df),]
+      df <- df[complete.cases(df), ]
 
       return(df)
     }

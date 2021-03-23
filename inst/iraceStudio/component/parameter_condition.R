@@ -1,11 +1,11 @@
-ParameterCondition <- R6::R6Class(
+ParameterCondition <- R6::R6Class( # nolint
   classname = "ParameterCondition",
   inherit = Component,
   public = list(
     session = NULL,
 
-    ui = function(inputId) {
-      ns <- NS(inputId)
+    ui = function(input_id) {
+      ns <- NS(input_id)
 
       tagList(
         fluidRow(
@@ -18,7 +18,7 @@ ParameterCondition <- R6::R6Class(
               choices = c(),
               width = "100%",
               options = list(
-                  size = 8
+                size = 8
               )
             )
           ),
@@ -31,19 +31,19 @@ ParameterCondition <- R6::R6Class(
               choices = c(),
               width = "100%",
               options = list(
-                  size = 8
+                size = 8
               )
             )
           ),
           column(
             width = 5,
             class = "d-flex align-items-center",
-            uiOutput(outputId = ns("valueCondition"), style = "width: 100%;"),
-            iraceStudio::actionButton(
+            uiOutput(outputId = ns("value_condition"), style = "width: 100%;"),
+            bs4Dash::actionButton(
               inputId = ns("addCondition"),
               label = "Add",
               style = "margin-left: 15px; margin-top: 15px;",
-              class = "btn-primary"
+              status = "primary"
             )
           )
         ),
@@ -56,15 +56,15 @@ ParameterCondition <- R6::R6Class(
           column(
             width = 7,
             class = "d-flex align-items-center justify-content-end",
-            iraceStudio::actionButton(
+            bs4Dash::actionButton(
               inputId = ns("deleteCondition"),
               label = "Delete",
               icon = icon("trash"),
-              class = "btn-danger"
+              status = "danger"
             )
           )
         ),
-        DT::dataTableOutput(outputId = ns("expressionTable"), width = "100%"),
+        DT::dataTableOutput(outputId = ns("expression_table"), width = "100%"),
         br()
       )
     },
@@ -77,11 +77,11 @@ ParameterCondition <- R6::R6Class(
         req(input$paramNames)
 
         conditions <- if (!input$paramNames %in% names(parent$types)) {
-           c()
+          c()
         } else {
           type <- parent$types[[input$paramNames]]
           domain <- parent$domain[[input$paramNames]]
-          self$conditionsList(type)
+          self$conditions_list(type)
         }
 
         updatePickerInput(
@@ -91,9 +91,11 @@ ParameterCondition <- R6::R6Class(
         )
       })
 
-      observeEvent(c(input$paramNames,
-                     parent$types), {
-        output$valueCondition <- renderUI({
+      observeEvent(c(
+        input$paramNames,
+        parent$types
+      ), {
+        output$value_condition <- renderUI({
           shiny::validate(
             need(store$pg, "")
           )
@@ -137,7 +139,7 @@ ParameterCondition <- R6::R6Class(
         })
       })
 
-      output$expressionTable <- DT::renderDataTable({
+      output$expression_table <- DT::renderDataTable({
         datatable(
           data = parent$expressions,
           escape = FALSE,
@@ -168,7 +170,7 @@ ParameterCondition <- R6::R6Class(
 
         if (type == "o" || type == "c") {
           if (input$conditions == "in" || input$conditions == "not in") {
-            output$valueCondition <- renderUI(
+            output$value_condition <- renderUI(
               pickerInput(
                 inputId = ns("paramValue"),
                 label = "Parameter value",
@@ -182,7 +184,7 @@ ParameterCondition <- R6::R6Class(
               )
             )
           } else {
-            output$valueCondition <- renderUI(
+            output$value_condition <- renderUI(
               pickerInput(
                 inputId = ns("paramValue"),
                 label = "Parameter value",
@@ -201,18 +203,18 @@ ParameterCondition <- R6::R6Class(
         req(input$paramValue != "")
 
         expr <- if (input$conditions == "in") {
-          valuesC <- paste0(paste0('"', input$paramValue, '"'), collapse = ", ")
-          paste0(input$paramNames, " %in% ", "c(", valuesC, ")")
+          values_c <- paste0(paste0('"', input$paramValue, '"'), collapse = ", ")
+          paste0(input$paramNames, " %in% ", "c(", values_c, ")")
         } else if (input$conditions == "not in") {
-          valuesC <- paste0(paste0('"', input$paramValue, '"'), collapse = ", ")
-          paste0("!(", input$paramNames, " %in% ", "c(", valuesC, ")", ")")
+          values_c <- paste0(paste0('"', input$paramValue, '"'), collapse = ", ")
+          paste0("!(", input$paramNames, " %in% ", "c(", values_c, ")", ")")
         } else {
           paste(input$paramNames, input$conditions, input$paramValue)
         }
 
-        if (nrow(store$sandbox$getFilters()) > 0) {
+        if (nrow(store$sandbox$get_filters()) > 0) {
           data <- subset(
-            store$sandbox$getFilters(),
+            store$sandbox$get_filters(),
             condition == expr
           )
 
@@ -222,24 +224,25 @@ ParameterCondition <- R6::R6Class(
           }
         }
 
-        newRow <- data.frame(condition = expr)
+        new_row <- data.frame(condition = expr)
 
-        parent$expressions <- rbind(parent$expressions, newRow)
+        parent$expressions <- rbind(parent$expressions, new_row)
       })
 
       observeEvent(input$deleteCondition, {
-        row <- input$expressionTable_rows_selected
-        parent$expressions <- parent$expressions[-row, ,drop = FALSE]
+        row <- input$expression_table_rows_selected
+        parent$expressions <- parent$expressions[-row, , drop = FALSE]
       })
 
       observe({
         toggleState(
           id = "deleteCondition",
-          condition = nrow(parent$expressions) > 0 & !is.null(input$expressionTable_rows_selected))
+          condition = nrow(parent$expressions) > 0 & !is.null(input$expression_table_rows_selected)
+        )
       })
     },
 
-    conditionsList = function(type) {
+    conditions_list = function(type) {
       common <- c("==", "!=")
       if (type == "r" || type == "i" || type == "i,log" || type == "r,log") {
         return(c(
@@ -258,7 +261,7 @@ ParameterCondition <- R6::R6Class(
       }
     },
 
-    setupInputs = function(names) {
+    setup_inputs = function(names) {
       updatePickerInput(
         session = self$session,
         inputId = "paramNames",
@@ -266,7 +269,7 @@ ParameterCondition <- R6::R6Class(
       )
     },
 
-    clearInputs = function() {
+    clear_inputs = function() {
       updatePickerInput(
         session = self$session,
         inputId = "paramNames",

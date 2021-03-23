@@ -1,12 +1,12 @@
-SandboxView <- R6::R6Class(
+SandboxView <- R6::R6Class( # nolint
   classname = "SandboxView",
   inherit = View,
   public = list(
-    executionSelect = NULL,
+    execution_select = NULL,
 
     initialize = function(id) {
       super$initialize(id)
-      self$executionSelect <- ExecutionSelect$new()
+      self$execution_select <- ExecutionSelect$new()
     },
 
     ui = function() {
@@ -28,7 +28,7 @@ SandboxView <- R6::R6Class(
           column(
             width = 4,
             class = "d-flex align-items-center justify-content-end",
-            self$executionSelect$ui(inputId = ns("executions"))
+            self$execution_select$ui(input_id = ns("executions"))
           )
         ),
         fluidRow(
@@ -43,17 +43,17 @@ SandboxView <- R6::R6Class(
                 width = 12,
                 style = "padding-left: 0px !important;",
                 disabled(
-                  iraceStudio::actionButton(
+                  bs4Dash::actionButton(
                     inputId = ns("add"),
                     label = "Add",
                     icon = icon("plus")
                   ),
-                  iraceStudio::actionButton(
+                  bs4Dash::actionButton(
                     inputId = ns("edit"),
                     label = "Edit",
                     icon = icon("edit")
                   ),
-                  iraceStudio::actionButton(
+                  bs4Dash::actionButton(
                     inputId = ns("delete"),
                     label = "Delete",
                     icon = icon("minus")
@@ -68,12 +68,12 @@ SandboxView <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       ns <- session$ns
 
       data <- reactiveValues(sandbox = data.frame())
 
-      self$executionSelect$call(id = "executions", store = store)
+      self$execution_select$call(id = "executions", store = store, events = events)
 
       output$boxes <- DT::renderDataTable(
         datatable(
@@ -94,17 +94,21 @@ SandboxView <- R6::R6Class(
         )
       )
 
-      observeEvent(c(
-        global_emitter$value(global_events$update_scenarios),
-        global_emitter$value(global_events$update_executions),
-        global_emitter$value(global_events$update_sandboxes)
-      ), {
-        if (!is.null(store$currentExecution)) {
-          data$sandbox <- self$sandbox_as_data_frame(store$currentExecution)
-        } else {
-          data$sandbox <- data.frame()
-        }
-      }, ignoreInit = TRUE)
+      observeEvent(
+        c(
+          events$update_scenarios,
+          events$update_executions,
+          events$update_sandboxes
+        ),
+        {
+          if (!is.null(store$current_execution)) {
+            data$sandbox <- self$sandbox_as_data_frame(store$current_execution)
+          } else {
+            data$sandbox <- data.frame()
+          }
+        },
+        ignoreInit = TRUE
+      )
 
       observeEvent(input$add, {
         showModal(
@@ -114,7 +118,7 @@ SandboxView <- R6::R6Class(
             textInput(inputId = ns("sandbox_name"), label = "Name"),
             textAreaInput(inputId = ns("sandbox_description"), label = "Description"),
             footer = tagList(
-              iraceStudio::actionButton(inputId = ns("add_sandbox"), label = "Add", class = "btn-primary"),
+              bs4Dash::actionButton(inputId = ns("add_sandbox"), label = "Add", status = "primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -123,14 +127,15 @@ SandboxView <- R6::R6Class(
 
       observeEvent(input$add_sandbox, {
         if (is.null(input$sandbox_name) || input$sandbox_name == "") {
-          alert.error("Scenario name is empty.")
+          alert_error("Scenario name is empty.")
           return(invisible())
         }
 
-        if (!is.null(store$currentExecution)) {
+        if (!is.null(store$current_execution)) {
           sandbox <- Sandbox$new(name = input$sandbox_name, description = input$sandbox_description)
-          store$currentExecution$add_sandbox(sandbox)
-          data$sandbox <- self$sandbox_as_data_frame(store$currentExecution)
+          store$current_execution$add_sandbox(sandbox)
+          update_reactive_counter(events$update_sandboxes)
+          data$sandbox <- self$sandbox_as_data_frame(store$current_execution)
         }
 
         removeModal()
@@ -147,7 +152,7 @@ SandboxView <- R6::R6Class(
             textInput(inputId = ns("sandbox_name"), label = "Name", value = sandbox$name),
             textAreaInput(inputId = ns("sandbox_description"), label = "Description", value = sandbox$description),
             footer = tagList(
-              iraceStudio::actionButton(inputId = ns("update_sandbox"), label = "Save", class = "btn-primary"),
+              bs4Dash::actionButton(inputId = ns("update_sandbox"), label = "Save", status = "primary"),
               modalButton(label = "Cancel")
             )
           )
@@ -155,15 +160,15 @@ SandboxView <- R6::R6Class(
       })
 
       observeEvent(input$update_sandbox, {
-        if (!is.null(store$currentExecution)) {
+        if (!is.null(store$current_execution)) {
           sandbox <- data$sandbox[input$boxes_rows_selected, ]
-          sandbox <- store$currentExecution$get_sandbox(sandbox$id)
+          sandbox <- store$current_execution$get_sandbox(sandbox$id)
 
-          sandbox$setName(input$sandbox_name)
-          sandbox$setDescription(input$sandbox_description)
-          global_emitter$emit(global_events$update_sandboxes)
+          sandbox$set_name(input$sandbox_name)
+          sandbox$set_description(input$sandbox_description)
+          update_reactive_counter(events$update_sandboxes)
 
-          data$sandbox <- self$sandbox_as_data_frame(store$currentExecution)
+          data$sandbox <- self$sandbox_as_data_frame(store$current_execution)
         }
 
         removeModal()
@@ -183,7 +188,7 @@ SandboxView <- R6::R6Class(
               )
             ),
             footer = tagList(
-              iraceStudio::actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
+              bs4Dash::actionButton(inputId = ns("confirm_delete"), label = "Yes", status = "danger"),
               modalButton(label = "Cancel")
             ),
             easyClose = TRUE
@@ -192,34 +197,42 @@ SandboxView <- R6::R6Class(
       })
 
       observeEvent(input$confirm_delete, {
-        if (!is.null(store$currentExecution)) {
+        if (!is.null(store$current_execution)) {
           sandbox <- data$sandbox[input$boxes_rows_selected, ]
-          store$currentExecution$remove_sandbox(sandbox$id)
-          data$sandbox <- self$sandbox_as_data_frame(store$currentExecution)
+          store$current_execution$remove_sandbox(sandbox$id)
+          update_reactive_counter(events$update_sandboxes)
+          data$sandbox <- self$sandbox_as_data_frame(store$current_execution)
         }
 
         removeModal()
       })
 
-      observeEvent(store$currentExecution,  {
-        if (is.null(store$currentExecution)) {
-          disable(id = "add")
-          data$sandbox <- data.frame()
-        } else {
-          enable(id = "add")
-          data$sandbox <- self$sandbox_as_data_frame(store$currentExecution)
-        }
-      }, ignoreNULL = FALSE, ignoreInit = TRUE)
+      observeEvent(store$current_execution,
+        {
+          if (is.null(store$current_execution)) {
+            disable(id = "add")
+            data$sandbox <- data.frame()
+          } else {
+            enable(id = "add")
+            data$sandbox <- self$sandbox_as_data_frame(store$current_execution)
+          }
+        },
+        ignoreNULL = FALSE,
+        ignoreInit = TRUE
+      )
 
-      observeEvent(input$boxes_rows_selected,{
-        if (is.null(input$boxes_rows_selected)) {
-          disable(id = "edit")
-          disable(id = "delete")
-        } else {
-          enable(id = "edit")
-          enable(id = "delete")
-        }
-      }, ignoreNULL = FALSE)
+      observeEvent(input$boxes_rows_selected,
+        {
+          if (is.null(input$boxes_rows_selected)) {
+            disable(id = "edit")
+            disable(id = "delete")
+          } else {
+            enable(id = "edit")
+            enable(id = "delete")
+          }
+        },
+        ignoreNULL = FALSE
+      )
     },
 
     sandbox_as_data_frame = function(execution) {
@@ -229,9 +242,9 @@ SandboxView <- R6::R6Class(
       for (name in names(sandboxes)) {
         sandbox <- sandboxes[[name]]
         data_row <- data.frame(
-          id = sandbox$getId(),
-          name = sandbox$getName(),
-          description = sandbox$getDescription(),
+          id = sandbox$get_id(),
+          name = sandbox$get_name(),
+          description = sandbox$get_description(),
           stringsAsFactors = FALSE
         )
 

@@ -1,4 +1,4 @@
-TrainInstancesView <- R6::R6Class(
+TrainInstancesView <- R6::R6Class( # nolint
   classname = "TrainInstancesView",
   inherit = View,
   public = list(
@@ -6,10 +6,11 @@ TrainInstancesView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header",
-            h2("Train Instances"),
-            p("Add training instances to perform the configuration. You can import instances from a folder, file, or add them directly in the text box.")
-            ),
+        div(
+          class = "sub-header",
+          h2("Train Instances"),
+          p("Add training instances to perform the configuration. You can import instances from a folder, file, or add them directly in the text box.") # nolint
+        ),
         fluidRow(
           class = "sub-header",
           column(
@@ -21,8 +22,8 @@ TrainInstancesView <- R6::R6Class(
               title = "Select a directory",
               buttonType = "outline-primary"
             ),
-            importButton(
-              inputId = ns("load"),
+            import_button(
+              input_id = ns("load"),
               label = "Import File",
               style = "margin-left: 5px;"
             ),
@@ -33,12 +34,12 @@ TrainInstancesView <- R6::R6Class(
               buttonType = "outline-primary",
               style = "margin-left: 5px;"
             ),
-            exportButton(
-              inputId = ns("export"),
+            export_button(
+              input_id = ns("export"),
               filename = "instances.txt",
               style = "margin-left: 5px;"
             ),
-            clear_button(inputId = ns("clear"), style = "margin-left: 5px;")
+            clear_button(input_id = ns("clear"), style = "margin-left: 5px;")
           )
         ),
         fluidRow(
@@ -56,14 +57,14 @@ TrainInstancesView <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       clear <- callModule(
         module = clear_button_sv,
         id = "clear",
         message = "This action will remove all instances. Are you sure?."
       )
 
-      volumes <- c("Home"=path.expand('~'), getVolumes()())
+      volumes <- c("Home" = path.expand("~"), getVolumes()())
 
       shinyDirChoose(input, "dir", roots = volumes)
       shinyDirChoose(input, "absolute", roots = volumes)
@@ -121,15 +122,18 @@ TrainInstancesView <- R6::R6Class(
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- tryCatch({
-            parseFilePaths(roots = volumes, input$load)
-          }, error = function(err) {
-            log_error("{err}")
-            return(NULL)
-          })
+          file <- tryCatch(
+            {
+              parseFilePaths(roots = volumes, input$load)
+            },
+            error = function(err) {
+              log_error("{err}")
+              return(NULL)
+            }
+          )
 
           if (is.null(file)) {
-            alert.error("Can't load train instances file, check if the file format is correct.")
+            alert_error("Can't load train instances file, check if the file format is correct.")
             return(invisible())
           }
 
@@ -144,17 +148,22 @@ TrainInstancesView <- R6::R6Class(
         }
       })
 
-      observeEvent(c(global_emitter$value(global_events$current_scenario), store$pg), {
-        updateTextAreaInput(
-          session = session,
-          inputId = "source_instances_file",
-          value = store$pg$get_train_instances()
-        )
-      })
+      observeEvent(c(events$change_scenario, store$pg),
+        {
+          updateTextAreaInput(
+            session = session,
+            inputId = "source_instances_file",
+            value = store$pg$get_train_instances()
+          )
+        },
+        ignoreNULL = TRUE,
+        ignoreInit = TRUE
+      )
 
       observeEvent(input$source_instances_file,
-                   store$pg$set_train_instances(input$source_instances_file),
-                   ignoreInit = TRUE)
+        store$pg$set_train_instances(input$source_instances_file),
+        ignoreInit = TRUE
+      )
 
       observeEvent(clear$action, {
         log_debug("Removing all data from instances")

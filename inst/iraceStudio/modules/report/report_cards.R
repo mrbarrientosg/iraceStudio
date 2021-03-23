@@ -1,9 +1,9 @@
-SummaryCard <- R6::R6Class(
+SummaryCard <- R6::R6Class( # nolint
   classname = "SummaryCard",
   inherit = Component,
   public = list(
-    ui = function(inputId) {
-      ns <- NS(inputId)
+    ui = function(input_id) {
+      ns <- NS(input_id)
 
       box(
         title = strong("Summary"),
@@ -14,11 +14,11 @@ SummaryCard <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       output$summary_content <- renderUI({
         shiny::validate(
           need(
-            !is.null(store$iraceResults),
+            !is.null(store$irace_results),
             "Execute irace first to display information."
           )
         )
@@ -27,14 +27,14 @@ SummaryCard <- R6::R6Class(
           style = "list-style-type:none;",
           tags$li(
             HTML(
-              paste(strong("IRACE version:"), "&nbsp;", store$iraceResults$irace.version)
+              paste(strong("IRACE version:"), "&nbsp;", store$irace_results$irace.version)
             )
           ),
           tags$li(
             HTML(
               paste(
                 strong("Number of candidate configurations:"), "&nbsp;",
-                nrow(store$iraceResults$allConfigurations)
+                nrow(store$irace_results$allConfigurations)
               )
             )
           ),
@@ -42,7 +42,7 @@ SummaryCard <- R6::R6Class(
             HTML(
               paste(
                 strong("Number of target executions:"), "&nbsp;",
-                store$iraceResults$state$experimentsUsedSoFar
+                store$irace_results$state$experimentsUsedSoFar
               )
             )
           ),
@@ -50,7 +50,7 @@ SummaryCard <- R6::R6Class(
             HTML(
               paste(
                 strong("Elitist new instances:"), "&nbsp;",
-                store$iraceResults$scenario$elitistNewInstances
+                store$irace_results$scenario$elitistNewInstances
               )
             )
           ),
@@ -58,7 +58,7 @@ SummaryCard <- R6::R6Class(
             HTML(
               paste(
                 strong("Elitist limit:"), "&nbsp;",
-                store$iraceResults$scenario$elitistLimit
+                store$irace_results$scenario$elitistLimit
               )
             )
           ),
@@ -66,7 +66,7 @@ SummaryCard <- R6::R6Class(
             HTML(
               paste(
                 strong("nbIterations:"), "&nbsp;",
-                store$iraceResults$state$nbIterations
+                store$irace_results$state$nbIterations
               )
             )
           ),
@@ -75,7 +75,7 @@ SummaryCard <- R6::R6Class(
             HTML(
               paste(
                 strong("minNbSurvival:"), "&nbsp;",
-                store$iraceResults$state$minSurvival
+                store$irace_results$state$minSurvival
               )
             )
           ),
@@ -83,7 +83,7 @@ SummaryCard <- R6::R6Class(
             HTML(
               paste(
                 strong("nbParameters:"), "&nbsp;",
-                store$iraceResults$parameters$nbParameters
+                store$irace_results$parameters$nbParameters
               )
             )
           ),
@@ -91,7 +91,7 @@ SummaryCard <- R6::R6Class(
             HTML(
               paste(
                 strong("seed:"), "&nbsp;",
-                store$iraceResults$scenario$seed
+                store$irace_results$scenario$seed
               )
             )
           ),
@@ -99,7 +99,7 @@ SummaryCard <- R6::R6Class(
             HTML(
               paste(
                 strong("confidence level:"), "&nbsp;",
-                store$iraceResults$scenario$confidence
+                store$irace_results$scenario$confidence
               )
             )
           ),
@@ -107,16 +107,16 @@ SummaryCard <- R6::R6Class(
             HTML(
               paste(
                 strong("budget:"), "&nbsp;",
-                store$iraceResults$scenario$budgetEstimation
+                store$irace_results$scenario$budgetEstimation
               )
             )
           ),
-          tags$li(HTML(paste(strong("mu:"), "&nbsp;", store$iraceResults$scenario$mu))),
+          tags$li(HTML(paste(strong("mu:"), "&nbsp;", store$irace_results$scenario$mu))),
           tags$li(
             HTML(
               paste(
                 strong("deterministic:"), "&nbsp;",
-                store$iraceResults$scenario$deterministic
+                store$irace_results$scenario$deterministic
               )
             )
           )
@@ -126,18 +126,18 @@ SummaryCard <- R6::R6Class(
   )
 )
 
-BestConfigurationCard <- R6::R6Class(
+BestConfigurationCard <- R6::R6Class( # nolint
   classname = "BestConfigurationCard",
   inherit = Component,
   public = list(
-    copyInput = NULL,
+    copy_input = NULL,
 
     initialize = function() {
-      self$copyInput <- CopyInput$new()
+      self$copy_input <- CopyInput$new()
     },
 
-    ui = function(inputId) {
-      ns <- NS(inputId)
+    ui = function(input_id) {
+      ns <- NS(input_id)
 
       box(
         title = strong("Best Configuration"),
@@ -154,69 +154,69 @@ BestConfigurationCard <- R6::R6Class(
           ),
           column(
             width = 6,
-            self$copyInput$ui(inputId = ns("copy"), label = "Copy Box Plot"),
+            self$copy_input$ui(input_id = ns("copy"), label = "Copy Box Plot"),
             plotOutput(outputId = ns("box_plot"))
           )
         )
       )
     },
 
-    server = function(input, output, session, store) {
-      copy <- self$copyInput$call(id = "copy", store = store)
+    server = function(input, output, session, store, events) {
+      copy <- self$copy_input$call(id = "copy", store = store, events = events)
 
       observeEvent(copy$action, {
-        req(store$iraceResults)
+        req(store$irace_results)
         req(copy$section)
-        req(store$currentExecution)
-        report <- store$currentExecution$get_report()
-        store$copy$id <- report$get_id(copy$section)
-        store$copy$plot <- "bestConfigBoxPlot"
+        req(store$current_execution)
+        report <- store$current_execution$get_report()
+        events$copy$id <- report$get_id(copy$section)
+        events$copy$plot <- "best_config_boxplot"
       })
 
       output$best_so_far <- renderUI({
         shiny::validate(
           need(
-            !is.null(store$iraceResults),
+            !is.null(store$irace_results),
             "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
-            nrow(store$iraceResults$allConfigurations) != 0,
+            nrow(store$irace_results$allConfigurations) != 0,
             "The number of candidate configurations is 0."
           )
         )
 
-        last <- length(store$iraceResults$iterationElites)
-        id <- store$iraceResults$iterationElites[last]
-        bestConfiguration <- getConfigurationById(
-          iraceResults = store$iraceResults,
+        last <- length(store$irace_results$iterationElites)
+        id <- store$irace_results$iterationElites[last]
+        best_configuration <- getConfigurationById(
+          iraceResults = store$irace_results,
           ids = id
         )
 
-        meanValue <- colMeans(
-          store$iraceResults$experiments[, store$iraceResults$iterationElites[last], drop = FALSE],
+        mean_value <- colMeans(
+          store$irace_results$experiments[, store$irace_results$iterationElites[last], drop = FALSE],
           na.rm = TRUE
         )[[1]]
 
-        nbIterationsElites <- length(store$iraceResults$iterationElites)
-        totalInstances <- sum(!is.na(store$iraceResults$experiments[, store$iraceResults$iterationElites[nbIterationsElites]]))
+        nb_iterations_elites <- length(store$irace_results$iterationElites)
+        total_instances <- sum(!is.na(store$irace_results$experiments[, store$irace_results$iterationElites[nb_iterations_elites]]))
 
         tagList(
           h6(strong("Best so far:")),
           tags$ul(
             style = "list-style-type:none;",
-            tags$li(HTML(paste(strong("Configuration:"), "&nbsp;", bestConfiguration[[1]]))),
-            tags$li(HTML(paste(strong("Mean value:"), "&nbsp;", meanValue))),
-            tags$li(HTML(paste(strong("Parent:"), "&nbsp;", bestConfiguration[[length(bestConfiguration)]]))),
-            tags$li(HTML(paste(strong("Total instances tested:"), "&nbsp;", totalInstances)))
+            tags$li(HTML(paste(strong("Configuration:"), "&nbsp;", best_configuration[[1]]))),
+            tags$li(HTML(paste(strong("Mean value:"), "&nbsp;", mean_value))),
+            tags$li(HTML(paste(strong("Parent:"), "&nbsp;", best_configuration[[length(best_configuration)]]))),
+            tags$li(HTML(paste(strong("Total instances tested:"), "&nbsp;", total_instances)))
           ),
           br(),
           h6(strong("Description of the 'Best so far' configuration:")),
           tags$ul(
             style = "list-style-type:none;",
-            self$list_configurations(bestConfiguration)
+            self$list_configurations(best_configuration)
           )
         )
       })
@@ -224,21 +224,21 @@ BestConfigurationCard <- R6::R6Class(
       output$box_plot <- renderPlot({
         shiny::validate(
           need(
-            !is.null(store$iraceResults),
+            !is.null(store$irace_results),
             "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
-            nrow(store$iraceResults$allConfigurations) != 0,
+            nrow(store$irace_results$allConfigurations) != 0,
             "Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
           )
         )
 
-        last <- length(store$iraceResults$iterationElites)
-        id <- paste0(store$iraceResults$iterationElites[last])
-        results <- subset(store$iraceResults$experiments, select = id)
+        last <- length(store$irace_results$iterationElites)
+        id <- paste0(store$irace_results$iterationElites[last])
+        results <- subset(store$irace_results$experiments, select = id)
 
         plot <- configurationsBoxplot(
           title = "Best Configuration Box Plot",
@@ -246,18 +246,18 @@ BestConfigurationCard <- R6::R6Class(
           ylab = "Solution cost"
         )
 
-        pkg$reportStore$bestConfigBoxPlot <- save_plot_as_base64()
+        pkg$report_store$best_config_boxplot <- save_plot_as_base64()
 
         plot
-      },)
+      }, )
     },
 
     list_configurations = function(configurations) {
-      formatedData <- NULL
+      formated_data <- NULL
 
       for (i in 2:(length(configurations) - 1)) {
-        formatedData <- c(
-          formatedData,
+        formated_data <- c(
+          formated_data,
           paste(
             "<li>", strong(paste0(colnames(configurations[i]), ":")), "&nbsp;",
             configurations[i], "</li>"
@@ -265,23 +265,23 @@ BestConfigurationCard <- R6::R6Class(
         )
       }
 
-      return(HTML(paste(formatedData, collapse = "\n")))
+      return(HTML(paste(formated_data, collapse = "\n")))
     }
   )
 )
 
-CandidatesCard <- R6::R6Class(
+CandidatesCard <- R6::R6Class( # nolint
   classname = "CandidatesCard",
   inherit = Component,
   public = list(
-    copyInput = NULL,
+    copy_input = NULL,
 
     initialize = function() {
-      self$copyInput <- CopyInput$new()
+      self$copy_input <- CopyInput$new()
     },
 
-    ui = function(inputId) {
-      ns <- NS(inputId)
+    ui = function(input_id) {
+      ns <- NS(input_id)
 
       box(
         title = strong("Candidates"),
@@ -314,15 +314,15 @@ CandidatesCard <- R6::R6Class(
             ),
             inlineCSS(".multi-wrapper .non-selected-wrapper,
             .multi-wrapper .selected-wrapper { height: 350px; }"),
-            iraceStudio::actionButton(inputId = ns("update"), label = "Update", class = "btn-primary")
+            bs4Dash::actionButton(inputId = ns("update"), label = "Update", status = "primary")
           )
         ),
         fluidRow(
           style = "padding: 20px;",
           column(
             width = 6,
-            self$copyInput$ui(
-              inputId = ns("copy_parallel"),
+            self$copy_input$ui(
+              input_id = ns("copy_parallel"),
               label = "Copy Parallel Coordinates"
             ),
             uiOutput(
@@ -332,8 +332,8 @@ CandidatesCard <- R6::R6Class(
           ),
           column(
             width = 6,
-            self$copyInput$ui(
-              inputId = ns("copy_freq"),
+            self$copy_input$ui(
+              input_id = ns("copy_freq"),
               label = "Copy Frequency Plot"
             ),
             uiOutput(
@@ -345,71 +345,73 @@ CandidatesCard <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
-      copy_parallel <- self$copyInput$call(id = "copy_parallel", store = store)
-      copy_freq <- self$copyInput$call(id = "copy_freq", store = store)
+    server = function(input, output, session, store, events) {
+      copy_parallel <- self$copy_input$call(id = "copy_parallel", store = store, events = events)
+      copy_freq <- self$copy_input$call(id = "copy_freq", store = store, events = events)
 
       observeEvent(copy_parallel$action, {
-        req(store$iraceResults)
+        req(store$irace_results)
         req(copy_parallel$section)
-        req(store$currentExecution)
-        report <- store$currentExecution$get_report()
-        store$copy$id <- report$get_id(copy_parallel$section)
-        store$copy$plot <- "parallelCoordinates"
+        req(store$current_execution)
+        report <- store$current_execution$get_report()
+        events$copy$id <- report$get_id(copy_parallel$section)
+        events$copy$plot <- "parallel_coordinates"
       })
 
       observeEvent(copy_freq$action, {
-        req(store$iraceResults)
+        req(store$irace_results)
         req(copy_freq$section)
-        req(store$currentExecution)
-        report <- store$currentExecution$get_report()
-        store$copy$id <- report$get_id(copy_freq$section)
-        store$copy$plot <- "parameterFreq"
+        req(store$current_execution)
+        report <- store$current_execution$get_report()
+        events$copy$id <- report$get_id(copy_freq$section)
+        events$copy$plot <- "parameter_freq"
       })
 
-      observeEvent(store$iraceResults, {
-        if (is.null(store$iraceResults)) {
-          disable(id = "update")
-
-          updateSliderInput(
-            session = session,
-            inputId = "iterations",
-            min = 0,
-            max = 0,
-            value = 0,
-            step = 1
-          )
-
-          updateMultiInput(
-            session = session,
-            inputId = "parameters",
-            choices = ""
-          )
-
-        } else {
-          updateSliderInput(
-            session = session,
-            inputId = "iterations",
-            min = 1,
-            max = store$iraceResults$state$nbIterations,
-            value = c(store$iraceResults$state$nbIterations - 1, store$iraceResults$state$nbIterations),
-            step = 1
-          )
-
-          updateMultiInput(
-            session = session,
-            inputId = "parameters",
-            choices = store$iraceResults$parameters$names,
-            selected = store$iraceResults$parameters$names
-          )
-
-          delay(1000, {
-            enable(id = "update")
-            click(id = "update")
+      observeEvent(store$irace_results,
+        {
+          if (is.null(store$irace_results)) {
             disable(id = "update")
-          })
-        }
-      }, ignoreNULL = TRUE)
+
+            updateSliderInput(
+              session = session,
+              inputId = "iterations",
+              min = 0,
+              max = 0,
+              value = 0,
+              step = 1
+            )
+
+            updateMultiInput(
+              session = session,
+              inputId = "parameters",
+              choices = ""
+            )
+          } else {
+            updateSliderInput(
+              session = session,
+              inputId = "iterations",
+              min = 1,
+              max = store$irace_results$state$nbIterations,
+              value = c(store$irace_results$state$nbIterations - 1, store$irace_results$state$nbIterations),
+              step = 1
+            )
+
+            updateMultiInput(
+              session = session,
+              inputId = "parameters",
+              choices = store$irace_results$parameters$names,
+              selected = store$irace_results$parameters$names
+            )
+
+            delay(1000, {
+              enable(id = "update")
+              click(id = "update")
+              disable(id = "update")
+            })
+          }
+        },
+        ignoreNULL = FALSE
+      )
 
       nb_plots_freq <- reactiveVal(value = 0)
       nb_plots_parall <- reactiveVal(value = 0)
@@ -426,8 +428,8 @@ CandidatesCard <- R6::R6Class(
 
         disable(id = "update")
 
-        path <- file.path(store$gui$optionsPath, ".Fimages")
-        createHiddenDirectory(path)
+        path <- file.path(store$gui$options_path, ".Fimages")
+        create_hidden_directory(path)
 
         nb_plots_freq(0)
 
@@ -440,7 +442,7 @@ CandidatesCard <- R6::R6Class(
         progress$set(0.1)
 
         configurations <- getConfigurationByIteration(
-          iraceResults = store$iraceResults,
+          iraceResults = store$irace_results,
           iterations = input$iterations[1]:input$iterations[2]
         )
 
@@ -450,9 +452,9 @@ CandidatesCard <- R6::R6Class(
         future({
           max <- 12
           limit <- 1
-          numberOfParameters <- ceiling(length(parameters) / max)
+          nb_parameters <- ceiling(length(parameters) / max)
 
-          for (i in seq_len(numberOfParameters)) {
+          for (i in seq_len(nb_parameters)) {
             k <- 1
             params <- NULL
 
@@ -465,12 +467,12 @@ CandidatesCard <- R6::R6Class(
 
             progress$inc(0.05, detail = "Making Plots...")
 
-            fixFormat <- isolate(store$iraceResults$parameters)
-            fixFormat$names <- params
+            fix_format <- isolate(store$irace_results$parameters)
+            fix_format$names <- params
 
             image <- paste0(path, "/Rplot%03d.png")
             png(filename = sprintf(image, i), width = 550, height = 550, res = 80)
-            parameterFrequency(configurations = configurations, parameters = fixFormat)
+            parameterFrequency(configurations = configurations, parameters = fix_format)
             dev.off()
 
             limit <- (max * i) + 1
@@ -484,7 +486,7 @@ CandidatesCard <- R6::R6Class(
         }) %...>% {
           progress$set(1.0, detail = "Finishing...")
           files <- .
-          pkg$reportStore$parameterFreq <- files
+          pkg$report_store$parameter_freq <- files
           unlink(path, recursive = TRUE, force = TRUE)
           progress$close()
         }
@@ -493,27 +495,27 @@ CandidatesCard <- R6::R6Class(
       output$freq_plot <- renderUI({
         shiny::validate(
           need(
-            !is.null(store$iraceResults),
+            !is.null(store$irace_results),
             "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
-            nrow(store$iraceResults$allConfigurations) != 0,
+            nrow(store$irace_results$allConfigurations) != 0,
             "The number of candidate configurations is 0."
           )
         )
 
         freq_plot_render() %...>% {
-          nb_plots_freq(length(pkg$reportStore$parameterFreq))
+          nb_plots_freq(length(pkg$report_store$parameter_freq))
 
-          imageList <- lapply(seq_len(nb_plots_freq()), function(i) {
-            imageName <- session$ns(paste0("image", i))
-            htmlOutput(outputId = imageName, style = "display: flex; justify-content: center;")
+          image_list <- lapply(seq_len(nb_plots_freq()), function(i) {
+            image_name <- session$ns(paste0("image", i))
+            htmlOutput(outputId = image_name, style = "display: flex; justify-content: center;")
           })
 
-          do.call(tagList, imageList)
+          do.call(tagList, image_list)
         }
       })
 
@@ -525,10 +527,10 @@ CandidatesCard <- R6::R6Class(
         for (i in seq_len(nb_plots_freq())) {
           local({
             my_i <- i
-            data <- pkg$reportStore$parameterFreq[my_i]
-            imageName <- paste0("image", my_i)
+            data <- pkg$report_store$parameter_freq[my_i]
+            image_name <- paste0("image", my_i)
 
-            output[[imageName]] <- renderUI({
+            output[[image_name]] <- renderUI({
               tags$img(src = data, height = "auto")
             })
           })
@@ -540,7 +542,7 @@ CandidatesCard <- R6::R6Class(
       ### Parallel Coordinates
       parallel_cord_render <- eventReactive(input$update, {
         conf <- getConfigurationByIteration(
-          iraceResults = store$iraceResults,
+          iraceResults = store$irace_results,
           iterations = input$iterations[1]:input$iterations[2]
         )
 
@@ -554,7 +556,7 @@ CandidatesCard <- R6::R6Class(
             "Cannot plot because IRACE did not finish. The amount of rows is 0."
           ),
           need(
-            nrow(store$iraceResults$allConfigurations) != 0,
+            nrow(store$irace_results$allConfigurations) != 0,
             "Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
           )
         )
@@ -567,8 +569,8 @@ CandidatesCard <- R6::R6Class(
 
         disable(id = "update")
 
-        path <- file.path(store$gui$optionsPath, ".Pimages")
-        createHiddenDirectory(path)
+        path <- file.path(store$gui$options_path, ".Pimages")
+        create_hidden_directory(path)
 
         nb_plots_parall(0)
         parameters <- input$parameters
@@ -576,9 +578,9 @@ CandidatesCard <- R6::R6Class(
         future({
           max <- 12
           limit <- 1
-          numberOfParameters <- ceiling(length(parameters) / max)
+          nb_parameters <- ceiling(length(parameters) / max)
 
-          for (i in seq_len(numberOfParameters)) {
+          for (i in seq_len(nb_parameters)) {
             k <- 1
             params <- c()
 
@@ -601,7 +603,7 @@ CandidatesCard <- R6::R6Class(
 
             parallelCoordinatesPlot(
               configurations = conf,
-              parameters = isolate(store$iraceResults$parameters),
+              parameters = isolate(store$irace_results$parameters),
               param_names = params,
               hierarchy = FALSE
             )
@@ -618,7 +620,7 @@ CandidatesCard <- R6::R6Class(
         }) %...>% {
           progress$inc(1.0, detail = "Finishing...")
           files <- .
-          pkg$reportStore$parallelCoordinates <- files
+          pkg$report_store$parallel_coordinates <- files
           unlink(path, recursive = TRUE, force = TRUE)
           progress$close()
         }
@@ -627,14 +629,14 @@ CandidatesCard <- R6::R6Class(
       output$parallel_plot <- renderUI({
         shiny::validate(
           need(
-            !is.null(store$iraceResults),
+            !is.null(store$irace_results),
             "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
-            nrow(store$iraceResults$allConfigurations) != 0,
+            nrow(store$irace_results$allConfigurations) != 0,
             "The number of candidate configurations is 0."
           )
         )
@@ -645,14 +647,14 @@ CandidatesCard <- R6::R6Class(
         }
 
         parallel_cord_render() %...>% {
-          nb_plots_parall(length(pkg$reportStore$parallelCoordinates))
+          nb_plots_parall(length(pkg$report_store$parallel_coordinates))
 
-          imageList <- lapply(seq_len(nb_plots_parall()), function(i) {
-            imageName <- session$ns(paste0("image-", i))
-            htmlOutput(outputId = imageName, style = "display: flex; justify-content: center;")
+          image_list <- lapply(seq_len(nb_plots_parall()), function(i) {
+            image_name <- session$ns(paste0("image-", i))
+            htmlOutput(outputId = image_name, style = "display: flex; justify-content: center;")
           })
 
-          do.call(tagList, imageList)
+          do.call(tagList, image_list)
         }
       })
 
@@ -664,10 +666,10 @@ CandidatesCard <- R6::R6Class(
         for (i in seq_len(nb_plots_parall())) {
           local({
             my_i <- i
-            data <- pkg$reportStore$parallelCoordinates[my_i]
-            imageName <- paste0("image-", my_i)
+            data <- pkg$report_store$parallel_coordinates[my_i]
+            image_name <- paste0("image-", my_i)
 
-            output[[imageName]] <- renderUI({
+            output[[image_name]] <- renderUI({
               tags$img(src = data, height = "auto")
             })
           })
@@ -679,18 +681,18 @@ CandidatesCard <- R6::R6Class(
   )
 )
 
-PerformanceCard <- R6::R6Class(
+PerformanceCard <- R6::R6Class( # nolint
   classname = "PerformanceCard",
   inherit = Component,
   public = list(
-    copyInput = NULL,
+    copy_input = NULL,
 
     initialize = function() {
-      self$copyInput <- CopyInput$new()
+      self$copy_input <- CopyInput$new()
     },
 
-    ui = function(inputId) {
-      ns <- NS(inputId)
+    ui = function(input_id) {
+      ns <- NS(input_id)
 
       box(
         title = strong("Performance"),
@@ -700,15 +702,15 @@ PerformanceCard <- R6::R6Class(
         fluidRow(
           column(
             width = 6,
-            self$copyInput$ui(
-              inputId = ns("copy_converge"),
+            self$copy_input$ui(
+              input_id = ns("copy_converge"),
               label = "Copy Convergence Plot"
             ),
             plotOutput(outputId = ns("converge_plot"), height = 650)
           ),
           column(
             width = 6,
-            self$copyInput$ui(inputId = ns("copy_box"), label = "Copy Box Plot"),
+            self$copy_input$ui(input_id = ns("copy_box"), label = "Copy Box Plot"),
             pickerInput(
               inputId = ns("iterations"),
               label = "Iterations",
@@ -724,98 +726,101 @@ PerformanceCard <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
-      copy_converge <- self$copyInput$call(id = "copy_converge", store = store)
-      copy_box <- self$copyInput$call(id = "copy_box", store = store)
+    server = function(input, output, session, store, events) {
+      copy_converge <- self$copy_input$call(id = "copy_converge", store = store, events = events)
+      copy_box <- self$copy_input$call(id = "copy_box", store = store, events = events)
 
       observeEvent(copy_converge$action, {
-        req(store$iraceResults)
+        req(store$irace_results)
         req(copy_converge$section)
-        req(store$currentExecution)
-        report <- store$currentExecution$get_report()
-        store$copy$id <- report$get_id(copy_converge$section)
-        store$copy$plot <- "convergencePlot"
+        req(store$current_execution)
+        report <- store$current_execution$get_report()
+        events$copy$id <- report$get_id(copy_converge$section)
+        events$copy$plot <- "convergence_plot"
       })
 
       observeEvent(copy_box$action, {
-        req(store$iraceResults)
+        req(store$irace_results)
         req(copy_box$section)
-        req(store$currentExecution)
-        report <- store$currentExecution$get_report()
-        store$copy$id <- report$get_id(copy_box$section)
-        store$copy$plot <- "performanceBoxPlot"
+        req(store$current_execution)
+        report <- store$current_execution$get_report()
+        events$copy$id <- report$get_id(copy_box$section)
+        events$copy$plot <- "performance_boxplot"
       })
 
-      observeEvent(store$iraceResults, {
-        if (is.null(store$iraceResults)) {
-          updatePickerInput(
-            session = session,
-            inputId = "iterations",
-            choices = ""
-          )
-        } else {
-          updatePickerInput(
-            session = session,
-            inputId = "iterations",
-            choices = 1:store$iraceResults$state$nbIterations
-          )
-        }
-      }, ignoreNULL = FALSE)
+      observeEvent(store$irace_results,
+        {
+          if (is.null(store$irace_results)) {
+            updatePickerInput(
+              session = session,
+              inputId = "iterations",
+              choices = ""
+            )
+          } else {
+            updatePickerInput(
+              session = session,
+              inputId = "iterations",
+              choices = 1:store$irace_results$state$nbIterations
+            )
+          }
+        },
+        ignoreNULL = FALSE
+      )
 
       output$performance_box_plot <- renderPlot({
         shiny::validate(
           need(
-            !is.null(store$iraceResults),
+            !is.null(store$irace_results),
             "Execute irace first to display information."
           ),
           need(input$iterations, "")
         )
         shiny::validate(
           need(
-            nrow(store$iraceResults$allConfigurations) != 0,
+            nrow(store$irace_results$allConfigurations) != 0,
             "Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
           )
         )
 
         iteration <- as.integer(input$iterations)
 
-        configurationPerIteration <- convert_vector_to_string(isolate(store$iraceResults$allElites[iteration][[1]]))
-        results <- isolate(store$iraceResults$experiments)
-        intersectedColumns <- self$format_col_data(results, configurationPerIteration)
-        results <- subset(isolate(store$iraceResults$experiments), select = intersectedColumns)
+        configuration_per_iteration <- convert_vector_to_string(isolate(store$irace_results$allElites[iteration][[1]]))
+        results <- isolate(store$irace_results$experiments)
+        intersected_columns <- self$format_col_data(results, configuration_per_iteration)
+        results <- subset(isolate(store$irace_results$experiments), select = intersected_columns)
         results <- na.omit(results)
 
         plot <- irace::configurationsBoxplot(results, ylab = "Solution cost", title = "Box Plot")
-        pkg$reportStore$performanceBoxPlot <- save_plot_as_base64()
+        pkg$report_store$performance_boxplot <- save_plot_as_base64()
         plot
       })
 
       output$converge_plot <- renderPlot({
         shiny::validate(
           need(
-            !is.null(store$iraceResults),
+            !is.null(store$irace_results),
             "Execute irace first to display information."
           )
         )
         shiny::validate(
           need(
-            nrow(store$iraceResults$allConfigurations) != 0,
+            nrow(store$irace_results$allConfigurations) != 0,
             "Cannot plot because IRACE did not finish. The number of candidate configurations is 0."
           )
         )
 
-        fes <- cumsum(table(store$iraceResults$experimentLog[, "iteration"]))
+        fes <- cumsum(table(store$irace_results$experimentLog[, "iteration"]))
         fes <- fes[!names(fes) == "0"]
-        elites <- as.character(store$iraceResults$iterationElites)
+        elites <- as.character(store$irace_results$iterationElites)
 
         shiny::validate(
           need(
-            dim(store$iraceResults$experiments[, elites]) != 0,
+            dim(store$irace_results$experiments[, elites]) != 0,
             "Cannot plot because IRACE did not finish. Must be an array of two dimensions."
           )
         )
 
-        values <- colMeans(store$iraceResults$experiments[, elites])
+        values <- colMeans(store$irace_results$experiments[, elites])
 
         data <- data.frame(x = fes, y = values, e = elites)
         data <- na.omit(data)
@@ -831,32 +836,32 @@ PerformanceCard <- R6::R6Class(
         points(x = data$x, y = data$y)
         text(x = data$x, y = data$y, labels = data$e, pos = 1)
 
-        pkg$reportStore$convergencePlot <- save_plot_as_base64()
+        pkg$report_store$convergence_plot <- save_plot_as_base64()
 
         p
       })
     },
 
-    format_col_data = function(resultsData, iterationData) {
-      vectorColNames <- colnames(resultsData)
-      formatedData <- Reduce(intersect, list(vectorColNames, iterationData))
-      return(formatedData)
+    format_col_data = function(results_data, iteration_data) {
+      vector_col_names <- colnames(results_data)
+      formated_data <- Reduce(intersect, list(vector_col_names, iteration_data))
+      return(formated_data)
     }
   )
 )
 
-DetailByIterationCard <- R6::R6Class(
+DetailByIterationCard <- R6::R6Class( # nolint
   classname = "DetailByIterationCard",
   inherit = Component,
   public = list(
-    copyInput = NULL,
+    copy_input = NULL,
 
     initialize = function() {
-      self$copyInput <- CopyInput$new()
+      self$copy_input <- CopyInput$new()
     },
 
-    ui = function(inputId) {
-      ns <- NS(inputId)
+    ui = function(input_id) {
+      ns <- NS(input_id)
 
       box(
         title = strong("Details by Iteration"),
@@ -878,128 +883,131 @@ DetailByIterationCard <- R6::R6Class(
           style = "padding: 20px;",
           column(
             width = 12,
-            self$copyInput$ui(
-              inputId = ns("copy_best_so_far"),
+            self$copy_input$ui(
+              input_id = ns("copy_best_so_far"),
               label = "Copy Best So Far Table"
             ),
             h5(strong("Description of the best-so-far Configuration")),
-            htmlOutput(outputId = ns("summaryBestSoFar")),
+            htmlOutput(outputId = ns("summary_best_so_far")),
             br(),
-            DT::dataTableOutput(outputId = ns("bestSoFarTable")),
+            DT::dataTableOutput(outputId = ns("best_so_far_table")),
             br(),
             hr(),
-            self$copyInput$ui(
-              inputId = ns("copy_elite_config"),
+            self$copy_input$ui(
+              input_id = ns("copy_elite_config"),
               label = "Copy Elite Configurations Table"
             ),
             h5(strong("Elite configurations")),
-            DT::dataTableOutput(outputId = ns("eliteConfigurationTable")),
+            DT::dataTableOutput(outputId = ns("elite_configuration_table")),
             br()
           )
         )
       )
     },
 
-    server = function(input, output, session, store) {
-      copy_best_so_far <- self$copyInput$call(id = "copy_best_so_far", store = store)
-      copy_elite_config <- self$copyInput$call(id = "copy_elite_config", store = store)
+    server = function(input, output, session, store, events) {
+      copy_best_so_far <- self$copy_input$call(id = "copy_best_so_far", store = store, events = events)
+      copy_elite_config <- self$copy_input$call(id = "copy_elite_config", store = store, events = events)
 
       observeEvent(copy_best_so_far$action, {
-        req(store$iraceResults)
+        req(store$irace_results)
         req(copy_best_so_far$section)
-        req(store$currentExecution)
-        report <- store$currentExecution$get_report()
-        store$copy$id <- report$get_id(copy_best_so_far$section)
-        store$copy$table <- "bestSoFarTable"
+        req(store$current_execution)
+        report <- store$current_execution$get_report()
+        events$copy$id <- report$get_id(copy_best_so_far$section)
+        events$copy$table <- "best_so_far_table"
       })
 
       observeEvent(copy_elite_config$action, {
-        req(store$iraceResults)
+        req(store$irace_results)
         req(copy_elite_config$section)
-        req(store$currentExecution)
-        report <- store$currentExecution$get_report()
-        store$copy$id <- report$get_id(copy_elite_config$section)
-        store$copy$table <- "eliteConfigurationTable"
+        req(store$current_execution)
+        report <- store$current_execution$get_report()
+        events$copy$id <- report$get_id(copy_elite_config$section)
+        events$copy$table <- "elite_configuration_table"
       })
 
-      observeEvent(store$iraceResults, {
-        if (is.null(store$iraceResults)) {
-          updatePickerInput(
-            session = session,
-            inputId = "iterations",
-            choices = ""
-          )
-        } else {
-          updatePickerInput(
-            session = session,
-            inputId = "iterations",
-            choices = 1:store$iraceResults$state$nbIterations
-          )
-        }
-      }, ignoreNULL = FALSE)
+      observeEvent(store$irace_results,
+        {
+          if (is.null(store$irace_results)) {
+            updatePickerInput(
+              session = session,
+              inputId = "iterations",
+              choices = ""
+            )
+          } else {
+            updatePickerInput(
+              session = session,
+              inputId = "iterations",
+              choices = 1:store$irace_results$state$nbIterations
+            )
+          }
+        },
+        ignoreNULL = FALSE
+      )
 
-      output$summaryBestSoFar <- renderUI({
+      output$summary_best_so_far <- renderUI({
         shiny::validate(
           need(
-            !is.null(store$iraceResults), ""
+            !is.null(store$irace_results), ""
           )
         )
 
         shiny::validate(
           need(
-            nrow(store$iraceResults$allConfigurations) != 0, ""
+            nrow(store$irace_results$allConfigurations) != 0, ""
           )
         )
 
         req(input$iterations, cancelOutput = TRUE)
 
-        bestConfigurations <- store$iraceResults$allElites[as.integer(input$iterations)]
-        bestConfigurationID <- bestConfigurations[[1]][1]
-        detailsBestConfiguration <- getConfigurationById(store$iraceResults, ids = bestConfigurationID)
+        best_configurations <- store$irace_results$allElites[as.integer(input$iterations)]
+        best_configuration_id <- best_configurations[[1]][1]
+        details_best_configuration <- getConfigurationById(store$irace_results, ids = best_configuration_id)
 
-        names(detailsBestConfiguration)[names(detailsBestConfiguration) == ".ID."] <- "ID"
-        names(detailsBestConfiguration)[names(detailsBestConfiguration) == ".PARENT."] <- "PARENT"
+        names(details_best_configuration)[names(details_best_configuration) == ".ID."] <- "ID"
+        names(details_best_configuration)[names(details_best_configuration) == ".PARENT."] <- "PARENT"
 
-        meanValue <- colMeans(
-          store$iraceResults$experiments[, store$iraceResults$iterationElites[as.integer(input$iterations)], drop = FALSE],
+        mean_value <- colMeans(
+          store$irace_results$experiments[, store$irace_results$iterationElites[as.integer(input$iterations)], drop = FALSE], # nolint
           na.rm = TRUE
         )
 
         tagList(
-          HTML(paste(strong("Best so far Configuration:"), "&nbsp;", bestConfigurationID)),
+          HTML(paste(strong("Best so far Configuration:"), "&nbsp;", best_configuration_id)),
           br(),
-          HTML(paste(strong("Mean value:"), "&nbsp;", meanValue))
+          HTML(paste(strong("Mean value:"), "&nbsp;", mean_value))
         )
       })
 
-      output$bestSoFarTable <- DT::renderDataTable({
+      output$best_so_far_table <- DT::renderDataTable({
         shiny::validate(
           need(
-            !is.null(store$iraceResults),
+            !is.null(store$irace_results),
             "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
-            nrow(store$iraceResults$allConfigurations) != 0,
+            nrow(store$irace_results$allConfigurations) != 0,
             "The number of candidate configurations is 0."
           )
         )
 
         req(input$iterations, cancelOutput = TRUE)
 
-        bestConfigurations <- store$iraceResults$allElites[as.integer(input$iterations)]
-        bestConfigurationID <- bestConfigurations[[1]][1]
-        detailsBestConfiguration <- getConfigurationById(store$iraceResults, ids = bestConfigurationID)
+        best_configurations <- store$irace_results$allElites[as.integer(input$iterations)]
+        best_configuration_id <- best_configurations[[1]][1]
+        details_best_configuration <- getConfigurationById(store$irace_results, ids = best_configuration_id)
 
-        names(detailsBestConfiguration)[names(detailsBestConfiguration) == ".ID."] <- "ID"
-        names(detailsBestConfiguration)[names(detailsBestConfiguration) == ".PARENT."] <- "PARENT"
+        names(details_best_configuration)[names(details_best_configuration) == ".ID."] <- "ID"
+        names(details_best_configuration)[names(details_best_configuration) == ".PARENT."] <- "PARENT"
 
-        pkg$reportStore$bestSoFarTable <- detailsBestConfiguration
+        pkg$report_store$best_so_far_table <- details_best_configuration
 
         datatable(
-          detailsBestConfiguration,
+          details_best_configuration,
           escape = FALSE,
           rownames = FALSE,
           style = "bootstrap4",
@@ -1016,35 +1024,35 @@ DetailByIterationCard <- R6::R6Class(
         )
       })
 
-      output$eliteConfigurationTable <- DT::renderDataTable({
+      output$elite_configuration_table <- DT::renderDataTable({
         shiny::validate(
           need(
-            !is.null(store$iraceResults),
+            !is.null(store$irace_results),
             "Execute irace first to display information."
           )
         )
 
         shiny::validate(
           need(
-            nrow(store$iraceResults$allConfigurations) != 0,
+            nrow(store$irace_results$allConfigurations) != 0,
             "The number of candidate configurations is 0."
           )
         )
 
         req(input$iterations)
 
-        bestConfigurations <- store$iraceResults$allElites[as.integer(input$iterations)]
-        bestConfigurationID <- bestConfigurations[[1]]
+        best_configurations <- store$irace_results$allElites[as.integer(input$iterations)]
+        best_configuration_id <- best_configurations[[1]]
 
-        elitesConfig <- getConfigurationById(store$iraceResults, ids = bestConfigurationID)
+        elites_config <- getConfigurationById(store$irace_results, ids = best_configuration_id)
 
-        names(elitesConfig)[names(elitesConfig) == ".ID."] <- "ID"
-        names(elitesConfig)[names(elitesConfig) == ".PARENT."] <- "PARENT"
+        names(elites_config)[names(elites_config) == ".ID."] <- "ID"
+        names(elites_config)[names(elites_config) == ".PARENT."] <- "PARENT"
 
-        pkg$reportStore$eliteConfigurationTable <- elitesConfig
+        pkg$report_store$elite_configuration_table <- elites_config
 
         datatable(
-          elitesConfig,
+          elites_config,
           escape = FALSE,
           rownames = FALSE,
           style = "bootstrap4",

@@ -1,4 +1,4 @@
-ParametersView <- R6::R6Class(
+ParametersView <- R6::R6Class( # nolint
   classname = "ParametersView",
   inherit = View,
   public = list(
@@ -12,34 +12,39 @@ ParametersView <- R6::R6Class(
       ns <- NS(self$id)
 
       tagList(
-        div(class = "sub-header",
-            h2("Parameters"),
-            p("Add, remove or modify parameter definitions"),
-            HTML("<ul>
-                 <li>Name: name to identify a parameter in irace (e.g. tabuSize)</li>
-                 <li>Switch: (optional) command line flag to pass the parameter value to the target runner (e.g. --tsize )</li>
-                 <li>Type: parameter type (real, integer, categorical or ordered)</li>
-                 <li>Domain: parameter domain (a range for numerical parameters, or a set for categorical and ordered parameters)</li>
-                 <li>Condition: activation condition (in R) based on the values of other parameters (e.g. searchType == \"tabu\")  </li>
-                 </ul>
-                 For more information, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a> ")
-            ),
+        div(
+          class = "sub-header",
+          h2("Parameters"),
+          p("Add, remove or modify parameter definitions"),
+          HTML("<ul>
+                <li>Name: name to identify a parameter in irace (e.g. tabuSize)</li>
+                <li>Switch: (optional) command line flag to pass the parameter value to the target runner (e.g. --tsize )</li>
+                <li>Type: parameter type (real, integer, categorical or ordered)</li>
+                <li>Domain: parameter domain (a range for numerical parameters, or a set for categorical and ordered parameters)</li>
+                <li>Condition: activation condition (in R) based on the values of other parameters (e.g. searchType == \"tabu\")  </li>
+                </ul>
+                For more information, go to the irace package <a href=\"https://cran.r-project.org/package=irace/vignettes/irace-package.pdf\" target=\"_blank\">user guide</a>") # nolint
+        ),
         fluidRow(
           column(
             width = 8,
-            iraceStudio::actionButton(inputId = ns("add"), label = "Add", icon = icon("plus")),
+            bs4Dash::actionButton(
+              inputId = ns("add"),
+              label = "Add",
+              icon = icon("plus")
+            ),
             disabled(
-              iraceStudio::actionButton(
+              bs4Dash::actionButton(
                 inputId = ns("edit"),
                 label = "Edit",
                 icon = icon("edit")
               ),
-              iraceStudio::actionButton(
+              bs4Dash::actionButton(
                 inputId = ns("delete"),
                 label = "Delete",
                 icon = icon("minus")
               ),
-              iraceStudio::actionButton(
+              bs4Dash::actionButton(
                 inputId = ns("check"),
                 label = "Check",
                 icon = icon("check")
@@ -49,15 +54,15 @@ ParametersView <- R6::R6Class(
           column(
             width = 4,
             class = "d-flex align-items-center justify-content-end",
-            importButton(
-              inputId = ns("load")
+            import_button(
+              input_id = ns("load")
             ),
-            exportButton(
-              inputId = ns("export"),
+            export_button(
+              input_id = ns("export"),
               filename = "parameters.txt",
               style = "margin-left: 5px;"
             ),
-            clear_button(inputId = ns("clear"), style = "margin-left: 5px;")
+            clear_button(input_id = ns("clear"), style = "margin-left: 5px;")
           )
         ),
         br(),
@@ -76,12 +81,14 @@ ParametersView <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       ns <- session$ns
 
-      values <- reactiveValues(parameters = NULL,
-                               domainList = c(),
-                               parameter = NULL)
+      values <- reactiveValues(
+        parameters = NULL,
+        domain_list = c(),
+        parameter = NULL
+      )
 
       clear <- callModule(
         module = clear_button_sv,
@@ -89,13 +96,14 @@ ParametersView <- R6::R6Class(
         message = "This action will remove all parameters. Are you sure?."
       )
 
-      output$parameters_table <- DT::renderDataTable({
-        shiny::validate(
-          need(store$pg, "")
-        )
+      output$parameters_table <- DT::renderDataTable(
+        {
+          shiny::validate(
+            need(store$pg, "")
+          )
 
-        store$pg$get_parameters()
-      },
+          store$pg$get_parameters()
+        },
         escape = FALSE,
         selection = "single",
         rownames = FALSE,
@@ -113,12 +121,16 @@ ParametersView <- R6::R6Class(
       # Para poder modificar la tabla de parametros despues de instanciarse
       proxy <- dataTableProxy(outputId = "parameters_table")
 
-      observeEvent(c(global_emitter$value(global_events$current_scenario), store$pg), {
-        values$parameters <- store$pg$get_parameters()
-      })
+      observeEvent(c(events$change_scenario, store$pg),
+        {
+          values$parameters <- store$pg$get_parameters()
+        },
+        ignoreNULL = TRUE,
+        ignoreInit = TRUE
+      )
 
       observeEvent(values$parameters, {
-        global_emitter$emit(global_events$update_parameters)
+        update_reactive_counter(events$update_parameters)
 
         proxy %>%
           replaceData(
@@ -128,37 +140,42 @@ ParametersView <- R6::R6Class(
           )
       })
 
-      volumes <- c("Home"=path.expand('~'), getVolumes()())
+      volumes <- c("Home" = path.expand("~"), getVolumes()())
 
       shinyFileChoose(input, "load", roots = volumes)
 
       observeEvent(input$load, {
         if (!is.integer(input$load)) {
-          file <- tryCatch({
-            parseFilePaths(roots = volumes, input$load)
-          }, error = function(err) {
-            log_error("{err}")
-            return(NULL)
-          })
+          file <- tryCatch(
+            {
+              parseFilePaths(roots = volumes, input$load)
+            },
+            error = function(err) {
+              log_error("{err}")
+              return(NULL)
+            }
+          )
 
           if (is.null(file)) {
-            alert.error("Can't load parameters file, check if the file format is correct.")
+            alert_error("Can't load parameters file, check if the file format is correct.")
             return(invisible())
           }
 
           log_info("Importing paremeter file from {file$datapath}")
 
-          tryCatch({
-            data <- readParameters(file = file$datapath)
+          tryCatch(
+            {
+              data <- readParameters(file = file$datapath)
 
-            store$pg$add_parameter(extract.parameters(data))
+              store$pg$add_parameter(extract_parameters(data))
 
-            values$parameters <- store$pg$get_parameters()
-          },
-          error = function(err) {
-            log_error("{err}")
-            alert.error(err$message)
-          })
+              values$parameters <- store$pg$get_parameters()
+            },
+            error = function(err) {
+              log_error("{err}")
+              alert_error(err$message)
+            }
+          )
         }
       })
 
@@ -201,21 +218,23 @@ ParametersView <- R6::R6Class(
         parameters <- paste0(parameters, collapse = "\n")
 
         log_debug("Checking parameters")
-        tryCatch({
-          irace::readParameters(text = parameters)
+        tryCatch(
+          {
+            irace::readParameters(text = parameters)
 
-          log_debug("Parameters check successfully")
+            log_debug("Parameters check successfully")
 
-          shinyalert(
-            title = "Check",
-            text = "The check is successfully.",
-            type = "success"
-          )
-        },
-        error = function(err) {
-          log_error("{err}")
-          alert.error(err$message)
-        })
+            shinyalert(
+              title = "Check",
+              text = "The check is successfully.",
+              type = "success"
+            )
+          },
+          error = function(err) {
+            log_error("{err}")
+            alert_error(err$message)
+          }
+        )
       })
 
       # Show modal to add a new parameter
@@ -226,7 +245,7 @@ ParametersView <- R6::R6Class(
           self$modal$ui(ns, "New parameter")
         )
 
-        #self$modal$server(input, output, session, store = store, values)
+        # self$modal$server(input, output, session, store = store, values)
       })
 
       self$modal$server(input, output, session, store = store, values)
@@ -240,13 +259,13 @@ ParametersView <- R6::R6Class(
           self$modal$ui(ns, "Edit", parameter)
         )
 
-        #self$modal$server(input, output, session, store = store, values, parameter)
+        # self$modal$server(input, output, session, store = store, values, parameter)
       })
 
       # show modal to delete a parameter
       observeEvent(input$delete, {
         if (is.null(input$parameters_table_rows_selected) ||
-            is.na(input$parameters_table_rows_selected)) {
+          is.na(input$parameters_table_rows_selected)) {
           shinyalert(
             title = "Error",
             text = "Please select the parameter that you want to delete!",
@@ -265,7 +284,7 @@ ParametersView <- R6::R6Class(
                 )
               ),
               footer = tagList(
-                iraceStudio::actionButton(inputId = ns("confirm_delete"), label = "Yes", class = "btn-danger"),
+                bs4Dash::actionButton(inputId = ns("confirm_delete"), label = "Yes", status = "danger"),
                 modalButton(label = "Cancel")
               ),
               easyClose = TRUE
@@ -301,14 +320,15 @@ ParametersView <- R6::R6Class(
   )
 )
 
-ModalParameter <- R6::R6Class(
+ModalParameter <- R6::R6Class( # nolint
   classname = "ModalParameter",
   private = list(
-    removeObserver = list(),
+    remove_observer = list(),
 
     checkValue = function(key, values) {
-      if (is.null(values))
+      if (is.null(values)) {
         return(NULL)
+      }
 
       if (key == "domain") {
         result <- gsub("[\\s+\\)\\(]", "", as.character(values[[key]]), perl = TRUE)
@@ -329,7 +349,6 @@ ModalParameter <- R6::R6Class(
   ),
   public = list(
     ui = function(ns, title, values = NULL) {
-
       types <- c(
         "Real" = "r",
         "Integer" = "i",
@@ -359,9 +378,9 @@ ModalParameter <- R6::R6Class(
           label = "Type",
           choices = types,
           width = "100%",
-          selected = checkNull(private$checkValue("types", values), "r")
+          selected = check_null(private$checkValue("types", values), "r")
         ),
-        uiOutput(outputId = ns("domainOutput")),
+        uiOutput(outputId = ns("domain_output")),
         br(),
         strong("Condition (using R syntax)"),
         shinyAce::aceEditor(
@@ -375,8 +394,8 @@ ModalParameter <- R6::R6Class(
           value = private$checkValue("conditions", values)
         ),
         footer = tagList(
-          iraceStudio::actionButton(inputId = ns("parameterSave"), label = "Save", class = "btn-primary"),
-          iraceStudio::actionButton(inputId = ns("parameterCancel"), label = "Cancel")
+          bs4Dash::actionButton(inputId = ns("parameterSave"), label = "Save", status = "primary"),
+          bs4Dash::actionButton(inputId = ns("parameterCancel"), label = "Cancel")
         )
       )
     },
@@ -384,56 +403,65 @@ ModalParameter <- R6::R6Class(
     server = function(input, output, session, store, parent) {
       ns <- session$ns
 
-      output$domainOutput <- renderUI({
+      output$domain_output <- renderUI({
         type <- input$parameterType
         param <- parent$parameter
-        default <- checkNull(private$checkValue("types", param), "r")
-        type <- checkNull(type, default)
+        default <- check_null(private$checkValue("types", param), "r")
+        type <- check_null(type, default)
 
         if (type == "o" || type == "c") {
-          domain <- checkNull(private$checkValue("domain", param), c())
+          domain <- check_null(private$checkValue("domain", param), c())
           for (value in domain) {
             local({
-              myId <- value
-              buttonId <- paste0(myId, "-delete")
-              private$removeObserver[[myId]] <- observeEvent(input[[buttonId]], {
-                parent$domainList <- parent$domainList[!(parent$domainList %in% myId)]
-                private$removeObserver[[myId]] <- NULL
-              }, ignoreInit = TRUE, once = TRUE)
+              my_id <- value
+              button_id <- paste0(my_id, "-delete")
+              private$remove_observer[[my_id]] <- observeEvent(input[[button_id]],
+                {
+                  parent$domain_list <- parent$domain_list[!(parent$domain_list %in% my_id)]
+                  private$remove_observer[[my_id]] <- NULL
+                },
+                ignoreInit = TRUE,
+                once = TRUE
+              )
             })
           }
-          parent$domainList <- domain
+          parent$domain_list <- domain
           tagList(
             textInput(ns("domainName"), "Domain values (press add)"),
-            iraceStudio::actionButton(ns("addDomain"), "Add", class = "btn-link"),
-            uiOutput(ns("domainList"))
+            bs4Dash::actionButton(ns("addDomain"), "Add", class = "btn-link"),
+            uiOutput(ns("domain_list"))
           )
         } else {
           domain <- private$checkValue("domain", param)
           fluidRow(
             column(
               width = 6,
-              numericInput(ns("domainMin"), "Min", checkNull(domain[1], 0))
+              numericInput(ns("domainMin"), "Min", check_null(domain[1], 0))
             ),
             column(
               width = 6,
-              numericInput(ns("domainMax"), "Max", checkNull(domain[2], 0))
+              numericInput(ns("domainMax"), "Max", check_null(domain[2], 0))
             )
           )
         }
       })
 
-      output$domainList <- renderUI({
+      output$domain_list <- renderUI({
         shiny::validate(
-          need(length(parent$domainList) != 0, "Empty domain")
+          need(length(parent$domain_list) != 0, "Empty domain")
         )
         tagList(
           bs4Dash::bs4ListGroup(
             id = "sortable",
-            lapply(parent$domainList, function(name) {
+            .list = lapply(parent$domain_list, function(name) {
               bs4ListGroupItem(
                 name,
-                iraceStudio::actionButton(ns(paste0(name, "-delete")), labe = NULL, icon = icon("trash"), class = "btn-danger")
+                bs4Dash::actionButton(
+                  inputId = ns(paste0(name, "-delete")),
+                  label = NULL,
+                  icon = icon("trash"),
+                  status = "danger"
+                )
               )
             })
           ),
@@ -447,138 +475,154 @@ ModalParameter <- R6::R6Class(
       })
 
       observeEvent(input$addDomain, {
-        if (input$domainName %in% isolate(parent$domainList))
+        if (input$domainName %in% isolate(parent$domain_list)) {
           return()
+        }
 
         id <- as.character(input$domainName)
-        parent$domainList <- c(parent$domainList, input$domainName)
+        parent$domain_list <- c(parent$domain_list, input$domainName)
 
         local({
-          myId <- id
+          my_id <- id
           name <- input$domainName
-          buttonId <- paste0(name, "-delete")
-          private$removeObserver[[myId]] <- observeEvent(input[[buttonId]], {
-            parent$domainList <- parent$domainList[!(parent$domainList %in% name)]
-            private$removeObserver[[myId]] <- NULL
-            private$clearValue(buttonId, input, ns)
-          }, ignoreInit = TRUE, once = TRUE)
+          button_id <- paste0(name, "-delete")
+          private$remove_observer[[my_id]] <- observeEvent(input[[button_id]],
+            {
+              parent$domain_list <- parent$domain_list[!(parent$domain_list %in% name)]
+              private$remove_observer[[my_id]] <- NULL
+              private$clearValue(button_id, input, ns)
+            },
+            ignoreInit = TRUE,
+            once = TRUE
+          )
         })
 
         shinyjs::reset("domainName")
       })
 
       observeEvent(input$sortable, {
-        parent$domainList <- isolate(input$sortable)
+        parent$domain_list <- isolate(input$sortable)
       })
 
-      observeEvent(input$parameterSave, {
-        shinyjs::disable("parameterSave")
+      observeEvent(input$parameterSave,
+        {
+          shinyjs::disable("parameterSave")
 
-        domain <- if (input$parameterType == "o" || input$parameterType == "c") {
-          if (length(parent$domainList) == 0) {
-            alert.error("Domain cannot be empty")
+          domain <- if (input$parameterType == "o" || input$parameterType == "c") {
+            if (length(parent$domain_list) == 0) {
+              alert_error("Domain cannot be empty")
+              return(NULL)
+            }
+            paste0("(", paste0(parent$domain_list, collapse = ", "), ")")
+          } else {
+            paste0("(", input$domainMin, ", ", input$domainMax, ")")
+          }
+
+          if (is.null(domain)) {
+            shinyjs::enable("parameterSave")
             return(NULL)
           }
-          paste0("(", paste0(parent$domainList, collapse = ", "), ")")
-        } else {
-          paste0("(", input$domainMin, ", ", input$domainMax, ")")
-        }
 
-        if (is.null(domain)) {
-          shinyjs::enable("parameterSave")
-          return(NULL)
-        }
-
-        flag <- gsub('"', "", input$parameterFlag)
-        condition <- if (is.null(input$parameterCondition) || input$parameterCondition == "")
-          ""
-        else
-          paste("|", input$parameterCondition)
-
-        newRow <- data.frame(
-          names = input$parameterName,
-          switches = paste0('"', flag, '"'),
-          types = input$parameterType,
-          domain = domain,
-          conditions = condition,
-          stringsAsFactors = FALSE,
-          check.names = FALSE
-        )
-
-        check <- capture.output(
-          write.table(
-            newRow,
-            row.names = FALSE,
-            col.names = FALSE,
-            sep = "\t",
-            quote = F
-          )
-        )
-
-        result <- tryCatch({
-          irace::readParameters(text = check)
-          TRUE
-        },
-        error = function(err) {
-          if (!grepl("A parameter definition is missing!", err$message, fixed = TRUE)) {
-            log_error("{err}")
-            alert.error(err$message)
-            shinyjs::enable("parameterSave")
-            FALSE
+          flag <- gsub('"', "", input$parameterFlag)
+          condition <- if (is.null(input$parameterCondition) || input$parameterCondition == "") {
+            ""
           } else {
-            TRUE
+            paste("|", input$parameterCondition)
           }
-        })
 
-        if (result) {
-          log_debug(
-            paste(
-              "Save a new parameter with",
-              "name: {input$parameter_name}, flag: {input$parameter_flag}"
+          new_row <- data.frame(
+            names = input$parameterName,
+            switches = paste0('"', flag, '"'),
+            types = input$parameterType,
+            domain = domain,
+            conditions = condition,
+            stringsAsFactors = FALSE,
+            check.names = FALSE
+          )
+
+          check <- capture.output(
+            write.table(
+              new_row,
+              row.names = FALSE,
+              col.names = FALSE,
+              sep = "\t",
+              quote = F
             )
           )
 
-          added <- tryCatch({
-            if (is.null(parent$parameter)) {
-              store$pg$add_parameter(newRow)
-            } else {
-              store$pg$update_parameter(
-                row = input$parameters_table_rows_selected,
-                new_parameter = newRow
-              )
+          result <- tryCatch(
+            {
+              irace::readParameters(text = check)
+              TRUE
+            },
+            error = function(err) {
+              if (!grepl("A parameter definition is missing!", err$message, fixed = TRUE)) {
+                log_error("{err}")
+                alert_error(err$message)
+                shinyjs::enable("parameterSave")
+                FALSE
+              } else {
+                TRUE
+              }
             }
-          },
-          error = function(err) {
-            log_error("{err}")
-            alert.error(err$message)
-            shinyjs::enable("parameterSave")
-            FALSE
-          })
+          )
 
-          if (added) {
-            log_debug("Parameter saved")
-            parent$parameters <- store$pg$get_parameters()
+          if (result) {
+            log_debug(
+              paste(
+                "Save a new parameter with",
+                "name: {input$parameter_name}, flag: {input$parameter_flag}"
+              )
+            )
 
-            clear()
+            added <- tryCatch(
+              {
+                if (is.null(parent$parameter)) {
+                  store$pg$add_parameter(new_row)
+                } else {
+                  store$pg$update_parameter(
+                    row = input$parameters_table_rows_selected,
+                    new_parameter = new_row
+                  )
+                }
+              },
+              error = function(err) {
+                log_error("{err}")
+                alert_error(err$message)
+                shinyjs::enable("parameterSave")
+                FALSE
+              }
+            )
 
-            removeModal()
+            if (added) {
+              log_debug("Parameter saved")
+              parent$parameters <- store$pg$get_parameters()
+
+              clear()
+
+              removeModal()
+            }
           }
-        }
-      }, ignoreInit = TRUE)
+        },
+        ignoreInit = TRUE
+      )
 
-      observeEvent(input$parameterCancel, {
-        clear()
-        removeModal()
-      }, ignoreInit = TRUE)
+      observeEvent(input$parameterCancel,
+        {
+          clear()
+          removeModal()
+        },
+        ignoreInit = TRUE
+      )
 
       clear <- function() {
-        for (value in isolate(parent$domainList)) {
+        for (value in isolate(parent$domain_list)) {
           private$clearValue(paste0(value, "-delete"), input, ns)
         }
-        parent$domainList <- isolate(c())
+        parent$domain_list <- isolate(c())
         parent$parameter <- NULL
-        lapply(private$removeObserver, function(o) o$destroy())
-        private$removeObserver <- list()
+        lapply(private$remove_observer, function(o) o$destroy())
+        private$remove_observer <- list()
       }
     }
   )

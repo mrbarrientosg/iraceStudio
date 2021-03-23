@@ -1,16 +1,16 @@
-FilterView <- R6::R6Class(
+FilterView <- R6::R6Class( # nolint
   classname = "FilterView",
   inherit = View,
   public = list(
-    executionSelect = NULL,
-    sandboxSelect = NULL,
-    configurationFilter = NULL,
+    execution_select = NULL,
+    sandbox_select = NULL,
+    configuration_filter = NULL,
 
     initialize = function(id) {
       super$initialize(id)
-      self$executionSelect <- ExecutionSelect$new()
-      self$sandboxSelect <- SandboxSelect$new()
-      self$configurationFilter <- ParameterCondition$new()
+      self$execution_select <- ExecutionSelect$new()
+      self$sandbox_select <- SandboxSelect$new()
+      self$configuration_filter <- ParameterCondition$new()
     },
 
     ui = function() {
@@ -25,14 +25,14 @@ FilterView <- R6::R6Class(
                   <li>search for configurations in the filter section. Once you have set all conditions, click in the filter button below</li>
                   <li>select configurations in the configuration section</li>
                   <li>see the list of selected configurations in the sanbox section</li>
-                 </ul>")
+                 </ul>") # nolint
           ),
           column(
             width = 8,
             class = "d-flex align-items-center justify-content-end",
-            self$executionSelect$ui(inputId = ns("executions")),
+            self$execution_select$ui(input_id = ns("executions")),
             div(style = "padding: 8px;"),
-            self$sandboxSelect$ui(inputId = ns("sandboxes"))
+            self$sandbox_select$ui(input_id = ns("sandboxes"))
           )
         ),
         fluidRow(
@@ -61,7 +61,7 @@ FilterView <- R6::R6Class(
               min = 0, max = 1, step = 1
             ),
             hr(),
-            self$configurationFilter$ui(inputId = ns("filter")),
+            self$configuration_filter$ui(input_id = ns("filter")),
             hr(),
             multiInput(
               inputId = ns("idSelect"),
@@ -97,7 +97,11 @@ FilterView <- R6::R6Class(
                 size = 8
               )
             ),
-            footer = iraceStudio::actionButton(inputId = ns("filter"), label = "Filter", class = "btn-primary")
+            footer = bs4Dash::actionButton(
+              inputId = ns("filter"),
+              label = "Filter",
+              status = "primary"
+            )
           ),
           box(
             title = strong("Configurations"),
@@ -107,20 +111,20 @@ FilterView <- R6::R6Class(
             column(
               width = 12,
               style = "margin-bottom: 15px; padding-left: 0px !important;",
-              iraceStudio::actionButton(
+              bs4Dash::actionButton(
                 inputId = ns("addSandBox"),
                 label = "Add to SandBox"
               ),
-              iraceStudio::actionButton(
+              bs4Dash::actionButton(
                 inputId = ns("selectAllConfigs"),
                 label = "Select All"
               ),
-              iraceStudio::actionButton(
+              bs4Dash::actionButton(
                 inputId = ns("deselectAllConfigs"),
                 label = "Deselect All"
               )
             ),
-            DT::dataTableOutput(outputId = ns("configurationsTable"), width = "100%"),
+            DT::dataTableOutput(outputId = ns("configurations_table"), width = "100%"),
             br()
           ),
           box(
@@ -131,94 +135,106 @@ FilterView <- R6::R6Class(
             column(
               width = 12,
               style = "margin-bottom: 15px; padding-left: 0px !important;",
-              iraceStudio::actionButton(
+              bs4Dash::actionButton(
                 inputId = ns("selectAllSandBox"),
                 label = "Select All"
               ),
-              iraceStudio::actionButton(
+              bs4Dash::actionButton(
                 inputId = ns("deselectAllSandBox"),
                 label = "Deselect All"
               ),
-              iraceStudio::actionButton(
+              bs4Dash::actionButton(
                 inputId = ns("deleteSandBox"),
                 label = "Delete"
               ),
             ),
-            DT::dataTableOutput(outputId = ns("sandboxTable"), width = "100%"),
+            DT::dataTableOutput(outputId = ns("sandbox_table"), width = "100%"),
             br()
           )
         )
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       ns <- session$ns
 
-      self$executionSelect$call(
+      self$execution_select$call(
         id = "executions",
-        store = store
+        store = store,
+        events = events
       )
 
-      self$sandboxSelect$call(
+      self$sandbox_select$call(
         id = "sandboxes",
-        store = store
+        store = store,
+        events = events
       )
 
-      values <- reactiveValues(configurations = NULL,
-                               sandbox = NULL,
-                               expressions = data.frame(),
-                               types = NULL,
-                               domain = NULL)
+      values <- reactiveValues(
+        configurations = NULL,
+        sandbox = NULL,
+        expressions = data.frame(),
+        types = NULL,
+        domain = NULL
+      )
 
-      self$configurationFilter$call(id = "filter", store = store, parent = values)
+      self$configuration_filter$call(id = "filter", store = store, parent = values)
 
-      updateValue <- observe({
-        req(store$sandbox)
-        store$sandbox$setDescentId(input$descentId)
-        store$sandbox$setTrajectoryId(input$trajectoryId)
-        store$sandbox$setElites(input$elites)
-        store$sandbox$setIterations(input$iterations)
-        store$sandbox$setIds(input$idSelect)
-      }, suspended = TRUE)
+      update_value <- observe(
+        {
+          req(store$sandbox)
+          store$sandbox$set_descent_id(input$descentId)
+          store$sandbox$set_trajectory_id(input$trajectoryId)
+          store$sandbox$set_elites(input$elites)
+          store$sandbox$set_iterations(input$iterations)
+          store$sandbox$set_ids(input$idSelect)
+        },
+        suspended = TRUE
+      )
 
       observeEvent(
-        c(store$sandbox,
-          global_emitter$value(global_events$current_scenario)),  {
-        updateValue$suspend()
+        c(
+          store$sandbox,
+          events$change_scenario
+        ),
+        {
+          update_value$suspend()
 
-        values$sandbox <- data.frame()
-        values$configurations <- data.frame()
+          values$sandbox <- data.frame()
+          values$configurations <- data.frame()
 
-        if (!is.null(store$sandbox)) {
-          if (!is.null(store$iraceResults)) {
-            self$setupInputs(session, store)
-            self$configurationFilter$setupInputs(store$iraceResults$parameters$names)
-            values$configurations <- store$iraceResults$allConfigurations[0, ]
-            values$types <- store$iraceResults$parameters$types
-            values$domain <- store$iraceResults$parameters$domain
+          if (!is.null(store$sandbox)) {
+            if (!is.null(store$irace_results)) {
+              self$setup_inputs(session, store)
+              self$configuration_filter$setup_inputs(store$irace_results$parameters$names)
+              values$configurations <- store$irace_results$allConfigurations[0, ]
+              values$types <- store$irace_results$parameters$types
+              values$domain <- store$irace_results$parameters$domain
+            }
+
+            values$expressions <- store$sandbox$get_filters()
+
+            if (nrow(store$sandbox$get_configurations()) == 0) {
+              values$sandbox <- values$configurations
+            } else {
+              values$sandbox <- store$sandbox$get_configurations()
+            }
+          } else {
+            self$configuration_filter$clear_inputs()
+            self$clear_inputs(session)
           }
 
-          values$expressions <- store$sandbox$getFilters()
-
-          if (nrow(store$sandbox$getConfigurations()) == 0)
-            values$sandbox <- values$configurations
-          else
-            values$sandbox <- store$sandbox$getConfigurations()
-
-        } else {
-          self$configurationFilter$clearInputs()
-          self$clearInputs(session)
-        }
-
-        updateValue$resume()
-      }, ignoreNULL = FALSE)
+          update_value$resume()
+        },
+        ignoreNULL = FALSE
+      )
 
       observeEvent(values$expressions, {
         req(store$sandbox)
-        store$sandbox$setFilters(isolate(values$expressions))
+        store$sandbox$set_filters(isolate(values$expressions))
       })
 
-      output$configurationsTable <- DT::renderDataTable({
+      output$configurations_table <- DT::renderDataTable({
         datatable(
           values$configurations,
           escape = FALSE,
@@ -234,10 +250,10 @@ FilterView <- R6::R6Class(
         )
       })
 
-      configProxy <- dataTableProxy(outputId = "configurationsTable")
+      config_proxy <- dataTableProxy(outputId = "configurations_table")
 
       observeEvent(input$filter, {
-        req(store$iraceResults)
+        req(store$irace_results)
         req(store$sandbox)
 
         iterations <- seq.int(
@@ -246,79 +262,85 @@ FilterView <- R6::R6Class(
           by = 1
         )
 
-        configurationsIter <- getConfigurationByIteration(
-          iraceResults = store$iraceResults,
+        configurations_iter <- getConfigurationByIteration(
+          iraceResults = store$irace_results,
           iterations = iterations
         )
 
         if (input$elites) {
           elites <- c()
           for (i in iterations) {
-            elites <- c(elites, store$iraceResults$allElites[[i]])
+            elites <- c(elites, store$irace_results$allElites[[i]])
           }
-          configurationsIter <- configurationsIter[configurationsIter$.ID. %in% elites, ]
+          configurations_iter <- configurations_iter[configurations_iter$.ID. %in% elites, ]
         }
 
-        if (nrow(store$sandbox$getFilters()) > 0) {
-          expression <- parse(text = paste(store$sandbox$getFilters()$condition, collapse = " & "))
-          configurationsIter <- subset(configurationsIter, eval(expression))
+        if (nrow(store$sandbox$get_filters()) > 0) {
+          expression <- parse(text = paste(store$sandbox$get_filters()$condition, collapse = " & "))
+          configurations_iter <- subset(configurations_iter, eval(expression))
         }
 
         if (!is.null(input$idSelect)) {
-          ids <- store$iraceResults$allConfigurations[store$iraceResults$allConfigurations$.ID. %in% input$idSelect, ]
-          configurationsIter <- rbind(configurationsIter, ids)
+          ids <- store$irace_results$allConfigurations[store$irace_results$allConfigurations$.ID. %in% input$idSelect, ]
+          configurations_iter <- rbind(configurations_iter, ids)
         }
 
         if (!is.null(input$descentId) && input$descentId != "none") {
-          data <- descentConfigurationTree(store$iraceResults, as.integer(input$descentId))
+          data <- descentConfigurationTree(store$irace_results, as.integer(input$descentId))
           if (nrow(data) > 0) {
             ids <- c(as.integer(input$descentId), data$to)
-            configs <- store$iraceResults$allConfigurations[store$iraceResults$allConfigurations$.ID. %in% ids, ]
-            configurationsIter <- rbind(configurationsIter, configs)
+            configs <- store$irace_results$allConfigurations[store$irace_results$allConfigurations$.ID. %in% ids, ]
+            configurations_iter <- rbind(configurations_iter, configs)
           }
         }
 
         if (!is.null(input$trajectoryId) && input$trajectoryId != "none") {
-          data <- configurationTrajectory(store$iraceResults, as.integer(input$trajectoryId))
+          data <- configurationTrajectory(store$irace_results, as.integer(input$trajectoryId))
           if (nrow(data) > 0) {
             ids <- c(as.integer(input$trajectoryId), data$to)
-            configs <- store$iraceResults$allConfigurations[store$iraceResults$allConfigurations$.ID. %in% ids, ]
-            configurationsIter <- rbind(configurationsIter, configs)
+            configs <- store$irace_results$allConfigurations[store$irace_results$allConfigurations$.ID. %in% ids, ]
+            configurations_iter <- rbind(configurations_iter, configs)
           }
         }
 
-        values$configurations <- unique(configurationsIter)
+        values$configurations <- unique(configurations_iter)
       })
 
-      observeEvent(values$configurations, {
-        names(values$configurations)[names(values$configurations) == ".ID."] <- "ID"
-        names(values$configurations)[names(values$configurations) == ".PARENT."] <- "PARENT"
-      }, ignoreInit = TRUE)
+      observeEvent(values$configurations,
+        {
+          names(values$configurations)[names(values$configurations) == ".ID."] <- "ID"
+          names(values$configurations)[names(values$configurations) == ".PARENT."] <- "PARENT"
+        },
+        ignoreInit = TRUE
+      )
 
       observeEvent(input$addSandBox, {
         rows <- values$configurations[input$configurationsTable_rows_selected, ]
-        sandBox <- unique(rbind(store$sandbox$getConfigurations(), rows))
-        store$sandbox$setConfigurations(sandBox)
-        values$sandbox <- store$sandbox$getConfigurations()
+        sandbox <- unique(rbind(store$sandbox$get_configurations(), rows))
+        store$sandbox$set_configurations(sandbox)
+        values$sandbox <- store$sandbox$get_configurations()
       })
 
-      observeEvent(c(input$configurationsTable_rows_selected, values$configurations), {
-        condition <- !is.null(input$configurationsTable_rows_selected) & nrow(values$configurations) > 0
-        toggleState(id = "addSandBox", condition = condition)
-        toggleState(id = "deselectAllConfigs", condition = condition)
-        toggleState(id = "selectAllConfigs", condition = nrow(values$configurations) > 0)
-      }, ignoreNULL = FALSE)
+      observeEvent(c(input$configurationsTable_rows_selected, values$configurations),
+        {
+          condition <- !is.null(input$configurationsTable_rows_selected) & nrow(values$configurations) > 0
+          toggleState(id = "addSandBox", condition = condition)
+          toggleState(id = "deselectAllConfigs", condition = condition)
+          toggleState(id = "selectAllConfigs", condition = nrow(values$configurations) > 0)
+        },
+        ignoreNULL = FALSE
+      )
 
       observeEvent(input$selectAllConfigs, {
-        configProxy %>% selectRows(input$configurationsTable_rows_all)
+        config_proxy %>% selectRows(input$configurationsTable_rows_all)
       })
 
       observeEvent(input$deselectAllConfigs, {
-        configProxy %>% selectRows(NULL)
+        config_proxy %>% selectRows(NULL)
       })
 
       ## SANDBOX
-      output$sandboxTable <- DT::renderDataTable({
+      output$sandbox_table <- DT::renderDataTable({
         datatable(
           data = values$sandbox,
           escape = FALSE,
@@ -334,7 +356,7 @@ FilterView <- R6::R6Class(
         )
       })
 
-      sandboxProxy <- dataTableProxy(outputId = "sandboxTable")
+      sandbox_proxy <- dataTableProxy(outputId = "sandbox_table")
 
       observe({
         req(values$sandbox)
@@ -342,14 +364,14 @@ FilterView <- R6::R6Class(
         names(values$sandbox)[names(values$sandbox) == ".ID."] <- "ID"
         names(values$sandbox)[names(values$sandbox) == ".PARENT."] <- "PARENT"
 
-        store$updateSandbox <- isolate(store$updateSandbox + 1)
-        configProxy %>% selectRows(NULL)
-        sandboxProxy %>% selectRows(NULL)
+        isolate(update_reactive_counter(events$update_sandbox))
+        config_proxy %>% selectRows(NULL)
+        sandbox_proxy %>% selectRows(NULL)
       })
 
       observeEvent(input$deleteSandBox, {
-        store$sandbox$removeConfiguration(input$sandboxTable_rows_selected)
-        values$sandbox <- store$sandbox$getConfigurations()
+        store$sandbox$remove_configuration(input$sandboxTable_rows_selected)
+        values$sandbox <- store$sandbox$get_configurations()
       })
 
       observe({
@@ -360,53 +382,53 @@ FilterView <- R6::R6Class(
       })
 
       observeEvent(input$selectAllSandBox, {
-        sandboxProxy %>% selectRows(input$sandboxTable_rows_all)
+        sandbox_proxy %>% selectRows(input$sandboxTable_rows_all)
       })
 
       observeEvent(input$deselectAllSandBox, {
-        sandboxProxy %>% selectRows(NULL)
+        sandbox_proxy %>% selectRows(NULL)
       })
     },
 
-    setupInputs = function(session, store) {
+    setup_inputs = function(session, store) {
       updateCheckboxInput(
         session = session,
         inputId = "elites",
-        value = store$sandbox$getElites()
+        value = store$sandbox$get_elites()
       )
 
       updateSliderInput(
         session = session,
         inputId = "iterations",
         min = 1,
-        max = store$iraceResults$state$nbIterations,
-        value = store$sandbox$getIterations(),
+        max = store$irace_results$state$nbIterations,
+        value = store$sandbox$get_iterations(),
         step = 1
       )
 
       updateMultiInput(
         session = session,
         inputId = "idSelect",
-        choices = store$iraceResults$allConfigurations$.ID.,
-        selected = store$sandbox$getIds()
+        choices = store$irace_results$allConfigurations$.ID.,
+        selected = store$sandbox$get_ids()
       )
 
       updatePickerInput(
         session = session,
         inputId = "descentId",
-        choices = c("none", store$iraceResults$allConfigurations$.ID.),
-        selected = store$sandbox$getDescentId()
+        choices = c("none", store$irace_results$allConfigurations$.ID.),
+        selected = store$sandbox$get_descent_id()
       )
 
       updatePickerInput(
         session = session,
         inputId = "trajectoryId",
-        choices = c("none", store$iraceResults$allConfigurations$.ID.),
-        selected = store$sandbox$getTrajectoryId()
+        choices = c("none", store$irace_results$allConfigurations$.ID.),
+        selected = store$sandbox$get_trajectory_id()
       )
     },
 
-    clearInputs = function(session) {
+    clear_inputs = function(session) {
       updateCheckboxInput(
         session = session,
         inputId = "elites",

@@ -1,9 +1,12 @@
-ExecutionsHistoryView <- R6::R6Class(
+ExecutionsHistoryView <- R6::R6Class( # nolint
   classname = "ExecutionsHistoryView",
   inherit = View,
   public = list(
+    execution_select = NULL,
+
     initialize = function(id) {
       super$initialize(id)
+      self$execution_select <- ExecutionSelect$new()
     },
 
     ui = function() {
@@ -30,16 +33,16 @@ ExecutionsHistoryView <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
-      # executions <- self$executionSelect$call(id = "executions", store = store)
+    server = function(input, output, session, store, events) {
+      executions <- self$execution_select$call(id = "executions", store = store, events = events)
 
-      # output$irace_output <- renderText({
-      #   shiny::validate(
-      #     need(executions$option != "", message = "")
-      #   )
+      output$irace_output <- renderText({
+        shiny::validate(
+          need(executions$option != "", message = "")
+        )
 
-      #   store$pg$get_execution(executions$option)$get_output_log()
-      # })
+        store$pg$get_execution(executions$option)$get_output_log()
+      })
     }
   )
 )

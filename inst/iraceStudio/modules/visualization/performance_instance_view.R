@@ -1,14 +1,14 @@
-PerformanceInstanceView <- R6::R6Class(
+PerformanceInstanceView <- R6::R6Class( # nolint
   classname = "PerformanceInstanceView",
   inherit = View,
   public = list(
-    executionSelect = NULL,
-    sandboxSelect = NULL,
+    execution_select = NULL,
+    sandbox_select = NULL,
 
     initialize = function(id) {
       super$initialize(id)
-      self$executionSelect <- ExecutionSelect$new()
-      self$sandboxSelect <- SandboxSelect$new()
+      self$execution_select <- ExecutionSelect$new()
+      self$sandbox_select <- SandboxSelect$new()
     },
 
     ui = function() {
@@ -29,9 +29,9 @@ PerformanceInstanceView <- R6::R6Class(
           column(
             width = 8,
             class = "d-flex align-items-center justify-content-end",
-            self$executionSelect$ui(inputId = ns("executions")),
+            self$execution_select$ui(input_id = ns("executions")),
             div(style = "padding: 8px;"),
-            self$sandboxSelect$ui(inputId = ns("sandboxes"))
+            self$sandbox_select$ui(input_id = ns("sandboxes"))
           )
         ),
         fluidRow(
@@ -40,7 +40,7 @@ PerformanceInstanceView <- R6::R6Class(
             collapsible = FALSE,
             closable = FALSE,
             width = 12,
-            plotlyOutput(outputId = ns("configurationPlot")) %>%
+            plotlyOutput(outputId = ns("configuration_plot")) %>%
               shinycssloaders::withSpinner(type = 6)
           ),
           box(
@@ -49,41 +49,44 @@ PerformanceInstanceView <- R6::R6Class(
             closable = FALSE,
             width = 12,
             strong("Click a point to see more info."),
-            plotlyOutput(outputId = ns("distanceBestPlot")) %>%
+            plotlyOutput(outputId = ns("distance_best_plot")) %>%
               shinycssloaders::withSpinner(type = 6),
             br(),
-            DT::dataTableOutput(outputId = ns("selectedPointTable"))
+            DT::dataTableOutput(outputId = ns("selected_point_table"))
           )
         )
       )
     },
 
-    server = function(input, output, session, store) {
-      self$executionSelect$call(
+    server = function(input, output, session, store, events) {
+      self$execution_select$call(
         id = "executions",
-        store = store
+        store = store,
+        events = events
       )
 
-      self$sandboxSelect$call(
+      self$sandbox_select$call(
         id = "sandboxes",
-        store = store
+        store = store,
+        events = events
       )
 
-      best_data <- eventReactive(c(store$iraceResults, store$updateSandbox), {
+      best_data <- eventReactive(c(store$irace_results, events$update_sandbox), {
         future({
-          config <- isolate(store$sandbox$getConfigurations()$ID)
+          config <- isolate(store$sandbox$get_configurations()$ID)
 
-          if (length(config) == 0)
-            config <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
+          if (length(config) == 0) {
+            config <- isolate(store$irace_results$allElites[[length(store$irace_results$allElites)]])
+          }
 
-          self$bestConfigurationByInstances(isolate(store$iraceResults), config)
+          self$bestConfigurationByInstances(isolate(store$irace_results), config)
         })
       })
 
-      output$distanceBestPlot <- renderPlotly({
+      output$distance_best_plot <- renderPlotly({
         shiny::validate(
           need(store$sandbox, ""),
-          need(store$iraceResults, "")
+          need(store$irace_results, "")
         )
 
         legend <- list(
@@ -91,13 +94,13 @@ PerformanceInstanceView <- R6::R6Class(
         )
 
         best_data() %...>% {
-          plot_ly(., source = "distanceBestPlot") %>%
+          plot_ly(., source = "distance_best_plot") %>%
             add_boxplot(
-              x = ~as.factor(instance),
+              x = ~ as.factor(instance),
               y = ~distance,
-              color = ~as.factor(instance),
+              color = ~ as.factor(instance),
               showlegend = TRUE,
-              text = ~sprintf("<b>ID:</b> %s\n<b>Distance:</b> %g", configuration, distance),
+              text = ~ sprintf("<b>ID:</b> %s\n<b>Distance:</b> %g", configuration, distance),
               hoverinfo = "text",
               boxpoints = "all",
               jitter = 1.0,
@@ -107,7 +110,12 @@ PerformanceInstanceView <- R6::R6Class(
             layout(
               title = "Distance to best performance vs Instance",
               xaxis = list(title = "Instance", type = "category", fixedrange = T),
-              yaxis = list(title = "Distance to best performance", type = "linear", fixedrange = T, tickformat = ".03g"),
+              yaxis = list(
+                title = "Distance to best performance",
+                type = "linear",
+                fixedrange = T,
+                tickformat = ".03g"
+              ),
               legend = legend,
               hovermode = "closest",
               showlegend = TRUE
@@ -117,45 +125,47 @@ PerformanceInstanceView <- R6::R6Class(
       })
 
       selected_best_data <- reactive({
-        req(store$updateSandbox)
+        req(events$update_sandbox)
         req(store$sandbox)
-        req(store$iraceResults)
-        global_emitter$value(global_events$current_scenario)
+        req(store$irace_results)
+        events$change_scenario
 
-        event <- event_data("plotly_click", "distanceBestPlot")
+        event <- event_data("plotly_click", "distance_best_plot")
 
-        best_data() %...>% {
-          if (is.null(event)) {
-            return(data.frame())
+        best_data() %...>%
+          {
+            if (is.null(event)) {
+              return(data.frame())
+            }
+
+            return(subset(., configuration %in% event$customdata))
+          } %...>%
+          {
+            if (is.null(event)) {
+              return(data.frame())
+            }
+
+            data <- .
+
+            if (nrow(data) == 0) {
+              return(data.frame())
+            }
+
+            repeated <- data %>%
+              dplyr::group_by(instance) %>%
+              summarise(
+                id = unique(configuration),
+                `mean distance` = mean(distance),
+                min = min(distance),
+                max = max(distance),
+                nbExecutions = length(distance)
+              )
+
+            return(repeated)
           }
-
-          return(subset(., configuration %in% event$customdata))
-        } %...>% {
-          if (is.null(event)) {
-            return(data.frame())
-          }
-
-          data <- .
-
-          if (nrow(data) == 0) {
-            return(data.frame())
-          }
-
-          repeated <- data %>%
-            dplyr::group_by(instance) %>%
-            summarise(
-              id = unique(configuration),
-              `mean distance` = mean(distance),
-              min = min(distance),
-              max = max(distance),
-              nbExecutions = length(distance)
-            )
-
-          return(repeated)
-        }
       })
 
-      output$selectedPointTable <- DT::renderDataTable({
+      output$selected_point_table <- DT::renderDataTable({
         selected_best_data() %...>% {
           datatable(
             data = .,
@@ -175,22 +185,23 @@ PerformanceInstanceView <- R6::R6Class(
         }
       })
 
-      config_data <- eventReactive(c(store$iraceResults, store$updateSandbox), {
+      config_data <- eventReactive(c(store$irace_results, events$update_sandbox), {
         future({
-          id <- isolate(store$sandbox$getConfigurations()$ID)
+          id <- isolate(store$sandbox$get_configurations()$ID)
 
-          if (length(id) == 0)
-            id <- isolate(store$iraceResults$allElites[[length(store$iraceResults$allElites)]])
+          if (length(id) == 0) {
+            id <- isolate(store$irace_results$allElites[[length(store$irace_results$allElites)]])
+          }
 
-          self$configurationByIntances(isolate(store$iraceResults)) %>%
+          self$configurationByIntances(isolate(store$irace_results)) %>%
             subset(configuration %in% id)
         })
       })
 
-      output$configurationPlot <- renderPlotly({
+      output$configuration_plot <- renderPlotly({
         shiny::validate(
           need(store$sandbox, ""),
-          need(store$iraceResults, "")
+          need(store$irace_results, "")
         )
 
         legend <- list(
@@ -200,11 +211,11 @@ PerformanceInstanceView <- R6::R6Class(
         config_data() %...>% {
           plot_ly(.) %>%
             add_boxplot(
-              x = ~as.factor(instance),
+              x = ~ as.factor(instance),
               y = ~performance,
-              color = ~as.factor(instance),
+              color = ~ as.factor(instance),
               showlegend = TRUE,
-              text = ~sprintf("<b>ID:</b> %s\n<b>Performance:</b> %g", configuration, performance),
+              text = ~ sprintf("<b>ID:</b> %s\n<b>Performance:</b> %g", configuration, performance),
               hoverinfo = "text",
               boxpoints = "all",
               jitter = 1.0,
@@ -224,26 +235,27 @@ PerformanceInstanceView <- R6::R6Class(
       observeEvent(session$userData$sidebar(), {
         sidebar <- session$userData$sidebar()
         if (sidebar == "visualization_by_instance") {
-          js$resizePlotly(session$ns("configurationPlot"))
-          js$resizePlotly(session$ns("distanceBestPlot"))
+          js$resizePlotly(session$ns("configuration_plot"))
+          js$resizePlotly(session$ns("distance_best_plot"))
         }
       })
     },
 
-    bestConfigurationByInstances = function(iraceResults, configurations = iraceResults$allConfigurations$.ID.) {
-      exp <- iraceResults$experiments[, as.character(configurations), drop = FALSE]
+    bestConfigurationByInstances = function(irace_results, configurations = irace_results$allConfigurations$.ID.) {
+      exp <- irace_results$experiments[, as.character(configurations), drop = FALSE]
 
       min <- apply(exp, 1, function(row) {
-        if (all(is.na(row)))
+        if (all(is.na(row))) {
           return(NA)
-        else
+        } else {
           min(row, na.rm = T)
+        }
       })
 
       exp <- 100 * (min[row(exp)] - exp) / min[row(exp)]
       exp[is.nan(exp)] <- 0.0 # Replace nan values with 0
 
-      instances <- iraceResults$state$.irace$instancesList[rownames(exp), "instance"]
+      instances <- irace_results$state$.irace$instancesList[rownames(exp), "instance"]
       rownames(exp) <- sort(instances)
 
       distance <- c(exp)
@@ -251,14 +263,14 @@ PerformanceInstanceView <- R6::R6Class(
       instance <- as.numeric(rownames(exp)[row(exp)])
 
       df <- data.frame(distance = distance, configuration = configuration, instance = instance)
-      df <- df[complete.cases(df),]
+      df <- df[complete.cases(df), ]
 
       return(df)
     },
 
-    configurationByIntances = function(iraceResults) {
-      exp <- iraceResults$experiments
-      instances <- iraceResults$state$.irace$instancesList[rownames(exp), "instance"]
+    configurationByIntances = function(irace_results) {
+      exp <- irace_results$experiments
+      instances <- irace_results$state$.irace$instancesList[rownames(exp), "instance"]
       rownames(exp) <- sort(instances)
 
       performance <- c(exp)
@@ -266,7 +278,7 @@ PerformanceInstanceView <- R6::R6Class(
       instance <- as.numeric(rownames(exp)[row(exp)])
 
       df <- data.frame(performance = performance, configuration = configuration, instance = instance)
-      df <- df[complete.cases(df),]
+      df <- df[complete.cases(df), ]
 
       return(df)
     }

@@ -20,7 +20,7 @@ Navbar <- R6::R6Class(
     },
 
     server = function(input, output, session, store) {
-      output$playgroundName <- renderText(store$playgroundName)
+      output$playgroundName <- renderText(store$playground_name)
     }
   )
 )
@@ -36,7 +36,7 @@ Body <- R6::R6Class(
 
     ui = function() {
       dashboardBody(
-        iraceVizzResources(),
+        irace_vizz_resources(),
         tabItems(
           tabItem(
             tabName = "overview",
@@ -56,75 +56,45 @@ ControlBar <- R6::R6Class(
   classname = "ControlBar",
   inherit = Component,
   public = list(
-    executionSelect = NULL,
-    sandboxSelect = NULL,
-
-    initialize = function() {
-      self$executionSelect <- ExecutionSelect$new()
-      self$sandboxSelect <- SandboxSelect$new()
-    },
-
     ui = function(id) {
       ns <- NS(id)
 
       dashboardControlbar(
-          id = ns("sidebar"),
-          skin = "light",
-          overlay = TRUE,
-          collapsed = TRUE,
-          fluidRow(
-             box(
-              title = strong("Global Options"),
-              collapsible = FALSE,
-              closable = FALSE,
-              width = 12,
-              pickerInput(
-                inputId = ns("scenarioPicker"),
-                label = "Scenario",
-                choices = "",
-                options = list(
-                  size = 8
-                )
-              ),
-              self$executionSelect$ui(inputId = ns("executions")),
-              self$sandboxSelect$ui(inputId = ns("sandboxes"))
+        id = ns("sidebar"),
+        skin = "light",
+        overlay = TRUE,
+        collapsed = TRUE,
+        fluidRow(
+          box(
+            title = strong("Global Options"),
+            collapsible = FALSE,
+            closable = FALSE,
+            width = 12,
+            pickerInput(
+              inputId = ns("scenarioPicker"),
+              label = "Scenario",
+              choices = "",
+              options = list(
+                size = 8
+              )
             )
           )
         )
+      )
     },
 
     server = function(input, output, session, store) {
-      self$executionSelect$call(id = "executions", store = store)
-      self$sandboxSelect$call(id = "sandboxes", store = store)
-
       observeEvent(input$scenarioPicker, {
         req(input$scenarioPicker)
-        store$pg$change_current_scenario(input$scenarioPicker)
-        pkg$outputLog <- NULL
+        store$current_scenario <- input$scenarioPicker
+        store$irace_results <- store$scenarios[[input$scenarioPicker]]
       })
 
-      observeEvent(global_emitter$value(global_events$update_scenarios), {
-        scenarios <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_name())
-        scenarios_id <- lapply(store$pg$get_scenarios(), function(scenario) scenario$get_id())
-
-        if (length(scenarios) == 0) {
-          scenarios_id <- ""
-        } else {
-          names(scenarios_id) <- unlist(scenarios, use.names = FALSE)
-        }
-
-         selected <- NULL
-
-        if (!is.null(store$pg$get_last_scenario())) {
-          selected <- store$pg$get_last_scenario()
-          store$pg$set_last_scenario(NULL)
-        }
-
+      observeEvent(store$scenarios, {
         updatePickerInput(
           session = session,
           inputId = "scenarioPicker",
-          choices = scenarios_id,
-          selected = selected
+          choices = names(store$scenarios)
         )
       })
     }
@@ -145,6 +115,36 @@ Sidebar <- R6::R6Class(
           )
         )
       )
+    }
+  )
+)
+
+Footer <- R6::R6Class(
+  classname = "Footer",
+  inherit = Component,
+  public = list(
+    ui = function(id) {
+      ns <- NS(id)
+
+      dashboardFooter(
+        left = div(
+          class = "d-flex flex-row",
+          div(
+            "Current Scenario: ",
+            uiOutput(
+              outputId = ns("scenario"),
+              inline = TRUE
+            )
+          )
+        ),
+        fixed = TRUE
+      )
+    },
+
+    server = function(input, output, session, store) {
+      output$scenario <- renderUI({
+        store$current_scenario
+      })
     }
   )
 )

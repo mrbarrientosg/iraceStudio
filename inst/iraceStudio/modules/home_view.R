@@ -1,4 +1,4 @@
-HomeView <- R6::R6Class(
+HomeView <- R6::R6Class( # nolint
   classname = "HomeView",
   inherit = View,
   public = list(
@@ -15,12 +15,11 @@ HomeView <- R6::R6Class(
             width = 12,
             p("This software is an interface to execute and visualize irace data."),
             p("The irace package is an algorithm configuration tool currently available as an R package:"),
-            HTML("<center><a href= \"https://iridia.ulb.ac.be/irace/\" target=\"_blank\">https://iridia.ulb.ac.be/irace/</a></center>"),
+            HTML("<center><a href= \"https://iridia.ulb.ac.be/irace/\" target=\"_blank\">https://iridia.ulb.ac.be/irace/</a></center>"), # nolint
             p(""),
-            HTML("<b>Important</b>: This is development version. If you have any problem, comment, or suggestion about his software,
-                 please contact us! we appreacite your input.<br>"),
-            HTML("<center><a href= \"https://groups.google.com/d/forum/irace-package\" target=\"_blank\">The irace package Google group</a></center>"),
-            HTML("<center><a href= \"https://github.com/mrbarrientosg/iraceStudio\" target=\"_blank\">Irace Studio Github repository</a></center>"),
+            HTML("<b>Important</b>: This is development version. If you have any problem, comment, or suggestion about his software, please contact us! we appreacite your input.<br>"), # nolint
+            HTML("<center><a href= \"https://groups.google.com/d/forum/irace-package\" target=\"_blank\">The irace package Google group</a></center>"), # nolint
+            HTML("<center><a href= \"https://github.com/mrbarrientosg/iraceStudio\" target=\"_blank\">Irace Studio Github repository</a></center>"), # nolint
             HTML("<br>How to start?<br>
                  <ol>
                  <li> Create a new scenario or load it from scenario files: go to the <b>scenario menu</b> to start the set up<br>
@@ -36,15 +35,13 @@ HomeView <- R6::R6Class(
                  <li> Execute your scenario: go to the <b>execution menu</b> to start and monitor an execution</li>
                  <li> Check your execution general report: go to the <b>report menu</b> to have access to the report </li>
                  <li> Explore the configurations results: go to the <b> visualization menu</b> to explore the configuration data</li>
-                 </ol>")
+                 </ol>") # nolint
           )
         )
       )
     },
 
-    server = function(input, output, session, store) {
-
-
+    server = function(input, output, session, store, events) {
     }
   )
 )

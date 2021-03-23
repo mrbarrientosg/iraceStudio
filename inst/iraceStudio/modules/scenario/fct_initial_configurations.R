@@ -11,7 +11,7 @@ export_initial_configurations <- function(file, store) {
 
 import_initial_configurations <- function(input, store, volumes) {
   if (nrow(store$pg$get_parameters()) == 0) {
-    alert.error(
+    alert_error(
       message = "There are no parameters. First add a parameter in the parameter section."
     )
     return(invisible())
@@ -32,20 +32,23 @@ import_initial_configurations <- function(input, store, volumes) {
   parameters <- tryCatch(readParameters(text = parameters),
     error = function(err) {
       log_error("{err}")
-      alert.error(as.character(err))
+      alert_error(as.character(err))
       return(NULL)
     }
   )
 
-  file <- tryCatch({
-            parseFilePaths(roots = volumes, input$load)
-          }, error = function(err) {
-            log_error("{err}")
-            return(NULL)
-          })
+  file <- tryCatch(
+    {
+      parseFilePaths(roots = volumes, input$load)
+    },
+    error = function(err) {
+      log_error("{err}")
+      return(NULL)
+    }
+  )
 
   if (is.null(file)) {
-    alert.error("Can't load configuration file, check if the file format is correct.")
+    alert_error("Can't load configuration file, check if the file format is correct.")
     return(invisible())
   }
 
@@ -54,15 +57,16 @@ import_initial_configurations <- function(input, store, volumes) {
       filename = file$datapath,
       parameters = parameters
     ),
-      error = function(err) {
-        log_error("{err}")
-        alert.error(as.character(err))
-        return(NULL)
-      }
+    error = function(err) {
+      log_error("{err}")
+      alert_error(as.character(err))
+      return(NULL)
+    }
     )
 
-    if (!is.null(config))
+    if (!is.null(config)) {
       store$pg$add_configuration(config)
+    }
   }
 }
 

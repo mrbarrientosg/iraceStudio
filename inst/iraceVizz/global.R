@@ -19,12 +19,16 @@ suppressMessages(library(shinybusy))
 suppressMessages(library(plotly))
 suppressMessages(library(shinycssloaders))
 suppressMessages(library(shinyhelper))
+suppressMessages(library(tidyverse))
+suppressMessages(library(ggplot2))
+suppressMessages(library(ggridges))
+suppressMessages(library(viridis))
 
-for (f in list.files("component", recursive = T, pattern = '.R', full.names = T)) {
+for (f in list.files("component", recursive = T, pattern = ".R", full.names = T)) {
   source(f)
 }
 
-for (f in list.files("modules", recursive = T, pattern = '.R', full.names = T)) {
+for (f in list.files("modules", recursive = T, pattern = ".R", full.names = T)) {
   source(f)
 }
 

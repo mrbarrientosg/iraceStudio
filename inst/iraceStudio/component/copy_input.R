@@ -1,10 +1,10 @@
 #' @export
-CopyInput <- R6::R6Class(
+CopyInput <- R6::R6Class( # nolint
   classname = "CopyInput",
   inherit = Component,
   public = list(
-    ui = function(inputId, label, choices = c()) {
-      ns <- NS(inputId)
+    ui = function(input_id, label, choices = c()) {
+      ns <- NS(input_id)
 
       fluidRow(
         column(
@@ -15,55 +15,59 @@ CopyInput <- R6::R6Class(
             choices = choices,
             width = "100%",
             options = list(
-                size = 8
+              size = 8
             )
           )
         ),
         column(
           width = 2,
-          actionButton(
+          bs4Dash::actionButton(
             inputId = ns("action"),
             label = "Copy",
             style = "margin-top:32px; text-align:center;",
             width = "100%",
-            class = "btn-primary"
+            status = "primary"
           )
         )
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       values <- reactiveValues()
       observeEvent(input$select_input, values$section <- input$select_input)
       observeEvent(input$action, values$action <- input$action)
 
-      observeEvent(c(store$currentExecution, global_emitter$value(global_events$update_report)), {
-        if (is.null(store$currentExecution)) {
-          updatePickerInput(
-            session = session,
-            inputId = "select_input",
-            choices = c(""),
-            selected = NULL
-          )
-        } else {
-          report <- store$currentExecution$get_report()
-
-          data <- report$get_data()
-
-          if (length(data) == 0) {
-            data <- c("")
+      observeEvent(c(store$current_execution, events$update_report),
+        {
+          if (is.null(store$current_execution)) {
+            updatePickerInput(
+              session = session,
+              inputId = "select_input",
+              choices = c(""),
+              selected = NULL
+            )
           } else {
-            data <- unlist(lapply(data, function(d) d$title), use.names = FALSE)
-          }
+            report <- store$current_execution$get_report()
 
-          updatePickerInput(
-            session = session,
-            inputId = "select_input",
-            choices = data,
-            selected = NULL
-          )
-        }
-      }, ignoreNULL = FALSE, ignoreInit = TRUE)
+            data <- report$get_data()
+
+            if (length(data) == 0) {
+              data <- c("")
+            } else {
+              data <- unlist(lapply(data, function(d) d$title), use.names = FALSE)
+            }
+
+            updatePickerInput(
+              session = session,
+              inputId = "select_input",
+              choices = data,
+              selected = NULL
+            )
+          }
+        },
+        ignoreNULL = FALSE,
+        ignoreInit = TRUE
+      )
 
       return(values)
     }

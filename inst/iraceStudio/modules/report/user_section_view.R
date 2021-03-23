@@ -1,18 +1,18 @@
-UserSectionView <- R6::R6Class(
+UserSectionView <- R6::R6Class( # nolint
   classname = "UserSectionView",
   inherit = View,
   public = list(
     cards = NULL,
     observe_delete_card = NULL,
     count = 0,
-    userSectionCard = NULL,
+    user_section_card = NULL,
 
     initialize = function(id) {
       super$initialize(id)
       self$cards <- list()
       self$observe_delete_card <- list()
       self$count <- 0
-      self$userSectionCard <- UserSectionCard$new()
+      self$user_section_card <- UserSectionCard$new()
     },
 
     ui = function() {
@@ -27,11 +27,12 @@ UserSectionView <- R6::R6Class(
           ),
           column(
             width = 4,
-            iraceStudio::actionButton(
+            bs4Dash::actionButton(
               inputId = ns("add"),
               label = "Add note",
-              class = "float-right btn-primary",
-              style = "margin-left: 5px;"
+              class = "float-right",
+              style = "margin-left: 5px;",
+              status = "primary"
             )
           )
         ),
@@ -41,12 +42,12 @@ UserSectionView <- R6::R6Class(
       )
     },
 
-    server = function(input, output, session, store) {
+    server = function(input, output, session, store, events) {
       ns <- session$ns
 
       observeEvent(input$add, {
-        if (is.null(store$currentExecution)) {
-          alert.error("Select a execution or execute irace first.")
+        if (is.null(store$current_execution)) {
+          alert_error("Select a execution or execute irace first.")
         } else {
           showModal(
             modalDialog(
@@ -54,7 +55,7 @@ UserSectionView <- R6::R6Class(
               easyClose = TRUE,
               textInput(inputId = ns("title"), label = "Title"),
               footer = tagList(
-                iraceStudio::actionButton(inputId = ns("addSection"), label = "Add", class = "btn-primary"),
+                bs4Dash::actionButton(inputId = ns("addSection"), label = "Add", status = "primary"),
                 modalButton(label = "Cancel")
               )
             )
@@ -62,108 +63,120 @@ UserSectionView <- R6::R6Class(
         }
       })
 
-      observeEvent(store$currentExecution, {
-        for (id in names(self$cards)) {
-          self$cards[[id]] <- NULL
-          self$observe_delete_card[[id]]$destroy()
-          self$observe_delete_card[[id]] <- NULL
-          removeUI(
-            selector = paste0("div:has(> #", ns(id), "-card)"),
-            immediate = TRUE
-          )
-          self$remove_shiny_inputs(id, input, ns)
-        }
+      observeEvent(store$current_execution,
+        {
+          for (id in names(self$cards)) {
+            self$cards[[id]] <- NULL
+            self$observe_delete_card[[id]]$destroy()
+            self$observe_delete_card[[id]] <- NULL
+            removeUI(
+              selector = paste0("div:has(> #", ns(id), "-card)"),
+              immediate = TRUE
+            )
+            self$remove_shiny_inputs(id, input, ns)
+          }
 
-        report <- store$currentExecution$get_report()
+          report <- store$current_execution$get_report()
 
-        data <- report$get_data()
+          data <- report$get_data()
 
-        self$cards <- list()
-        self$observe_delete_card <- list()
-        self$count <- report$get_count()
+          self$cards <- list()
+          self$observe_delete_card <- list()
+          self$count <- report$get_count()
 
-        for (id in names(data)) {
+          for (id in names(data)) {
+            insertUI(
+              selector = "#userSectionContent",
+              where = "beforeEnd",
+              ui = self$user_section_card$ui(
+                input_id = ns(id),
+                title = data[[id]]$title,
+                value = data[[id]]$content
+              )
+            )
+
+            self$cards[[id]] <- self$user_section_card$call(
+              id = id,
+              report_id = id,
+              report = report,
+              store = store,
+              events = events
+            )
+
+            local({
+              my_id <- id
+              .report <- report
+              self$observe_delete_card[[id]] <- observe({
+                req(self$cards[[my_id]]$card$visible != TRUE)
+
+                self$cards[[my_id]] <- NULL
+                self$observe_delete_card[[my_id]]$destroy()
+                self$observe_delete_card[[my_id]] <- NULL
+                .report$remove_data(my_id)
+                update_reactive_counter(events$update_report)
+                removeUI(
+                  selector = paste0("div:has(> #", ns(my_id), "-card)"),
+                  immediate = TRUE
+                )
+                self$remove_shiny_inputs(my_id, input, ns)
+              })
+            })
+          }
+        },
+        ignoreNULL = TRUE,
+        ignoreInit = TRUE
+      )
+
+      observeEvent(input$addSection,
+        {
+          removeModal()
+
+          report <- store$current_execution$get_report()
+          report$add_title(input$title)
+          update_reactive_counter(events$update_report)
+
+          self$count <- self$count + 1
+
+          id <- as.character(self$count)
+
           insertUI(
             selector = "#userSectionContent",
             where = "beforeEnd",
-            ui = self$userSectionCard$ui(
-              inputId = ns(id),
-              title = data[[id]]$title,
-              value = data[[id]]$content
+            ui = self$user_section_card$ui(
+              input_id = ns(id),
+              title = input$title
             )
           )
 
-          self$cards[[id]] <- self$userSectionCard$call(
+          self$cards[[id]] <- self$user_section_card$call(
             id = id,
             report_id = id,
             report = report,
-            store = store
+            store = store,
+            events = events
           )
 
           local({
-            myId <- id
+            my_id <- id
             .report <- report
             self$observe_delete_card[[id]] <- observe({
-              req(self$cards[[myId]]$card$visible != TRUE)
+              req(self$cards[[my_id]]$card$visible != TRUE)
 
-              self$cards[[myId]] <- NULL
-              self$observe_delete_card[[myId]]$destroy()
-              self$observe_delete_card[[myId]] <- NULL
-              .report$remove_data(myId)
+              self$cards[[my_id]] <- NULL
+              self$observe_delete_card[[my_id]]$destroy()
+              self$observe_delete_card[[my_id]] <- NULL
+              .report$remove_data(my_id)
+              update_reactive_counter(events$update_report)
               removeUI(
-                selector = paste0("div:has(> #", ns(myId), "-card)"),
+                selector = paste0("div:has(> #", ns(my_id), "-card)"),
                 immediate = TRUE
               )
-              self$remove_shiny_inputs(myId, input, ns)
+              self$remove_shiny_inputs(my_id, input, ns)
             })
           })
-        }
-      })
-
-      observeEvent(input$addSection, {
-        removeModal()
-
-        report <- store$currentExecution$get_report()
-        report$add_title(input$title)
-
-        self$count <- self$count + 1
-
-        id <- as.character(self$count)
-
-        insertUI(
-          selector = "#userSectionContent",
-          where = "beforeEnd",
-          ui = self$userSectionCard$ui(
-            inputId = ns(id),
-            title = input$title
-          )
-        )
-
-        self$cards[[id]] <- self$userSectionCard$call(
-          id = id,
-          report_id = id,
-          report = report,
-          store = store
-        )
-
-        local({
-          myId <- id
-          .report <- report
-          self$observe_delete_card[[id]] <- observe({
-            req(self$cards[[myId]]$card$visible != TRUE)
-
-            self$cards[[myId]] <- NULL
-            self$observe_delete_card[[myId]]$destroy()
-            self$observe_delete_card[[myId]] <- NULL
-            .report$remove_data(myId)
-            removeUI(
-              selector = paste0("div:has(> #", ns(myId), "-card)"),
-              immediate = TRUE
-            )
-            self$remove_shiny_inputs(myId, input, ns)
-          })
-        })
-      }, ignoreInit = TRUE)
+        },
+        ignoreInit = TRUE
+      )
     },
 
     remove_shiny_inputs = function(id, .input, ns) {

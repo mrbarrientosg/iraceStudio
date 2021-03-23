@@ -1,6 +1,6 @@
 #' @export
-report <- R6::R6Class(
-  classname = "report",
+Report <- R6::R6Class( # nolint
+  classname = "Report",
   private = list(
     data = NULL,
     count = 0
@@ -18,7 +18,6 @@ report <- R6::R6Class(
     add_title = function(title) {
       private$count <- private$count + 1
       private$data[[as.character(private$count)]]$title <- title
-      global_emitter$emit(global_events$update_report)
     },
 
     set_content = function(id, content) {
@@ -32,7 +31,6 @@ report <- R6::R6Class(
     remove_data = function(id) {
       private$data[[as.character(id)]] <- NULL
       private$count <- private$count - 1
-      global_emitter$emit(global_events$update_report)
     },
 
     get_id = function(section) {
@@ -51,7 +49,7 @@ report <- R6::R6Class(
 )
 
 #' @export
-Sandbox <- R6::R6Class(
+Sandbox <- R6::R6Class( # nolint
   classname = "Sandbox",
   cloneable = FALSE,
   private = list(
@@ -62,8 +60,8 @@ Sandbox <- R6::R6Class(
     iterations = NULL,
     filters = NULL,
     ids = NULL,
-    descentId = "",
-    trajectoryId = "",
+    descent_id = "",
+    trajectory_id = "",
     configurations = NULL
   ),
 
@@ -83,48 +81,61 @@ Sandbox <- R6::R6Class(
         private$iterations <- sandbox$iterations
         private$filters <- sandbox$filters
         private$ids <- sandbox$ids
-        private$descentId <- sandbox$descentId
-        private$trajectoryId <- sandbox$trajectoryId
+        private$descent_id <- sandbox$descent_id
+        private$trajectory_id <- sandbox$trajectory_id
         private$configurations <- sandbox$configurations
       }
     },
 
-    addFilter = function(filter) {
-      private$filters <- rbind(private$filters, filter)
-    },
 
-    removeFilter = function(row) {
-      private$filters <- private$filters[-row, ,drop = FALSE]
-    },
-
-    removeConfiguration = function(row) {
+    remove_configuration = function(row) {
       private$configurations <- private$configurations[-row, ]
     },
 
-    setId = function(id) private$id <- id,
-    setName = function(name) private$name <- name,
-    setDescription = function(desc) private$description <- desc,
-    setElites = function(elites) private$elites <- elites,
-    setIterations = function(iterations) private$iterations <- iterations,
-    setIds = function(ids) private$ids <- ids,
-    setFilters = function(filters) private$filters <- filters,
-    setDescentId = function(descentId) private$descentId <- descentId,
-    setTrajectoryId = function(trajectoryId) private$trajectoryId <- trajectoryId,
-    setConfigurations = function(configurations) private$configurations <- configurations,
+    set_id = function(id) private$id <- id,
+    set_name = function(name) private$name <- name,
+    set_description = function(desc) private$description <- desc,
+    set_elites = function(elites) private$elites <- elites,
+    set_iterations = function(iterations) private$iterations <- iterations,
+    set_ids = function(ids) private$ids <- ids,
+    set_filters = function(filters) private$filters <- filters,
+    set_descent_id = function(descent_id) private$descent_id <- descent_id,
+    set_trajectory_id = function(trajectory_id) private$trajectory_id <- trajectory_id,
+    set_configurations = function(configurations) private$configurations <- configurations,
 
     # GETTER
-    getId = function() return(private$id),
-    getName = function() return(private$name),
-    getDescription = function() return(private$description),
-    getElites = function() return(private$elites),
-    getIterations = function() return(private$iterations),
-    getFilters = function() return(private$filters),
-    getIds = function() return(private$ids),
-    getDescentId = function() return(private$descentId),
-    getTrajectoryId = function() return(private$trajectoryId),
-    getConfigurations = function() return(private$configurations),
+    get_id = function() {
+      return(private$id)
+    },
+    get_name = function() {
+      return(private$name)
+    },
+    get_description = function() {
+      return(private$description)
+    },
+    get_elites = function() {
+      return(private$elites)
+    },
+    get_iterations = function() {
+      return(private$iterations)
+    },
+    get_filters = function() {
+      return(private$filters)
+    },
+    get_ids = function() {
+      return(private$ids)
+    },
+    get_descent_id = function() {
+      return(private$descent_id)
+    },
+    get_trajectory_id = function() {
+      return(private$trajectory_id)
+    },
+    get_configurations = function() {
+      return(private$configurations)
+    },
 
-    asList = function() {
+    as_list = function() {
       data <- list()
       data$id <- private$id
       data$name <- private$name
@@ -133,8 +144,8 @@ Sandbox <- R6::R6Class(
       data$iterations <- private$iterations
       data$filters <- private$filters
       data$ids <- private$ids
-      data$descentId <- private$descentId
-      data$trajectoryId <- private$trajectoryId
+      data$descent_id <- private$descent_id
+      data$trajectory_id <- private$trajectory_id
       data$configurations <- private$configurations
       return(data)
     }
@@ -142,7 +153,7 @@ Sandbox <- R6::R6Class(
 )
 
 #' @export
-SandBoxes <- R6::R6Class(
+SandBoxes <- R6::R6Class( # nolint
   classname = "SandBoxes",
   private = list(
     boxes = NULL,
@@ -164,26 +175,28 @@ SandBoxes <- R6::R6Class(
 
     add_sandbox = function(sandbox) {
       private$count <- private$count + 1
-      sandbox$setId(private$count)
+      sandbox$set_id(private$count)
       private$boxes[[as.character(private$count)]] <- sandbox
-      global_emitter$emit(global_events$update_sandboxes)
     },
 
     remove_sandbox = function(id) {
       private$boxes[[id]] <- NULL
       private$count <- private$count - 1
-      global_emitter$emit(global_events$update_sandboxes)
     },
 
-    get_boxes = function() return(private$boxes),
-    get_box = function (id) return(private$boxes[[id]]),
+    get_boxes = function() {
+      return(private$boxes)
+    },
+    get_box = function(id) {
+      return(private$boxes[[id]])
+    },
 
     as_list = function() {
       data <- list()
 
       data$sandboxes <- list()
       for (name in names(private$boxes)) {
-        data$sandboxes[[name]] <- private$boxes[[name]]$asList()
+        data$sandboxes[[name]] <- private$boxes[[name]]$as_list()
       }
 
       data$count <- private$count
@@ -194,8 +207,8 @@ SandBoxes <- R6::R6Class(
 )
 
 #' @export
-execution <- R6::R6Class(
-  classname = "execution",
+Execution <- R6::R6Class( # nolint
+  classname = "Execution",
   cloneable = FALSE,
   private = list(
     id = NA,
@@ -213,10 +226,10 @@ execution <- R6::R6Class(
         private$name <- execution$name
         private$irace_results <- execution$irace_results
         private$output_log <- execution$output_log
-        private$report <- report$new(report = execution$report)
+        private$report <- Report$new(report = execution$report)
         private$sandboxes <- SandBoxes$new(data = execution$sandboxes)
       } else {
-        private$report <- report$new()
+        private$report <- Report$new()
         private$sandboxes <- SandBoxes$new()
       }
     },
@@ -269,8 +282,8 @@ execution <- R6::R6Class(
 )
 
 #' @export
-executions <- R6::R6Class(
-  classname = "executions",
+Executions <- R6::R6Class( # nolint
+  classname = "Executions",
   cloneable = FALSE,
   private = list(
     executions = NULL,
@@ -282,7 +295,7 @@ executions <- R6::R6Class(
       private$last_insert <- 0
       if (!is.null(data)) {
         for (name in names(data$executions)) {
-          private$executions[[name]] <- execution$new(execution = data$executions[[name]])
+          private$executions[[name]] <- Execution$new(execution = data$executions[[name]])
         }
         private$last_insert <- data$last_insert
       }
@@ -293,7 +306,6 @@ executions <- R6::R6Class(
       new_id <- paste0("execution-", id, "-", private$last_insert)
       execution$set_id(new_id)
       private$executions[[new_id]] <- execution
-      global_emitter$emit(global_events$update_executions)
     },
 
     add_irace_results = function(id, irace_results) {
@@ -306,13 +318,6 @@ executions <- R6::R6Class(
 
     add_report = function(id, report) {
       private$executions[[id]]$set_report(report)
-    },
-
-    remove_all = function() {
-      private$executions <- NULL
-      private$executions <- list()
-      private$last_insert <- 0
-      global_emitter$emit(global_events$update_scenarios)
     },
 
     is_empty = function() length(private$executions) == 0,
@@ -338,18 +343,18 @@ executions <- R6::R6Class(
 )
 
 #' @export
-configurations <- R6::R6Class(
-  classname ="configurations",
+Configurations <- R6::R6Class( # nolint
+  classname = "Configurations",
   cloneable = FALSE,
   private = list(
     data = NULL
   ),
 
   public = list(
-    initialize = function(configurations = NULL, paramNames = NULL) {
+    initialize = function(configurations = NULL, param_names = NULL) {
       if (is.null(configurations)) {
-        private$data <- data.frame(matrix(ncol = length(paramNames), nrow = 0))
-        colnames(private$data) <- paramNames
+        private$data <- data.frame(matrix(ncol = length(param_names), nrow = 0))
+        colnames(private$data) <- param_names
       } else {
         private$data <- configurations
       }
@@ -367,25 +372,26 @@ configurations <- R6::R6Class(
       private$data <- private$data[-row, ]
     },
 
-    addColumn = function(name) {
+    add_column = function(name) {
       l <- lapply(name, function(x) NA)
       names(l) <- name
       private$data <- tibble::add_column(private$data, as.data.frame(l))
     },
 
-    updateColumn = function(oldName, newName) {
-      if (oldName != newName)
-        private$data <- dplyr::rename(private$data, oldName = newName)
+    update_column = function(old_name, new_name) {
+      if (old_name != new_name) {
+        private$data <- dplyr::rename(private$data, old_name = new_name)
+      }
     },
 
-    removeColumn = function(name) {
+    remove_column = function(name) {
       private$data <- private$data[, !(names(private$data) %in% name), drop = F]
     },
 
     get_configurations = function() private$data,
     get_configuration = function(row) private$data[row, ],
-    clear_configurations = function(removeAll = F) {
-      if (removeAll) {
+    clear_configurations = function(remove_all = F) {
+      if (remove_all) {
         private$data <- data.frame()
       } else {
         private$data <- private$data[0, , drop = F]
@@ -395,17 +401,18 @@ configurations <- R6::R6Class(
 )
 
 #' @export
-parameters <- R6::R6Class(
-  classname = "parameters",
+Parameters <- R6::R6Class( # nolint
+  classname = "Parameters",
   cloneable = FALSE,
   private = list(
     data = NULL,
 
     check_parameter_repeat = function(parameter, idx = -1) {
-      data <- if (idx == -1)
+      data <- if (idx == -1) {
         private$data
-      else
+      } else {
         private$data[-idx, ]
+      }
 
 
       if (nrow(data) > 0) {
@@ -438,7 +445,7 @@ parameters <- R6::R6Class(
 
   public = list(
     initialize = function(parameters = NULL) {
-      if (is.null(parameters))
+      if (is.null(parameters)) {
         private$data <- data.frame(
           names = character(0),
           switches = character(0),
@@ -448,8 +455,9 @@ parameters <- R6::R6Class(
           stringsAsFactors = FALSE,
           check.names = FALSE
         )
-      else
+      } else {
         private$data <- parameters
+      }
     },
 
     add_parameter = function(new_parameter) {
@@ -499,8 +507,8 @@ parameters <- R6::R6Class(
 )
 
 #' @export
-scenario <- R6::R6Class(
-  classname ="scenario",
+Scenario <- R6::R6Class( # nolint
+  classname = "Scenario",
   cloneable = FALSE,
   private = list(
     id = NA,
@@ -528,18 +536,18 @@ scenario <- R6::R6Class(
         private$description <- scenario$description
         private$creation_date <- scenario$creation_date
         private$irace_options <- scenario$irace_options
-        private$parameters <- parameters$new(scenario$parameters)
+        private$parameters <- Parameters$new(scenario$parameters)
         private$target_runner <- scenario$target_runner
         private$target_evaluator <- scenario$target_evaluator
         private$forbidden <- scenario$forbidden
         private$train_instances <- scenario$train_instances
         private$test_instances <- scenario$test_instances
-        private$configurations <- configurations$new(configurations = scenario$configurations)
-        private$executions <- executions$new(scenario$executions)
+        private$configurations <- Configurations$new(configurations = scenario$configurations)
+        private$executions <- Executions$new(scenario$executions)
       } else {
-        private$executions <- executions$new()
-        private$parameters <- parameters$new()
-        private$configurations <- configurations$new(paramNames = c())
+        private$executions <- Executions$new()
+        private$parameters <- Parameters$new()
+        private$configurations <- Configurations$new(param_names = c())
       }
     },
 
@@ -550,8 +558,9 @@ scenario <- R6::R6Class(
     add_parameter = function(new_parameter) {
       v <- private$parameters$add_parameter(new_parameter)
 
-      if (v)
-        private$configurations$addColumn(new_parameter$names)
+      if (v) {
+        private$configurations$add_column(new_parameter$names)
+      }
 
       return(v)
     },
@@ -559,15 +568,16 @@ scenario <- R6::R6Class(
     update_parameter = function(row, new_parameter) {
       old <- private$parameters$update_parameter(row, new_parameter)
 
-      if (!is.null(old))
-        private$configurations$updateColumn(old$names, new_parameter$names)
+      if (!is.null(old)) {
+        private$configurations$update_column(old$names, new_parameter$names)
+      }
 
       return(!is.null(old))
     },
 
     remove_parameter = function(row) {
       r <- private$parameters$remove_parameter(row)
-      private$configurations$removeColumn(r$names)
+      private$configurations$remove_column(r$names)
     },
 
     add_configuration = function(configuration) {
@@ -584,10 +594,6 @@ scenario <- R6::R6Class(
 
     add_execution = function(execution) {
       private$executions$add_execution(private$id, execution)
-    },
-
-    remove_executions = function() {
-      private$executions$remove_all()
     },
 
     set_target_runner = function(code) {
@@ -694,13 +700,13 @@ scenario <- R6::R6Class(
 )
 
 #' @export
-playground <- R6::R6Class(
-  classname = "playground",
+Playground <- R6::R6Class( # nolint
+  classname = "Playground",
   cloneable = FALSE,
   private = list(
     name = "",
     description = "",
-    iracePath = "",
+    irace_path = "",
     scenarios = NULL,
     last_scenario = NULL,
     current_scenario = NULL,
@@ -711,22 +717,21 @@ playground <- R6::R6Class(
       private$name <- name
       private$scenarios <- list()
       private$last_insert <- 0
-      private$iracePath <- .libPaths()[1]
+      private$irace_path <- .libPaths()[1]
       if (!is.null(playground)) {
         private$name <- playground$name
         private$description <- playground$description
-        if (dir.exists(playground$iracePath)) {
-          private$iracePath <- playground$iracePath
+        if (dir.exists(playground$irace_path)) {
+          private$irace_path <- playground$irace_path
         }
         for (name in names(playground$scenarios)) {
-          private$scenarios[[name]] <- scenario$new(scenario = playground$scenarios[[name]])
+          private$scenarios[[name]] <- Scenario$new(scenario = playground$scenarios[[name]])
         }
         private$current_scenario <- private$scenarios[[playground$last_scenario]]
         private$last_scenario <- playground$last_scenario
         private$last_insert <- playground$last_insert
-        global_emitter$emit(global_events$update_scenarios)
       } else {
-        self$add_scenario(scenario$new(name = "scenario-1"))
+        self$add_scenario(Scenario$new(name = "scenario-1"))
       }
     },
 
@@ -740,11 +745,9 @@ playground <- R6::R6Class(
 
       new_scenario$set_id(id)
       private$scenarios[[id]] <- new_scenario
-      global_emitter$emit(global_events$update_scenarios)
 
       if (is.null(private$current_scenario)) {
         private$current_scenario <- new_scenario
-        global_emitter$emit(global_events$current_scenario)
       }
     },
 
@@ -752,9 +755,7 @@ playground <- R6::R6Class(
       private$scenarios[[id]] <- NULL
 
       if (is.null(private$scenarios) || length(private$scenarios) == 0) {
-        self$add_scenario(scenario$new(name = "scenario-1"))
-      } else {
-        global_emitter$emit(global_events$update_scenarios)
+        self$add_scenario(Scenario$new(name = "scenario-1"))
       }
     },
 
@@ -854,15 +855,14 @@ playground <- R6::R6Class(
     get_last_scenario = function() private$last_scenario,
     set_last_scenario = function(value) private$last_scenario <- value,
 
-    get_irace_path = function() private$iracePath,
-    set_irace_path = function(path) private$iracePath <- path,
+    get_irace_path = function() private$irace_path,
+    set_irace_path = function(path) private$irace_path <- path,
 
     get_current_scenario = function() private$current_scenario,
 
     change_current_scenario = function(id) {
       scenario <- private$scenarios[[id]]
       private$current_scenario <- scenario
-      global_emitter$emit(global_events$current_scenario)
     },
 
     clear_scenario_temp = function() {
@@ -875,12 +875,12 @@ playground <- R6::R6Class(
       playground$description <- private$description
       playground$last_scenario <- private$current_scenario$get_id()
       playground$scenarios <- list()
-      playground$iracePath <- private$iracePath
+      playground$irace_path <- private$irace_path
       for (name in names(private$scenarios)) {
         playground$scenarios[[name]] <- private$scenarios[[name]]$as_list()
       }
       playground$last_insert <- private$last_insert
-      playground$.iraceStudio <- TRUE
+      playground$irace_studio <- TRUE
       saveRDS(playground, file = path, version = 2)
     }
   )
