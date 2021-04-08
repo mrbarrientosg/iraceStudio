@@ -140,7 +140,7 @@ PlaygroundView <- R6::R6Class( # nolint
                   type = "warning"
                 )
                 store$pg$add_scenario(private$scenario)
-                update_reactive_counter(events$update_scenarios)
+                events$update_scenarios <- update_reactive_counter(events$update_scenarios)
                 data$scenarios <- self$scenarios_as_data_frame(store)
                 private$scenario <- NULL
               } else {
@@ -214,7 +214,7 @@ PlaygroundView <- R6::R6Class( # nolint
         )
 
         store$pg$add_scenario(scenario)
-        update_reactive_counter(events$update_scenarios)
+        events$update_scenarios <- update_reactive_counter(events$update_scenarios)
 
         data$scenarios <- self$scenarios_as_data_frame(store)
 
@@ -261,7 +261,7 @@ PlaygroundView <- R6::R6Class( # nolint
 
         scenario$set_name(input$scenario_name)
         scenario$set_description(input$scenario_description)
-        update_reactive_counter(events$update_scenarios)
+        events$update_scenarios <- update_reactive_counter(events$update_scenarios)
 
         data$scenarios <- self$scenarios_as_data_frame(store)
 
@@ -294,8 +294,8 @@ PlaygroundView <- R6::R6Class( # nolint
         scenario <- data$scenarios[input$scenarios_rows_selected, ]
 
         store$pg$remove_scenario(scenario$id)
-        update_reactive_counter(events$update_scenarios)
-        update_reactive_counter(events$change_scenario)
+        events$update_scenarios <- update_reactive_counter(events$update_scenarios)
+        events$change_scenario <- update_reactive_counter(events$change_scenario)
 
         data$scenarios <- self$scenarios_as_data_frame(store)
 

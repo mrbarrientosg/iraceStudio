@@ -9,17 +9,17 @@ run_irace_studio <- function(port = 4350, ...) {
 }
 
 #' @export
-run_irace_vizz <- function(port = 4350, ...) {
+run_irace_vizz <- function(port = NULL, ...) {
   app_dir <- app_sys("iraceVizz")
 
   if (app_dir == "") {
     stop("Could not find example directory. Try re-installing `Irace Studio`.", call. = FALSE)
   }
 
-  with_golem_options(
-    app = shiny::runApp(app_dir, display.mode = "normal", port = port, launch.browser = T),
+  print(with_golem_options(
+    app = shiny::shinyAppDir(app_dir, options = list(display.mode = "normal", port = port, launch.browser = T)),
     golem_opts = list(...)
-  )
+  ))
 }
 
 run_app <- function(port = 4350, ...) {
@@ -29,8 +29,8 @@ run_app <- function(port = 4350, ...) {
     stop("Could not find example directory. Try re-installing `Irace Studio`.", call. = FALSE)
   }
 
-  with_golem_options(
-    app = shiny::runApp(app_dir, display.mode = "normal", port = port, launch.browser = T),
+  print(with_golem_options(
+    app = shiny::shinyAppDir(app_dir, options = list(display.mode = "normal", port = port, launch.browser = T)),
     golem_opts = list(...)
-  )
+  ))
 }

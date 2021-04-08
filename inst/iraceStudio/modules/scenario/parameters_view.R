@@ -130,7 +130,7 @@ ParametersView <- R6::R6Class( # nolint
       )
 
       observeEvent(values$parameters, {
-        update_reactive_counter(events$update_parameters)
+        events$update_parameters <- update_reactive_counter(events$update_parameters)
 
         proxy %>%
           replaceData(

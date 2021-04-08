@@ -113,7 +113,7 @@ UserSectionView <- R6::R6Class( # nolint
                 self$observe_delete_card[[my_id]]$destroy()
                 self$observe_delete_card[[my_id]] <- NULL
                 .report$remove_data(my_id)
-                update_reactive_counter(events$update_report)
+                events$update_report <- update_reactive_counter(events$update_report)
                 removeUI(
                   selector = paste0("div:has(> #", ns(my_id), "-card)"),
                   immediate = TRUE
@@ -133,7 +133,7 @@ UserSectionView <- R6::R6Class( # nolint
 
           report <- store$current_execution$get_report()
           report$add_title(input$title)
-          update_reactive_counter(events$update_report)
+          events$update_report <- update_reactive_counter(events$update_report)
 
           self$count <- self$count + 1
 
@@ -166,7 +166,7 @@ UserSectionView <- R6::R6Class( # nolint
               self$observe_delete_card[[my_id]]$destroy()
               self$observe_delete_card[[my_id]] <- NULL
               .report$remove_data(my_id)
-              update_reactive_counter(events$update_report)
+              events$update_report <- update_reactive_counter(events$update_report)
               removeUI(
                 selector = paste0("div:has(> #", ns(my_id), "-card)"),
                 immediate = TRUE

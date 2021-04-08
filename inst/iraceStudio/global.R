@@ -237,7 +237,7 @@ import_scenario <- function(name, path, scenario, events, only_options = FALSE) 
       exe <- Execution$new(name = "execution-1")
       exe$set_irace_results(iraceResults)
       scenario$add_execution(exe)
-      update_reactive_counter(events$update_executions)
+      events$update_executions <- update_reactive_counter(events$update_executions)
     }
     aux <- iraceResults$scenario
     rm(iraceResults)

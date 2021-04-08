@@ -2,22 +2,13 @@ PerformanceConfigView <- R6::R6Class( # nolint
   classname = "PerformanceConfigView",
   inherit = View,
   public = list(
-    execution_select = NULL,
-    sandbox_select = NULL,
-
-    initialize = function(id) {
-      super$initialize(id)
-      self$execution_select <- ExecutionSelect$new()
-      self$sandbox_select <- SandboxSelect$new()
-    },
-
     ui = function() {
       ns <- NS(self$id)
 
       tagList(
         fluidRow(
           column(
-            width = 4,
+            width = 12,
             h2("Configuration performance"),
             p("Visualize training performace by configuration. Select the active execution and sandbox in the selectors."), # nolint
             HTML("<ul>
@@ -25,13 +16,6 @@ PerformanceConfigView <- R6::R6Class( # nolint
                  <li>to add configurations in the current sandbox, go to the Filter menu</li>
                  <li>to create a new sandbox, go to the Sandbox menu</li>
                  </ul>")
-          ),
-          column(
-            width = 8,
-            class = "d-flex align-items-center justify-content-end",
-            self$execution_select$ui(input_id = ns("executions")),
-            div(style = "padding: 8px;"),
-            self$sandbox_select$ui(input_id = ns("sandboxes"))
           )
         ),
         fluidRow(
@@ -48,18 +32,6 @@ PerformanceConfigView <- R6::R6Class( # nolint
     },
 
     server = function(input, output, session, store, events) {
-      self$execution_select$call(
-        id = "executions",
-        store = store,
-        events = events
-      )
-
-      self$sandbox_select$call(
-        id = "sandboxes",
-        store = store,
-        events = events
-      )
-
       values <- reactiveValues(data = NULL)
 
       observeEvent(store$irace_results, {
@@ -70,10 +42,7 @@ PerformanceConfigView <- R6::R6Class( # nolint
         }
       })
 
-      filtered_config_data <- eventReactive(c(values$data, events$update_sandbox, store$sandbox), {
-        req(events$update_sandbox)
-        req(store$sandbox)
-
+      filtered_config_data <- eventReactive(c(values$data, events$update_sandbox), {
         id <- store$sandbox$get_configurations()$ID
 
         if (length(id) == 0) {

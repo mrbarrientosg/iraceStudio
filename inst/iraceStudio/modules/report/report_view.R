@@ -25,9 +25,14 @@ ReportView <- R6::R6Class( # nolint
           class = "justify-content-between",
           style = "height: 90px;",
           column(
-            width = 12,
+            width = 8,
             h2("Report"),
             p("(Development) View here the irace execution report")
+          ),
+          column(
+            width = 4,
+            class = "d-flex align-items-center justify-content-end",
+            bs4Dash::actionButton(inputId = ns("irace_vizz"), "Advance Vizz", status = "primary")
           )
         ),
         fluidRow(
@@ -46,6 +51,29 @@ ReportView <- R6::R6Class( # nolint
       self$candidates_card$call(id = "candidates", store = store, events = events)
       self$performance_card$call(id = "performance", store = store, events = events)
       self$detail_by_iteration_card$call(id = "detail_by_iteration", store = store, events = events)
+
+      observeEvent(input$irace_vizz, {
+        file <- file.path(store$gui$options_path, "iraceResults.Rdata")
+        iraceResults <- isolate(store$irace_results)
+        save(iraceResults, file = file)
+
+        script_path <- file.path(store$gui$options_path, "run_vizz.R")
+
+        file.copy(system.file("app/script/run_vizz.R", package = "iraceStudio"), script_path)
+
+        a <- process$new(
+          command = "Rscript",
+          args = c(
+            script_path,
+            file
+          ),
+          stdout = "|", stderr = "|"
+        )
+
+        a$poll_io(5000)
+        log_info("stdout: {a$read_output_lines()}")
+        log_info("stderr: {a$read_error_lines()}")
+      })
     }
   )
 )

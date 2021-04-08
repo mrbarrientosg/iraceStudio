@@ -30,8 +30,16 @@ Body <- R6::R6Class(
   public = list(
     overview = NULL,
 
+    filter_view = NULL,
+    performance_instance = NULL,
+    performance_config = NULL,
+
     initialize = function() {
       self$overview <- Overview$new("overview")
+
+      self$filter_view <- FilterView$new("visualization_filter")
+      self$performance_instance <- PerformanceInstanceView$new("visualization_by_instance")
+      self$performance_config <- PerformanceConfigView$new("visualization_by_config")
     },
 
     ui = function() {
@@ -41,65 +49,33 @@ Body <- R6::R6Class(
           tabItem(
             tabName = "overview",
             self$overview$ui()
+          ),
+          tabItem(
+            tabName = "visualization_filter",
+            self$filter_view$ui()
+          ),
+          tabItem(
+            tabName = "visualization_by_config",
+            self$performance_config$ui()
+          ),
+          tabItem(
+            tabName = "visualization_by_instance",
+            self$performance_instance$ui()
           )
         )
       )
     },
 
-    setupModules = function(store) {
+    setupModules = function(store, events) {
       self$overview$call(store = store)
+
+      self$filter_view$call(store = store, events = events)
+      self$performance_instance$call(store = store, events = events)
+      self$performance_config$call(store = store, events = events)
     }
   )
 )
 
-ControlBar <- R6::R6Class(
-  classname = "ControlBar",
-  inherit = Component,
-  public = list(
-    ui = function(id) {
-      ns <- NS(id)
-
-      dashboardControlbar(
-        id = ns("sidebar"),
-        skin = "light",
-        overlay = TRUE,
-        collapsed = TRUE,
-        fluidRow(
-          box(
-            title = strong("Global Options"),
-            collapsible = FALSE,
-            closable = FALSE,
-            width = 12,
-            pickerInput(
-              inputId = ns("scenarioPicker"),
-              label = "Scenario",
-              choices = "",
-              options = list(
-                size = 8
-              )
-            )
-          )
-        )
-      )
-    },
-
-    server = function(input, output, session, store) {
-      observeEvent(input$scenarioPicker, {
-        req(input$scenarioPicker)
-        store$current_scenario <- input$scenarioPicker
-        store$irace_results <- store$scenarios[[input$scenarioPicker]]
-      })
-
-      observeEvent(store$scenarios, {
-        updatePickerInput(
-          session = session,
-          inputId = "scenarioPicker",
-          choices = names(store$scenarios)
-        )
-      })
-    }
-  )
-)
 
 Sidebar <- R6::R6Class(
   classname = "Sidebar",
@@ -112,39 +88,27 @@ Sidebar <- R6::R6Class(
             text = "Overview",
             tabName = "overview",
             icon = NULL
+          ),
+          menuItem(
+            text = strong("Performance"),
+            menuSubItem(
+              text = "Configuration",
+              tabName = "visualization_by_config",
+              icon = NULL
+             ),
+            menuSubItem(
+              text = "Instance",
+              tabName = "visualization_by_instance",
+              icon = NULL
+            )
+          ),
+          menuItem(
+            text = "Filter",
+            tabName = "visualization_filter",
+            icon = NULL
           )
         )
       )
-    }
-  )
-)
-
-Footer <- R6::R6Class(
-  classname = "Footer",
-  inherit = Component,
-  public = list(
-    ui = function(id) {
-      ns <- NS(id)
-
-      dashboardFooter(
-        left = div(
-          class = "d-flex flex-row",
-          div(
-            "Current Scenario: ",
-            uiOutput(
-              outputId = ns("scenario"),
-              inline = TRUE
-            )
-          )
-        ),
-        fixed = TRUE
-      )
-    },
-
-    server = function(input, output, session, store) {
-      output$scenario <- renderUI({
-        store$current_scenario
-      })
     }
   )
 )

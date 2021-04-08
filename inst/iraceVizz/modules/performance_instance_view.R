@@ -2,22 +2,13 @@ PerformanceInstanceView <- R6::R6Class( # nolint
   classname = "PerformanceInstanceView",
   inherit = View,
   public = list(
-    execution_select = NULL,
-    sandbox_select = NULL,
-
-    initialize = function(id) {
-      super$initialize(id)
-      self$execution_select <- ExecutionSelect$new()
-      self$sandbox_select <- SandboxSelect$new()
-    },
-
     ui = function() {
       ns <- NS(self$id)
 
       tagList(
         fluidRow(
           column(
-            width = 4,
+            width = 12,
             h2("Performance by Instance"),
             p("Visualize training performace by instance. Select the active execution and sandbox in the selectors."),
             HTML("<ul>
@@ -25,13 +16,6 @@ PerformanceInstanceView <- R6::R6Class( # nolint
                  <li>to add configurations in the current sandbox, go to the Filter menu</li>
                  <li>to create a new sandbox, go to the Sandbox menu</li>
                  </ul>")
-          ),
-          column(
-            width = 8,
-            class = "d-flex align-items-center justify-content-end",
-            self$execution_select$ui(input_id = ns("executions")),
-            div(style = "padding: 8px;"),
-            self$sandbox_select$ui(input_id = ns("sandboxes"))
           )
         ),
         fluidRow(
@@ -59,18 +43,6 @@ PerformanceInstanceView <- R6::R6Class( # nolint
     },
 
     server = function(input, output, session, store, events) {
-      self$execution_select$call(
-        id = "executions",
-        store = store,
-        events = events
-      )
-
-      self$sandbox_select$call(
-        id = "sandboxes",
-        store = store,
-        events = events
-      )
-
       best_data <- eventReactive(c(store$irace_results, events$update_sandbox), {
         future({
           config <- isolate(store$sandbox$get_configurations()$ID)
@@ -125,10 +97,8 @@ PerformanceInstanceView <- R6::R6Class( # nolint
       })
 
       selected_best_data <- reactive({
-        req(events$update_sandbox)
         req(store$sandbox)
         req(store$irace_results)
-        events$change_scenario
 
         event <- event_data("plotly_click", "distance_best_plot")
 
@@ -162,6 +132,7 @@ PerformanceInstanceView <- R6::R6Class( # nolint
               )
 
             return(repeated)
+            # return(data.frame())
           }
       })
 
@@ -253,7 +224,7 @@ PerformanceInstanceView <- R6::R6Class( # nolint
       })
 
       exp <- 100 * (min[row(exp)] - exp) / min[row(exp)]
-      exp[is.nan(exp)] <- 0.0 # Replace nan values with 0
+      #exp[is.nan(exp)] <- 0.0 # Replace nan values with 0
 
       instances <- irace_results$state$.irace$instancesList[rownames(exp), "instance"]
       rownames(exp) <- sort(instances)

@@ -131,7 +131,7 @@ Overview <- R6::R6Class(
           configurations[conf, ".IT."] <- i
         }
 
-        parameters <- store$raceResults$parameters
+        parameters <- store$race_results$parameters
 
         for (pname in parameters$names) {
           if (parameters$types[pname] %in% c("r", "i")) {
@@ -170,7 +170,7 @@ Overview <- R6::R6Class(
           configurations[conf, ".IT."] <- i
         }
 
-        parameters <- store$raceResults$parameters
+        parameters <- store$race_results$parameters
 
         for (pname in parameters$names) {
           if (parameters$types[pname] %in% c("r", "i")) {

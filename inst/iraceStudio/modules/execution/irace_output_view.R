@@ -135,7 +135,7 @@ IraceOutputView <- R6::R6Class( # nolint
               }
 
               store$pg$add_execution(self$execution)
-              update_reactive_counter(events$update_executions)
+              events$update_executions <- update_reactive_counter(events$update_executions)
 
               shinyalert(title = "The execution has ended", type = "success", timer = 1500)
             } else {

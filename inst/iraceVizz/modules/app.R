@@ -5,36 +5,33 @@ App <- R6::R6Class(
     navbar = NULL,
     sidebar = NULL,
     body = NULL,
-    controlbar = NULL,
-    footer = NULL,
     store = NULL,
     logs = NULL,
+    events = NULL,
     logger_path = NULL,
 
     initialModal = function(input) {
-      if (length(isolate(private$store$scenarios)) == 0) {
-        volumes <- c("Home" = path.expand("~"), getVolumes()())
-        showModal(
-          modalDialog(
-            title = "Welcome to Irace Vizz",
-            footer = tagList(
-              shinyFilesButton(
-                id = "select",
-                label = "Select",
-                title = "Select a Scenario",
-                multiple = FALSE,
-                buttonType = "primary"
-              )
+      volumes <- c("Home" = path.expand("~"), getVolumes()())
+      showModal(
+        modalDialog(
+          title = "Welcome to Irace Vizz",
+          footer = tagList(
+            shinyFilesButton(
+              id = "select",
+              label = "Select",
+              title = "Select a Scenario",
+              multiple = FALSE,
+              buttonType = "primary"
             )
           )
         )
+      )
 
-        shinyFileChoose(
-          input = input,
-          id = "select",
-          roots = volumes
-        )
-      }
+      shinyFileChoose(
+        input = input,
+        id = "select",
+        roots = volumes
+      )
     },
 
     validateName = function(name, path) {
@@ -45,9 +42,7 @@ App <- R6::R6Class(
     setupModules = function() {
       shinybusy::show_modal_spinner(text = "Loading scenario...")
       private$navbar$call(id = "navbar", store = private$store)
-      private$controlbar$call(id = "controlbar", store = private$store)
-      private$footer$call(id = "footer", store = private$store)
-      private$body$setupModules(private$store)
+      private$body$setupModules(private$store, private$events)
       shinybusy::remove_modal_spinner()
     }
   ),
@@ -57,13 +52,15 @@ App <- R6::R6Class(
       private$navbar <- Navbar$new()
       private$sidebar <- Sidebar$new()
       private$body <- Body$new()
-      private$controlbar <- ControlBar$new()
-      private$footer <- Footer$new()
 
       private$store <- reactiveValues(
-        scenarios = list(),
-        iraceResults = NULL,
-        currentScenario = NULL
+        irace_results = NULL,
+        current_scenario = NULL,
+        sandbox = NULL
+      )
+
+      private$events <- reactiveValues(
+        update_sandbox = 0
       )
     },
 
@@ -74,9 +71,7 @@ App <- R6::R6Class(
         # freshTheme = common_theme,
         header = private$navbar$ui("navbar"),
         sidebar = private$sidebar$ui(),
-        body = private$body$ui(),
-        controlbar = private$controlbar$ui("controlbar"),
-        footer = private$footer$ui("footer")
+        body = private$body$ui()
       )
     },
 
@@ -88,57 +83,31 @@ App <- R6::R6Class(
       observeEvent(input$select, {
         if (!is.integer(input$select)) {
           file <- parseFilePaths(roots = volumes, input$select)
-          removeModal()
-          shinyalert(
-            title = "Scenario name",
-            text = "Give a name to identify the scenario.",
-            type = "input",
-            inputType = "text",
-            showCancelButton = TRUE,
-            closeOnEsc = FALSE,
-            callbackR = function(name) {
-              if (is.logical(name) && !name) {
-                private$initialModal(input)
-                return(invisible())
-              }
-
-              if (is.null(name) || name == "") {
-                alert_error("Scenario name is empty.")
-                return(invisible())
-              }
-
-              # if (private$validateName(name, workPath)) {
-              #   shinyalert(
-              #     title = "Error",
-              #     text = "Playground name is repeated.",
-              #     closeOnEsc = FALSE,
-              #     type = "error",
-              #     callbackR = function() {
-              #       private$initialModal(input)
-              #     }
-              #   )
-              #   return(invisible())
-              # }
-
-              load(file$datapath)
-              private$store$scenarios[[name]] <- iraceResults
-              rm(iraceResults)
-              private$setupModules()
-            }
-          )
+          load(file$datapath)
+          private$store$irace_results <- iraceResults
+          private$store$sandbox <- Sandbox$new()
+          rm(iraceResults)
+          private$setupModules()
         }
       })
 
-      if (app_prod()) {
+      if (is.null(golem::get_golem_options("data"))) {
         private$initialModal(input)
       } else {
         isolate({
-          load(app_sys("data/irace-acotsp.Rdata"))
-          private$store$scenarios[["test"]] <- iraceResults
+          load(golem::get_golem_options("data"))
+          private$store$irace_results <- iraceResults
+          private$store$sandbox <- Sandbox$new()
           rm(iraceResults)
         })
         private$setupModules()
       }
+
+      onSessionEnded(function() {
+        stopApp()
+      })
+
+      session$userData$sidebar <- reactive(input$sidebar)
     },
 
     setup = function() {

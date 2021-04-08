@@ -42,11 +42,6 @@ Body <- R6::R6Class( # nolint
     irace_output_view = NULL,
     executions_history_view = NULL,
 
-    sandbox_view = NULL,
-    filter_view = NULL,
-    performance_instance = NULL,
-    performance_config = NULL,
-
     report_view = NULL,
     user_section_view = NULL,
 
@@ -63,11 +58,6 @@ Body <- R6::R6Class( # nolint
       self$testing_view <- TestingView$new("scenario_testing")
       self$irace_output_view <- IraceOutputView$new("execution_irace_output")
       self$executions_history_view <- ExecutionsHistoryView$new("execution_history")
-
-      self$sandbox_view <- SandboxView$new("visualization_sandbox")
-      self$filter_view <- FilterView$new("visualization_filter")
-      self$performance_instance <- PerformanceInstanceView$new("visualization_by_instance")
-      self$performance_config <- PerformanceConfigView$new("visualization_by_config")
 
       self$report_view <- ReportView$new("report")
       self$user_section_view <- UserSectionView$new("report_user_section")
@@ -126,22 +116,6 @@ Body <- R6::R6Class( # nolint
             self$executions_history_view$ui()
           ),
           tabItem(
-            tabName = "visualization_sandbox",
-            self$sandbox_view$ui()
-          ),
-          tabItem(
-            tabName = "visualization_filter",
-            self$filter_view$ui()
-          ),
-          tabItem(
-            tabName = "visualization_by_config",
-            self$performance_config$ui()
-          ),
-          tabItem(
-            tabName = "visualization_by_instance",
-            self$performance_instance$ui()
-          ),
-          tabItem(
             tabName = "report",
             self$report_view$ui()
           ),
@@ -168,11 +142,6 @@ Body <- R6::R6Class( # nolint
       self$irace_output_view$call(store = store, events = events)
       self$executions_history_view$call(store = store, events = events)
 
-      self$sandbox_view$call(store = store, events = events)
-      self$filter_view$call(store = store, events = events)
-      self$performance_instance$call(store = store, events = events)
-      self$performance_config$call(store = store, events = events)
-
       self$report_view$call(store = store, events = events)
       self$user_section_view$call(store = store, events = events)
     }
@@ -184,11 +153,9 @@ ControlBar <- R6::R6Class( # nolint
   inherit = Component,
   public = list(
     execution_select = NULL,
-    sandbox_select = NULL,
 
     initialize = function() {
       self$execution_select <- ExecutionSelect$new()
-      self$sandbox_select <- SandboxSelect$new()
     },
 
     ui = function(id) {
@@ -214,7 +181,6 @@ ControlBar <- R6::R6Class( # nolint
               )
             ),
             self$execution_select$ui(input_id = ns("executions")),
-            self$sandbox_select$ui(input_id = ns("sandboxes")),
             tags$a(
               "Irace User Guide",
               class = "btn-link",
@@ -234,16 +200,10 @@ ControlBar <- R6::R6Class( # nolint
         events = events
       )
 
-      self$sandbox_select$call(
-        id = "sandboxes",
-        store = store,
-        events = events
-      )
-
       observeEvent(input$scenarioPicker, {
         req(input$scenarioPicker)
         store$pg$change_current_scenario(input$scenarioPicker)
-        update_reactive_counter(events$current_scenario)
+        events$change_scenario <- update_reactive_counter(events$change_scenario)
         pkg$output_log <- NULL
       })
 
@@ -257,6 +217,8 @@ ControlBar <- R6::R6Class( # nolint
 
       observeEvent(c(store$pg, events$update_scenarios),
         {
+          req(store$pg)
+
           scenarios <- lapply(store$pg$get_scenarios(), function(scenario) {
             scenario$get_name()
           })
@@ -285,8 +247,7 @@ ControlBar <- R6::R6Class( # nolint
             selected = selected
           )
         },
-        ignoreNULL = TRUE,
-        ignoreInit = TRUE
+        ignoreNULL = TRUE
       )
     }
   )
@@ -381,33 +342,6 @@ Sidebar <- R6::R6Class( # nolint
             menuSubItem(
               text = "User Notes",
               tabName = "report_user_section",
-              icon = NULL
-            )
-          ),
-
-          menuItem(
-            text = strong("Visualization"),
-            menuItem(
-              text = strong("Performance"),
-              menuSubItem(
-                text = "Configuration",
-                tabName = "visualization_by_config",
-                icon = NULL
-              ),
-              menuSubItem(
-                text = "Instance",
-                tabName = "visualization_by_instance",
-                icon = NULL
-              )
-            ),
-            menuSubItem(
-              text = "Sandbox",
-              tabName = "visualization_sandbox",
-              icon = NULL
-            ),
-            menuSubItem(
-              text = "Filter",
-              tabName = "visualization_filter",
               icon = NULL
             )
           )

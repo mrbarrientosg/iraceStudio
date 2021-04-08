@@ -78,7 +78,7 @@ IraceOptionsView <- R6::R6Class( # nolint
               text = "Cannot be import all options from the scenario.",
               type = "warning"
             )
-            update_reactive_counter(events$change_scenario)
+            events$change_scenario <- update_reactive_counter(events$change_scenario)
           } else {
             alert_error("Can't load scenario file, check if the file format is correct.")
           }

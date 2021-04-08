@@ -96,10 +96,6 @@ ParameterCondition <- R6::R6Class( # nolint
         parent$types
       ), {
         output$value_condition <- renderUI({
-          shiny::validate(
-            need(store$pg, "")
-          )
-
           if (!input$paramNames %in% names(parent$types)) {
             return()
           }

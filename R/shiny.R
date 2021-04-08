@@ -91,5 +91,5 @@ directory_input <- function(id_button, id_input, label, title, button_text = "Br
 
 #' @export
 update_reactive_counter <- function(counter) {
-  counter <- counter + 1
+  return(counter + 1)
 }

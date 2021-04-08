@@ -79,8 +79,8 @@ App <- R6::R6Class(
       } else {
         private$store$pg <- Playground$new(name = name)
       }
-      update_reactive_counter(private$events$update_scenarios)
-      update_reactive_counter(private$events$change_scenario)
+      private$events$update_scenarios <- update_reactive_counter(private$events$update_scenarios)
+      private$events$change_scenario <- update_reactive_counter(private$events$change_scenario)
     }
   ),
 
@@ -243,7 +243,6 @@ App <- R6::R6Class(
         private$setupModules()
         private$create_playground(name = "dev-test")
       }
-      session$userData$sidebar <- reactive(input$sidebar)
     },
 
     setupLogger = function() {
