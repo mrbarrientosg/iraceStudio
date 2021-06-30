@@ -146,14 +146,14 @@ BestConfigurationCard <- R6::R6Class(
         width = 12,
         fluidRow(
           column(
-            width = 6,
+            width = 4,
             htmlOutput(
               outputId = ns("best_so_far"),
               style = "overflow-y:scroll; max-height:650px; width:100%;"
             )
           ),
           column(
-            width = 6,
+            width = 8,
             self$copyInput$ui(inputId = ns("copy"), label = "Copy Box Plot"),
             plotOutput(outputId = ns("box_plot"), width = 550, height = 550)
           )
@@ -238,13 +238,16 @@ BestConfigurationCard <- R6::R6Class(
 
         last <- length(store$iraceResults$iterationElites)
         id <- paste0(store$iraceResults$iterationElites[last])
+        id_best <- store$iraceResults$iterationElites[last]
         results <- subset(store$iraceResults$experiments, select = id)
 
-        plot <- configurationsBoxplot(
-          title = "Best Configuration Box Plot",
-          experiments = results,
-          ylab = "Solution cost"
-        )
+        # plot <- configurationsBoxplot(
+        #   title = "Best Configuration Box Plot",
+        #   experiments = results,
+        #   ylab = "Solution cost"
+        # )
+        plot <- iraceplot::boxplot_training(store$iraceResults, id_configurations = id_best)
+
 
         pkg$reportStore$bestConfigBoxPlot <- save_plot_as_base64()
 
@@ -320,7 +323,7 @@ CandidatesCard <- R6::R6Class(
         fluidRow(
           style = "padding: 20px;",
           column(
-            width = 6,
+            width = 12,
             self$copyInput$ui(
               inputId = ns("copy_parallel"),
               label = "Copy Parallel Coordinates"
@@ -331,7 +334,7 @@ CandidatesCard <- R6::R6Class(
             )
           ),
           column(
-            width = 6,
+            width = 12,
             self$copyInput$ui(
               inputId = ns("copy_freq"),
               label = "Copy Frequency Plot"
@@ -470,7 +473,8 @@ CandidatesCard <- R6::R6Class(
 
             image <- paste0(path, "/Rplot%03d.png")
             png(filename = sprintf(image, i), width = 550, height = 550, res = 80)
-            parameterFrequency(configurations = configurations, parameters = fixFormat)
+            #parameterFrequency(configurations = configurations, parameters = fixFormat)
+            iraceplot::sampling_frequency(store$iraceResults)
             dev.off()
 
             limit <- (max * i) + 1
@@ -591,21 +595,22 @@ CandidatesCard <- R6::R6Class(
 
             progress$inc(0.05, detail = "Making Plots...")
 
-            image <- paste0(path, "/Rplot%03d.png")
-            png(
-              filename = sprintf(image, i),
-              width = 550,
-              height = 550,
-              res = 80
-            )
-
-            parallelCoordinatesPlot(
-              configurations = conf,
-              parameters = isolate(store$iraceResults$parameters),
-              param_names = params,
-              hierarchy = FALSE
-            )
-            dev.off()
+            # image <- paste0(path, "/Rplot%03d.png")
+            # png(
+            #   filename = sprintf(image, i),
+            #   width = 550,
+            #   height = 550,
+            #   res = 80
+            # )
+            #
+            # parallelCoordinatesPlot(
+            #   configurations = conf,
+            #   parameters = isolate(store$iraceResults$parameters),
+            #   param_names = params,
+            #   hierarchy = FALSE
+            # )
+            # dev.off()
+            iraceplot::parallel_coord(store$iraceResults, file_name = paste0(path, "/Rplot%03d.png"))
 
             limit <- (max * i) + 1
           }
@@ -785,7 +790,8 @@ PerformanceCard <- R6::R6Class(
         results <- subset(isolate(store$iraceResults$experiments), select = intersectedColumns)
         results <- na.omit(results)
 
-        plot <- irace::configurationsBoxplot(results, ylab = "Solution cost", title = "Box Plot")
+        #plot <- irace::configurationsBoxplot(results, ylab = "Solution cost", title = "Box Plot")
+        plot <- iraceplot::boxplot_training(store$iraceResults, id_configurations = configurationPerIteration)
         pkg$reportStore$performanceBoxPlot <- save_plot_as_base64()
         plot
       })
