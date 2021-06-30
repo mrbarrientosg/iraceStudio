@@ -146,16 +146,16 @@ BestConfigurationCard <- R6::R6Class(
         width = 12,
         fluidRow(
           column(
-            width = 4,
+            width = 5,
             htmlOutput(
               outputId = ns("best_so_far"),
               style = "overflow-y:scroll; max-height:650px; width:100%;"
             )
           ),
           column(
-            width = 8,
+            width = 7,
             self$copyInput$ui(inputId = ns("copy"), label = "Copy Box Plot"),
-            plotOutput(outputId = ns("box_plot"), width = 550, height = 550)
+            plotOutput(outputId = ns("box_plot"), width = 350, height = 550)
           )
         )
       )
@@ -293,7 +293,7 @@ CandidatesCard <- R6::R6Class(
         width = 12,
         sidebar_width = "30%",
         enable_sidebar = TRUE,
-        height = "800px",
+        height = "1400px",
         inlineCSS(".direct-chat-contacts { z-index: 0 !important; }"),
         sidebar = bs4Dash::bs4CardSidebar(
           tagList(
@@ -316,7 +316,7 @@ CandidatesCard <- R6::R6Class(
               )
             ),
             inlineCSS(".multi-wrapper .non-selected-wrapper,
-            .multi-wrapper .selected-wrapper { height: 500px; }"),
+            .multi-wrapper .selected-wrapper { height: 650px; }"),
             actionButton(inputId = ns("update"), label = "Update", class = "btn-primary")
           )
         ),
@@ -331,7 +331,7 @@ CandidatesCard <- R6::R6Class(
             uiOutput(
               outputId = ns("parallel_plot"),
               style = "overflow-y:scroll; max-height:650px; width:100%; margin-bottom:10px;"
-            )
+            ),
           ),
           column(
             width = 12,
